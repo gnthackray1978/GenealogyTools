@@ -2,6 +2,15 @@
 
 namespace DNAGedLib
 {
+    public class MatchProfile
+    {
+        public int Id { get; set; }
+
+        public Guid ProfileId { get; set; }
+
+        public string Name { get; set; }
+
+    }
 
     public class MatchTreeEntry
     {

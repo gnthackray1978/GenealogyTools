@@ -33,7 +33,7 @@ namespace PlaceLib
                     County = s.Ctyhistnm.ToLower(),
                     Country = s.Ctry15nm
 
-                }).Distinct().ToList();
+                }).Distinct().Where(w => w.County.Trim() != "").ToList();
             }
 
             return counties;

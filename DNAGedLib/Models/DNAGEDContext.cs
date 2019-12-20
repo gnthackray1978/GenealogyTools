@@ -1,9 +1,61 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Diagnostics;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace DNAGedLib.Models
 {
+    public class DebugLoggerProvider : ILoggerProvider
+    {
+        private readonly ConcurrentDictionary<string, ILogger> _loggers;
+
+        public DebugLoggerProvider()
+        {
+            _loggers = new ConcurrentDictionary<string, ILogger>();
+        }
+
+        public void Dispose()
+        {
+        }
+
+        public ILogger CreateLogger(string categoryName)
+        {
+            return _loggers.GetOrAdd(categoryName, new DebugLogger());
+        }
+    }
+
+    public class DebugLogger : ILogger
+    {
+        public void Log<TState>(
+            LogLevel logLevel, EventId eventId,
+            TState state, Exception exception,
+            Func<TState, Exception, string> formatter)
+        {
+            if (formatter != null)
+            {
+                Debug.WriteLine(formatter(state, exception));
+            }
+        }
+
+        public bool IsEnabled(LogLevel logLevel)
+        {
+            return true;
+        }
+
+        public IDisposable BeginScope<TState>(TState state)
+        {
+            return null;
+        }
+    }
+
     public partial class DNAGEDContext : DbContext
     {
+
+
+        public static readonly ILoggerFactory MyLoggerFactory
+            = LoggerFactory.Create(builder => { builder.AddProvider(new DebugLoggerProvider());});
+
         public virtual DbSet<MatchDetail> MatchDetail { get; set; }
         public virtual DbSet<MatchGroups> MatchGroups { get; set; }
         public virtual DbSet<MatchIcw> MatchIcw { get; set; }
@@ -12,9 +64,12 @@ namespace DNAGedLib.Models
         public virtual DbSet<MyPersons> MyPersons { get; set; }
         public virtual DbSet<PersonsOfInterest> PersonsOfInterest { get; set; }
         public virtual DbSet<PersonGroups> PersonGroups { get; set; }
+        public virtual DbSet<MatchKitName> MatchKitName { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+          //  optionsBuilder.UseLoggerFactory(MyLoggerFactory);
+
             if (!optionsBuilder.IsConfigured)
             {
                 optionsBuilder.UseSqlServer(@"Data Source=DESKTOP-KGS70RI\SQL2016EX;Initial Catalog=DNAGED;Integrated Security=SSPI;");
@@ -39,6 +94,10 @@ namespace DNAGedLib.Models
                 entity.Property(e => e.Id).ValueGeneratedNever();                 
             });
 
+            modelBuilder.Entity<MatchKitName>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedNever();
+            });
 
             modelBuilder.Entity<MatchGroups>(entity =>
             {
@@ -95,13 +154,13 @@ namespace DNAGedLib.Models
                 //    .WithMany(p => p.MatchTrees)
                 //    .HasForeignKey(d => d.MatchId)
                 //    .OnDelete(DeleteBehavior.ClientSetNull)
-                //    .HasConstraintName("FK_MatchTrees_MatchGroups");
+                ////    .HasConstraintName("FK_MatchTrees_MatchGroups");
 
-                entity.HasOne(d => d.Person)
-                    .WithMany(p => p.MatchTrees)
-                    .HasForeignKey(d => d.PersonId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_MatchTrees_Persons");
+                //entity.HasOne(d => d.Person)
+                //    .WithMany(p => p.MatchTrees)
+                //    .HasForeignKey(d => d.PersonId)
+                //    .OnDelete(DeleteBehavior.ClientSetNull)
+                //    .HasConstraintName("FK_MatchTrees_Persons");
             });
 
             modelBuilder.Entity<Persons>(entity =>

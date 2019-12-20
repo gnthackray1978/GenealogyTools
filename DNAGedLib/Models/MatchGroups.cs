@@ -9,7 +9,7 @@ namespace DNAGedLib.Models
         {
             //MatchDetail = new HashSet<MatchDetail>();
             //MatchIcw = new HashSet<MatchIcw>();
-            MatchTrees = new HashSet<MatchTrees>();
+          //  MatchTrees = new HashSet<MatchTrees>();
         }
 
         public int Id { get; set; }
@@ -32,6 +32,6 @@ namespace DNAGedLib.Models
 
         //public ICollection<MatchDetail> MatchDetail { get; set; }
         //public ICollection<MatchIcw> MatchIcw { get; set; }
-        public ICollection<MatchTrees> MatchTrees { get; set; }
+     //   public ICollection<MatchTrees> MatchTrees { get; set; }
     }
 }

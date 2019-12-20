@@ -9,6 +9,6 @@ namespace DNAGedLib.Models
         public Guid MatchGuid { get; set; }
         public int? SharedSegment { get; set; }
 
-        public MatchGroups MatchGu { get; set; }
+   //     public MatchGroups MatchGu { get; set; }
     }
 }

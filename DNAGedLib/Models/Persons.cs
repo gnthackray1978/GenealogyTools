@@ -28,6 +28,10 @@ namespace DNAGedLib.Models
         public string Memory { get; set; }
         public bool RootsEntry { get; set; }
         public bool Fix { get; set; }
+        public bool EnglishParentsChecked { get; set; }
+        public bool AmericanParentsChecked { get; set; }
+        public bool CountyUpdated { get; set; }
+        public bool CountryUpdated { get; set; }
         public DateTime? CreatedDate { get; set; }
         public ICollection<MatchTrees> MatchTrees { get; set; }
     }

@@ -30,7 +30,7 @@ namespace DNAGedLib
             int recCount = dnagedContext.PersonsOfInterest.Count();
             List<PersonContainer> records = dnagedContext.PersonsOfInterest.Select(s=> new PersonContainer{PersonsOfInterest = s}).ToList();
             
-            Console.WriteLine(recCount);
+            Console.WriteLine(recCount + " records in people of interest table");
 
             List<List<PersonGroupContainer>> listPersonGroups = new List<List<PersonGroupContainer>>();
 
@@ -45,11 +45,7 @@ namespace DNAGedLib
 
                 }
 
-                //if (records[idx].BirthYear == 1842 && records[idx].ChristianName == "John George" && records[idx].Surname== "Wright")
-                //{
-                //    Console.WriteLine("found");
-                //}
-
+                
                 groupId++;
 
                 if (!records[idx].IsDupe) //.PersonsOfInterest.Memory != "ADDED")
@@ -84,7 +80,7 @@ namespace DNAGedLib
             }
 
 
-            Console.WriteLine(listPersonGroups.Count);
+            Console.WriteLine(listPersonGroups.Count + " groups created");
 
 
             List<PersonGroups> pgroups = new List<PersonGroups>();

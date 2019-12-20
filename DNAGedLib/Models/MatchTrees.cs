@@ -8,9 +8,7 @@ namespace DNAGedLib.Models
         public Guid MatchId { get; set; }
         public long? RelId { get; set; }
         public long PersonId { get; set; }
-        public DateTime? CreatedDate { get; set; }
-
-        public MatchGroups Match { get; set; }
+        public DateTime? CreatedDate { get; set; }         
         public Persons Person { get; set; }
     }
 }

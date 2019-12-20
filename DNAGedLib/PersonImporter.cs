@@ -1,16 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Linq;
 using DNAGedLib.Models;
+using Microsoft.Data.SqlClient;
 using Microsoft.Data.Sqlite;
 using PlaceLib;
+using Microsoft.EntityFrameworkCore;
 
 namespace DNAGedLib
 {
     public class PersonImporter {
 
 
-        public List<MatchTreeEntry> Trees { get; set; } = new List<MatchTreeEntry>();
+        public List<MatchTreeEntry> SQLliteTrees { get; set; } = new List<MatchTreeEntry>();
 
         public List<ICW> ICWs { get; set; } = new List<ICW>();
 
@@ -18,13 +23,43 @@ namespace DNAGedLib
 
         public List<MatchGroups> MatchGroups { get; set; } = new List<MatchGroups>();
 
+        public List<MatchKitName> Profiles { get; set; } = new List<MatchKitName>();
 
-        public void Load() {
+        public void LoadProfiles()
+        {
+            UpdateStats();
+
+            DNAGEDContext dnagedContext = new DNAGEDContext();
+
+            Profiles = dnagedContext.MatchKitName.ToList();
+
+        }
+
+        public static void UpdateStats()
+        {
+            //using (var conn = new SqlConnection(@"Data Source=DESKTOP-KGS70RI\SQL2016EX;Initial Catalog=DNAGED;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False"))
+            //    using (var command = new SqlCommand("UpdateKits", conn)
+            //    {
+            //        CommandType = CommandType.StoredProcedure
+            //    })
+            //{
+            //    conn.Open();
+            //    command.ExecuteNonQuery();
+            //}
+
+        }
+
+    
+        public void Load(Guid testIdGuid) {
        
+
+
 
             void matchTrees(SqliteConnection mDbConnection, List<MatchTreeEntry> matchTreeEntries)
             {
-                string sql = "select * from Ancestry_matchTrees";
+                string sql = @"select * from Ancestry_matchTrees where matchid in (select matchguid from ancestry_matchgroups where testguid like '"+ testIdGuid + "')";
+
+                Debug.WriteLine(sql);
                 var command = new SqliteCommand(sql, mDbConnection);
 
                 var reader = command.ExecuteReader();
@@ -53,9 +88,13 @@ namespace DNAGedLib
                 }
             }
 
+
+
+
             void Ancestry_ICW(SqliteConnection mDbConnection, List<ICW> matchTreeEntries)
             {
-                string sql = "select * from Ancestry_ICW";
+                string subQuery = "select matchGuid from Ancestry_matchGroups where testGuid like '" + testIdGuid + "'";
+                string sql = "select * from Ancestry_ICW where matchid in ("+ subQuery  + ")";
                 var command = new SqliteCommand(sql, mDbConnection);
 
                 var reader = command.ExecuteReader();
@@ -85,7 +124,7 @@ namespace DNAGedLib
 
             void Ancestry_MatchGroups(SqliteConnection mDbConnection, List<MatchGroups> matchTreeEntries)
             {
-                string sql = "select * from Ancestry_matchGroups";
+                string sql = "select * from Ancestry_matchGroups where testGuid like '"+ testIdGuid + "'";
                 var command = new SqliteCommand(sql, mDbConnection);
 
                 var reader = command.ExecuteReader();
@@ -146,16 +185,28 @@ namespace DNAGedLib
 
             Console.WriteLine("Loading SQLLite DB");
 
-            matchTrees(m_dbConnection, Trees);
+            matchTrees(m_dbConnection, SQLliteTrees);
             Ancestry_ICW(m_dbConnection, ICWs);
             Ancestry_MatchDetail(m_dbConnection, MatchDetails);
             Ancestry_MatchGroups(m_dbConnection, MatchGroups);
 
 
-            Console.WriteLine(Trees.Count + " " + ICWs.Count + " " + MatchDetails.Count + " " + MatchGroups.Count);
+            Console.WriteLine(SQLliteTrees.Count + " " + ICWs.Count + " " + MatchDetails.Count + " " + MatchGroups.Count);
         }
 
-        
+
+        public void Hack(Guid importTestId, DateTime cutOff)
+        {
+
+
+            DNAGEDContext dnagedContext = new DNAGEDContext();
+
+            ImportMatchDetailsWithGroups(dnagedContext, importTestId);
+
+            UpdateKitStats(importTestId);
+
+            Console.WriteLine("finished");
+        }
 
         public void Export(Guid importTestId, DateTime cutOff) {
        
@@ -163,20 +214,18 @@ namespace DNAGedLib
             DNAGEDContext dnagedContext = new DNAGEDContext();
             
 
-            ImportPeople(dnagedContext, cutOff);
+            ImportPeople(dnagedContext);
 
-            ImportMatchTrees(dnagedContext);
+            ImportMatchTrees();
 
             ImportICW(dnagedContext);
 
             ImportMatchDetailsWithGroups(dnagedContext, importTestId);
 
-            // UpdateLocations();
+            UpdateKitStats(importTestId);
 
             Console.WriteLine("finished");
         }
-
-
 
         private void ImportICW(DNAGEDContext dnagedContext)
         {
@@ -215,80 +264,113 @@ namespace DNAGedLib
             Console.WriteLine("saved " + addedRecords + " new records");
         }
 
-        private void ImportMatchTrees(DNAGEDContext dnagedContext)
+        private void ImportMatchTrees()
         {
-            long counter = 0;
-            long percentage = 0;
-
-
-            var treesContextHash = dnagedContext.MatchTrees.Select(s => s.PersonId).Distinct().ToHashSet();
-
-            var treesSQLLiteHash = Trees.Select(t => t.PersonId).Distinct().ToHashSet();
-
-            // all ids not in treesContextHash that are in treesSQLLiteHash
-            Console.WriteLine(treesSQLLiteHash.Count + " Entries in SQL Lite DB");
-            Console.WriteLine(treesContextHash.Count + " Entries in SQL SERVER");
-
-
-            treesSQLLiteHash.ExceptWith(treesContextHash);
-
-            Console.WriteLine(treesSQLLiteHash.Count - treesContextHash.Count + " Correct Number");
-
-            Console.WriteLine(treesSQLLiteHash.Count + " Entries in TO ADD");
-
-
-            int intpercentage = 0;
-
-            Console.WriteLine("adding entries ..");
-
-            var guidList = dnagedContext.MatchTrees.Select(s => s.MatchId).ToHashSet();
-
-            long addedRecords = 0;
-            var total = treesSQLLiteHash.Count;
-            foreach (var s in Trees.Where(w => treesSQLLiteHash.Contains(w.PersonId)))
+            using (var dnagedContext = new DNAGEDContext())
             {
-                intpercentage = (int) ((counter / total) * 100);
+                long counter = 0;
+                long percentage = 0;
 
-                if (counter % 1000 == 0)
-                    Console.Write("\r" + intpercentage + " %   ");
+            
+                var treesContextHash = dnagedContext.MatchTrees.Select(s => s.PersonId).Distinct().ToHashSet();
+
+                var treesSQLLiteHash = SQLliteTrees.Select(t => t.PersonId).Distinct().ToHashSet();
+
+                // all ids not in treesContextHash that are in treesSQLLiteHash
+                Console.WriteLine(treesSQLLiteHash.Count + " MatchTrees in SQL Lite DB");
+                Console.WriteLine(treesContextHash.Count + " MatchTrees in SQL SERVER");                
+                Console.WriteLine(treesContextHash.Count - treesSQLLiteHash.Count + " Correct Number");
+
+                //remove the persons that are already in the sql server instance
+                treesSQLLiteHash.ExceptWith(treesContextHash);
+
+                Console.WriteLine(treesSQLLiteHash.Count + " Persons that are in MatchTrees that need adding");
 
 
-                counter++;
+                decimal percentagecompleted = 0;
 
-                dnagedContext.MatchTrees.Add(new MatchTrees
+                
+
+                var guidList = dnagedContext.MatchTrees.Select(s => s.MatchId).ToHashSet();
+
+                long addedRecords = 0;
+                //total of people we need to add
+                
+                
+                //use the list of people we need to add
+                //to filter out a list of records from the sqllite db
+                //they might not be the same length
+                //because the same person can be in multiple trees
+                //so in the table twice
+                var listOfTreesToAdd = SQLliteTrees.Where(w => treesSQLLiteHash.Contains(w.PersonId)).ToList();
+
+                Console.WriteLine(listOfTreesToAdd.Count + " Trees in MatchTrees that need adding");
+
+                var total = listOfTreesToAdd.Count;
+
+                List<MatchTrees> matchTrees = new List<MatchTrees>();
+
+                Console.WriteLine("importing trees now..");
+                foreach (var s in listOfTreesToAdd)
                 {
-                    Id = s.Id,
-                    PersonId = s.PersonId,
-                    RelId = s.RelId,
-                    MatchId = s.MatchId,
-                    CreatedDate = DateTime.Now
-                });
+                    percentagecompleted = Decimal.Divide(counter, total) * 100;
+                    
 
-                addedRecords++;
+                    if (addedRecords % 1000 == 0)
+                        Console.Write("\r" + percentagecompleted + " %   ");
 
-                guidList.Add(s.MatchId);
-            }
+                    counter++;
+
+                    //dnagedContext.MatchTrees.Add(new MatchTrees
+                    //{
+                    //    Id = s.Id,
+                    //    PersonId = s.PersonId,
+                    //    RelId = s.RelId,
+                    //    MatchId = s.MatchId,
+                    //    CreatedDate = DateTime.Now
+                    //});
+
+                    matchTrees.Add(new MatchTrees
+                    {
+                        Id = s.Id,
+                        PersonId = s.PersonId,
+                        RelId = s.RelId,
+                        MatchId = s.MatchId,
+                        CreatedDate = DateTime.Now
+                    });
 
 
-            dnagedContext.SaveChanges();
+                    addedRecords++;
+
+                  //  if (addedRecords % 50000 == 0)
+                  //      dnagedContext.SaveChanges();
+
+                    guidList.Add(s.MatchId);
+                }
+
+                //  dnagedContext.SaveChanges();
+
+                dnagedContext.BulkInsert(matchTrees);
+
+                Console.WriteLine("saved " + addedRecords + " new records");
+            };
 
 
-            Console.WriteLine("saved " + addedRecords + " new records");
         }
 
-        private DateTime ImportPeople(DNAGEDContext dnagedContext, DateTime cutOff)
+        private void ImportPeople(DNAGEDContext dnagedContext)
         {
             #region adding persons
 
-            
 
+            HashSet<long> personsAdded = null;
+             
+            personsAdded = dnagedContext.Persons.Select(p => p.Id).ToHashSet();
+            List<Persons> personToAdd = new List<Persons>();
 
-            var personsAdded = dnagedContext.Persons.Select(p => p.Id).ToHashSet();
+             
 
-            // HashSet<long> personHashSet = new HashSet<long>();
-
-
-            var filteredlist = this.Trees.Where(l => l.CreatedDate > cutOff).ToList();
+            var filteredlist = this.SQLliteTrees.ToList();
 
             //&& !personsAdded.Contains(l.PersonId)
 
@@ -309,7 +391,7 @@ namespace DNAGedLib
 
                 if (personsAdded.Contains(s.PersonId)) continue;
 
-                dnagedContext.Persons.Add(new Persons
+                personToAdd.Add(new Persons
                 {
                     Id = s.PersonId,
                     ChristianName = s.GivenName,
@@ -324,19 +406,28 @@ namespace DNAGedLib
                     DeathCountry = "Unknown",
                     FatherId = s.FatherId,
                     MotherId = s.MotherId,
+                    CountyUpdated = false,
+                    AmericanParentsChecked = false,
+                    EnglishParentsChecked = false,
+                    CountryUpdated = false
+                    
                 });
 
                 addedRecords++;
                 personsAdded.Add(s.PersonId);
+
+                if(addedRecords % 50000 == 0)
+                    dnagedContext.SaveChanges();
             }
 
             #endregion
 
+            dnagedContext.BulkInsert(personToAdd);
 
-            dnagedContext.SaveChanges();
+         //   dnagedContext.SaveChanges();
 
             Console.WriteLine("saved " + addedRecords + " new records");
-            return cutOff;
+            
         }
 
         private void ImportMatchDetailsWithGroups(DNAGEDContext dnagedContext, Guid importTestId)
@@ -389,32 +480,42 @@ namespace DNAGedLib
             Console.WriteLine("added: " + newMatchGroupCounter + " to the context");
 
 
-
-
-            var existingMatchRecords = dnagedContext.MatchDetail.Where(w => w.TestGuid == importTestId).Select(m => m.MatchGuid).ToList();
-
-            Console.WriteLine("number of match details in the system: " + existingMatchRecords.Count);
-            var sqlLiteMatchDetailsToImport = this.MatchDetails.Where(w => w.TestGuid == importTestId).Select(s => s.MatchGuid).ToList();
-
-            var missingRecordCount = sqlLiteMatchDetailsToImport.Count(w => !existingMatchRecords.Contains(w));
-
-            Console.WriteLine("missing match details: " + missingRecordCount);
-
-            Console.WriteLine("adding match details: ");
-            dnagedContext.MatchDetail.AddRange(this.MatchDetails.Where(w => !existingMatchRecords.Contains(w.MatchGuid) && w.TestGuid == importTestId).Select(s =>
-                new Models.MatchDetail()
-                {
-                    Id = s.Id,
-                    SharedSegment = s.SharedSegment,
-                    TestGuid = s.TestGuid,
-                    MatchGuid = s.MatchGuid,
-                    MatchGu = dnagedContext.MatchGroups.FirstOrDefault(f => f.MatchGuid == s.MatchGuid)
-                    
-                }));
-
-            Console.WriteLine("added: " + missingRecordCount + " MatchDetails to the context");
-
             dnagedContext.SaveChanges();
+
+            using (var context = new DNAGEDContext())
+            {
+
+                var existingMatchRecords = context.MatchDetail.Where(w => w.TestGuid == importTestId)
+                    .Select(m => m.MatchGuid).ToList();
+
+                Console.WriteLine("number of match details in the system: " + existingMatchRecords.Count);
+                var sqlLiteMatchDetailsToImport = this.MatchDetails.Where(w => w.TestGuid == importTestId)
+                    .Select(s => s.MatchGuid).ToList();
+
+                var missingRecordCount = sqlLiteMatchDetailsToImport.Count(w => !existingMatchRecords.Contains(w));
+
+                Console.WriteLine("missing match details: " + missingRecordCount);
+
+                Console.WriteLine("adding match details: ");
+
+                var matchDetails = this.MatchDetails
+                    .Where(w => !existingMatchRecords.Contains(w.MatchGuid) && w.TestGuid == importTestId).Select(s =>
+                        new Models.MatchDetail()
+                        {
+                            Id = s.Id,
+                            SharedSegment = s.SharedSegment,
+                            TestGuid = s.TestGuid,
+                            MatchGuid = s.MatchGuid,                          
+                        }).ToList();
+                
+                context.BulkInsert(matchDetails);
+
+                Console.WriteLine("added: " + missingRecordCount + " MatchDetails to the context");
+
+              //  context.SaveChanges();
+
+            }
+
             Console.WriteLine("saving context");
 
             Console.WriteLine("press key to continue");
@@ -426,6 +527,7 @@ namespace DNAGedLib
 
             DNAGEDContext dnagedContext = new DNAGEDContext();
 
+            Console.WriteLine("Updatinging URLS");
 
            // double total = dnagedContext.MatchGroups.Count(mg => mg.TreeId.Contains("ancestry.com"));
             double counter = 0;
@@ -446,14 +548,7 @@ namespace DNAGedLib
                 Console.Write("\r" + percentage + " %   ");
                 
                 counter++;
-
-                //if (saveCounter == 1000)
-                //{
-
-                //    dnagedContext.SaveChanges();
-                //    saveCounter = 0;
-                //}
-
+                 
                 saveCounter++;
 
                 dnagedContext.MatchGroups.Update(p);
@@ -461,12 +556,63 @@ namespace DNAGedLib
 
             dnagedContext.SaveChanges();
 
-
+            Console.WriteLine("Saved URL changes");
 
         }
-        
 
-       
+
+
+        public void UpdateKitStats(Guid testId)
+        {
+            int records = GetTestKitRecords(testId);
+
+            Console.WriteLine("Updating Kit Stats");
+
+            using (var dnagedContext = new DNAGEDContext())
+            {
+                var matchKit = dnagedContext.MatchKitName.FirstOrDefault(f => f.Id == testId);
+
+                if (matchKit != null)
+                {
+                    matchKit.LastUpdated = DateTime.Now;
+                    matchKit.PersonCount = records;
+                }
+
+                dnagedContext.SaveChanges();
+
+                Console.WriteLine("Saved Kit Stats");
+            }
+
+
+            
+
+        }
+
+
+        private int GetTestKitRecords(Guid testId)
+        {            
+            string connectionString = @"Data Source=DESKTOP-KGS70RI\SQL2016EX;Initial Catalog=DNAGED;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
+
+            int result = 0;
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+               
+                using (SqlCommand command = new SqlCommand(
+                    "SELECT count(*) as PersonNo FROM dbo.MatchTrees INNER JOIN dbo.MatchGroups ON dbo.MatchTrees.MatchId = dbo.MatchGroups.MatchGuid WHERE dbo.MatchGroups.TestGuid LIKE @TestGuid", connection))
+                {                   
+                    command.Parameters.Add(new SqlParameter("TestGuid", testId));
+                  
+                    SqlDataReader reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        result = reader.GetInt32(0);                      
+                    }
+                }
+            }
+
+            return result;
+        }
 
         #region update country
 
