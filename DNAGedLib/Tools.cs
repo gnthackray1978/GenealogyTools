@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
+using DNAGedLib;
 using DNAGedLib.Models;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace DNAGedLib
@@ -15,20 +17,128 @@ namespace DNAGedLib
     }
 
     public class Tools {
-        
-        /// <summary>
-        /// 
-        /// </summary>
+
+        public static void ResetPersonsOfInterest()
+        {
+            DNAGEDContext dnagedContext = new DNAGEDContext();
+
+            Console.WriteLine("Deleting contents of PersonsOfInterest");
+
+            dnagedContext.Database.ExecuteSqlRaw("DELETE FROM PersonsOfInterest");
+
+            List<PersonsOfInterest> personsOfInterests = new List<PersonsOfInterest>();
+
+
+            Console.WriteLine("Fetching new data");
+
+            using (SqlConnection connection = new SqlConnection(dnagedContext.Database.GetDbConnection().ConnectionString))
+            {
+                connection.Open();
+                //
+                // SqlCommand should be created inside using.
+                // ... It receives the SQL statement.
+                // ... It receives the connection object.
+                // ... The SQL text works with a specific database.
+                //
+                using (SqlCommand command = new SqlCommand(
+                    "SELECT dbo.Persons.Id, dbo.Persons.ChristianName, dbo.Persons.Surname, dbo.Persons.BirthYear, dbo.Persons.BirthPlace, dbo.Persons.BirthCounty, dbo.Persons.BirthCountry, dbo.MatchGroups.TestDisplayName, \r\n                         dbo.MatchGroups.TestAdminDisplayName, dbo.MatchGroups.TreeId AS TreeURL, dbo.MatchGroups.TestGuid, dbo.MatchGroups.Confidence, dbo.MatchGroups.SharedCentimorgans AS SharedCM, dbo.Persons.CreatedDate, \r\n                         dbo.Persons.RootsEntry, dbo.Persons.Memory, dbo.MatchKitName.Id AS KitIId, dbo.MatchKitName.Name, dbo.MatchTrees.CreatedDate AS MTCreated\r\nFROM            dbo.MatchTrees INNER JOIN\r\n                         dbo.MatchGroups ON dbo.MatchTrees.MatchId = dbo.MatchGroups.MatchGuid INNER JOIN\r\n                         dbo.MatchKitName ON dbo.MatchGroups.TestGuid = dbo.MatchKitName.Id RIGHT OUTER JOIN\r\n                         dbo.Persons ON dbo.MatchTrees.PersonId = dbo.Persons.Id\r\nWHERE        (dbo.Persons.BirthCountry = \'England\') OR\r\n                         (dbo.Persons.BirthCountry = \'Wales\')",
+                    connection))
+                {
+                    //
+                    // Instance methods can be used on the SqlCommand.
+                    // ... These read data.
+                    //
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        long idx = 0;
+                        while (reader.Read())
+                        {                           
+                          //  long.TryParse(reader.GetValue(0).ToString(), out long id);
+                            long.TryParse(reader.GetValue(0).ToString(), out long personId);
+                            string christianName = reader.GetValue(1).ToString();
+                            string surname = reader.GetValue(2).ToString();
+                            int.TryParse(reader.GetValue(3).ToString(), out int birthYear);
+                            string birthPlace = reader.GetValue(4).ToString();
+                            string birthCounty = reader.GetValue(5).ToString();
+                            string birthCountry = reader.GetValue(6).ToString();
+                            string testDisplayName = reader.GetValue(7).ToString();
+                            string testAdminDisplayName = reader.GetValue(8).ToString();
+                            string treeURL = reader.GetValue(9).ToString();
+                            Guid.TryParse(reader.GetValue(10).ToString(), out Guid testGuid);
+                            double.TryParse(reader.GetValue(11).ToString(), out double confidence);
+                            double.TryParse(reader.GetValue(12).ToString(), out double sharedCM);
+
+                            DateTime createDateTime = DateTime.Today;
+
+                         //   DateTime.TryParse(reader.GetValue(13).ToString(), out createDateTime);
+
+                            bool.TryParse(reader.GetValue(14).ToString(), out bool rootsEntry);
+                            string memory = reader.GetValue(15).ToString();
+
+                            Guid.TryParse(reader.GetValue(16).ToString(), out Guid kitId);
+
+                            string name = reader.GetValue(17).ToString();
+
+                            personsOfInterests.Add(new PersonsOfInterest()
+                            {
+                                Id = idx,
+                                BirthCountry = birthCountry,
+                                BirthCounty = birthCounty,
+                                BirthPlace = birthPlace,
+                                BirthYear = birthYear,
+                                ChristianName = christianName,
+                                Confidence = confidence,
+                                CreatedDate = createDateTime,
+                                KitId = kitId,
+                                Memory = memory,
+                                Name = name,
+                                PersonId = personId,
+                                RootsEntry = rootsEntry,
+                                SharedCentimorgans = sharedCM,
+                                Surname = surname,
+                                TestAdminDisplayName = testAdminDisplayName,
+                                TestDisplayName = testDisplayName,
+                                TestGuid = testGuid,
+                                TreeURL = treeURL
+                            });
+                            idx++;
+                         //   Console.WriteLine();
+                        }
+                    }
+                }
+
+
+            }
+
+            Console.WriteLine("Attempting to write new data");
+
+            dnagedContext.BulkInsert(personsOfInterests);
+
+            Console.WriteLine("Finished");
+        }
+    
         public static void CreateGroup()
         {            
             int idx = 0;
-
-           // List<UtilityPersonGroup> pgroups = new List<UtilityPersonGroup>();
+            Console.WriteLine("");
+            Console.WriteLine("Deleting contents of PersonGroups");
 
             DNAGEDContext dnagedContext = new DNAGEDContext();
 
-            int recCount = dnagedContext.PersonsOfInterest.Count();
-            List<PersonContainer> records = dnagedContext.PersonsOfInterest.Select(s=> new PersonContainer{PersonsOfInterest = s}).ToList();
+            dnagedContext.Database.ExecuteSqlRaw("DELETE FROM PersonGroups");
+
+
+            // List<UtilityPersonGroup> pgroups = new List<UtilityPersonGroup>();
+
+            Func<PersonsOfInterest,bool> myQ = (w) => w.Name == "GNT" || w.Name == "ATH" || w.Name == "GRT" || w.Name == "" ;
+
+        //    Func<PersonsOfInterest, bool> myQ = (w) => (w.Name == "GNT" || w.Name == "ATH" || w.Name == "GRT" || w.Name == "") && w.Surname == "Herbert" && w.ChristianName == "James" && w.BirthYear == 1786;
+
+            int recCount = dnagedContext.PersonsOfInterest.Count(myQ);
+
+            List<PersonContainer> records = dnagedContext.PersonsOfInterest
+                .Where(myQ)
+                .Select(s=> new PersonContainer{PersonsOfInterest = s}).OrderBy(o=>o.PersonsOfInterest.BirthYear).ToList();
             
             Console.WriteLine(recCount + " records in people of interest table");
 
@@ -55,7 +165,10 @@ namespace DNAGedLib
                     var pg = new PersonGroups
                     {
                         CreatedDate = DateTime.Now,
-                        Description = records[idx].PersonsOfInterest.BirthYear + records[idx].PersonsOfInterest.ChristianName + records[idx].PersonsOfInterest.Surname,
+                        Description = records[idx].PersonsOfInterest.BirthCounty +
+                                      records[idx].PersonsOfInterest.BirthYear + 
+                                      records[idx].PersonsOfInterest.ChristianName + 
+                                      records[idx].PersonsOfInterest.Surname, 
                         GroupingKey = "",
                         PersonGroupId = groupId,
                         PersonId = records[idx].PersonsOfInterest.PersonId,
@@ -96,6 +209,8 @@ namespace DNAGedLib
 
             AddPersonGroups(pgroups);
 
+            Console.WriteLine("Finished");
+            Console.ReadKey();
         }
 
 
@@ -108,21 +223,29 @@ namespace DNAGedLib
 
             var comparisonPerson = records[location];
 
-            int limit = location + 10;
+            int limit = location + 25;
             int idx = location + 1;
-            while (idx < limit && idx < records.Count)
+            while (idx < records.Count)
             {
+                if (records[idx].PersonsOfInterest.BirthYear == comparisonPerson.PersonsOfInterest.BirthYear +1)
+                    break;
 
+                //
                 if (records[idx].PersonsOfInterest.BirthYear == comparisonPerson.PersonsOfInterest.BirthYear &&
                     records[idx].PersonsOfInterest.ChristianName == comparisonPerson.PersonsOfInterest.ChristianName &&
-                    records[idx].PersonsOfInterest.Surname == comparisonPerson.PersonsOfInterest.Surname)
+                    records[idx].PersonsOfInterest.Surname == comparisonPerson.PersonsOfInterest.Surname &&
+                    records[idx].PersonsOfInterest.BirthCounty == comparisonPerson.PersonsOfInterest.BirthCounty)
                 {
                     if (!PersonGroupContainsPersonId(personGroups, records[idx].PersonsOfInterest.PersonId))
                     {
                         var pg = new PersonGroups
                         {
                             CreatedDate = DateTime.Now,
-                            Description = records[idx].PersonsOfInterest.BirthYear + records[idx].PersonsOfInterest.ChristianName + records[idx].PersonsOfInterest.Surname,
+                            Description = records[idx].PersonsOfInterest.BirthCounty +
+                                          records[idx].PersonsOfInterest.BirthYear + 
+                                          records[idx].PersonsOfInterest.ChristianName + 
+                                          records[idx].PersonsOfInterest.Surname                                          
+                            ,
                             GroupingKey = "",
                             PersonGroupId = groupId,
                             PersonId = records[idx].PersonsOfInterest.PersonId,
@@ -142,6 +265,8 @@ namespace DNAGedLib
                     records[idx].IsDupe = true;
                 }
                 idx++;
+
+
             }
         }
 

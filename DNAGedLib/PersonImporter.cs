@@ -227,8 +227,71 @@ namespace DNAGedLib
             Console.WriteLine("finished");
         }
 
-        private void ImportICW(DNAGEDContext dnagedContext)
+        public static void ImportICW()
         {
+            DNAGEDContext dnagedContext = new DNAGEDContext();
+
+            PersonImporter pi = new PersonImporter();
+
+         
+
+
+
+
+            pi.ImportICW(dnagedContext);
+
+            Console.WriteLine("finished");
+        }
+
+        public void ImportICW(DNAGEDContext dnagedContext)
+        {
+
+
+            void Ancestry_ICW(SqliteConnection mDbConnection, List<ICW> matchTreeEntries)
+            {
+         
+                string sql = "select * from Ancestry_ICW";
+                var command = new SqliteCommand(sql, mDbConnection);
+
+                var reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    matchTreeEntries.Add(new ICW()
+                    {
+                        Id = Convert.ToInt32(reader["Id"]),
+
+                        MatchId = MatchTreeHelpers.ExtractGuid(reader["matchid"]),
+
+                        MatchName = reader["matchname"].ToString(),
+
+                        MatchAdmin = reader["matchadmin"].ToString(),
+
+                        Icwid = MatchTreeHelpers.ExtractGuid(reader["icwid"]),
+
+                        Icwname = reader["icwname"].ToString(),
+
+                        Icwadmin = reader["icwadmin"].ToString(),
+
+                        Source = reader["source"].ToString(),
+                    });
+                }
+            }
+
+
+            string path = @"C:\Users\george\Documents\DNAGedcom.db";
+
+            var m_dbConnection =
+                new SqliteConnection("Data Source=" + path);
+            m_dbConnection.Open();
+
+            Console.WriteLine("Loading SQLLite DB");
+
+
+            Ancestry_ICW(m_dbConnection, ICWs);
+             
+
+
             long counter = 0;
             long percentage = 0;
 
@@ -247,7 +310,7 @@ namespace DNAGedLib
                 counter++;
 
 
-                if (dnagedContext.MatchIcw.Any(p => p.MatchId == i.MatchId && p.Icwid == i.Icwid)) continue;
+  //              if (dnagedContext.MatchIcw.Any(p => p.MatchId == i.MatchId && p.Icwid == i.Icwid)) continue;
 
                 dnagedContext.MatchIcw.Add(new MatchIcw()
                 {
