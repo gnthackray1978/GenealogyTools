@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2027
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30611.23
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSVAnalyser", "CSVAnalyser\CSVAnalyser.csproj", "{B7D8045D-CC85-4606-AC13-687EBAA2B80A}"
 EndProject
@@ -11,13 +11,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RootsReader", "RootsReader\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RootsLib", "RootsLib\RootsLib.csproj", "{D1AA76ED-9DA3-403E-A330-B062B6B08564}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GedcomParser", "GedcomParser", "{65EDB2F5-A54D-487A-9595-177B20FB53A4}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LINQ2GEDCOM", "LINQ2GEDCOM\LINQ2GEDCOM.csproj", "{50BE357D-F164-42FD-8409-079C7750E48E}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DNAGedLib", "DNAGedLib\DNAGedLib.csproj", "{05F1217E-4C52-40EB-A345-B327E4AB75FD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlaceLib", "PlaceLib\PlaceLib.csproj", "{98717879-840C-4FA3-9543-DD2B05F8D375}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GedcomParser", "GedcomParser\GedcomParser.csproj", "{9AD53D1A-3D91-44BC-903B-54D370E7A201}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GedcomParser.Test", "GedcomParser.Test\GedcomParser.Test.csproj", "{89B09FF1-5905-4CB1-8AFD-BE90221DCADB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,10 +41,6 @@ Global
 		{D1AA76ED-9DA3-403E-A330-B062B6B08564}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D1AA76ED-9DA3-403E-A330-B062B6B08564}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D1AA76ED-9DA3-403E-A330-B062B6B08564}.Release|Any CPU.Build.0 = Release|Any CPU
-		{50BE357D-F164-42FD-8409-079C7750E48E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{50BE357D-F164-42FD-8409-079C7750E48E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{50BE357D-F164-42FD-8409-079C7750E48E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{50BE357D-F164-42FD-8409-079C7750E48E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{05F1217E-4C52-40EB-A345-B327E4AB75FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{05F1217E-4C52-40EB-A345-B327E4AB75FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{05F1217E-4C52-40EB-A345-B327E4AB75FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -53,12 +49,17 @@ Global
 		{98717879-840C-4FA3-9543-DD2B05F8D375}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{98717879-840C-4FA3-9543-DD2B05F8D375}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{98717879-840C-4FA3-9543-DD2B05F8D375}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9AD53D1A-3D91-44BC-903B-54D370E7A201}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9AD53D1A-3D91-44BC-903B-54D370E7A201}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9AD53D1A-3D91-44BC-903B-54D370E7A201}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9AD53D1A-3D91-44BC-903B-54D370E7A201}.Release|Any CPU.Build.0 = Release|Any CPU
+		{89B09FF1-5905-4CB1-8AFD-BE90221DCADB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{89B09FF1-5905-4CB1-8AFD-BE90221DCADB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{89B09FF1-5905-4CB1-8AFD-BE90221DCADB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{89B09FF1-5905-4CB1-8AFD-BE90221DCADB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{50BE357D-F164-42FD-8409-079C7750E48E} = {65EDB2F5-A54D-487A-9595-177B20FB53A4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DC910791-ECE4-47E6-BC3F-72F91596FEEF}
