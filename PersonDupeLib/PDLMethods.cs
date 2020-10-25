@@ -5,19 +5,24 @@ using System.Diagnostics;
 using System.Linq;
 using DNAGedLib;
 using DNAGedLib.Models;
+using GenDBContext.Models;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
-namespace DNAGedLib
+namespace PersonDupeLib
 {
-    public class PersonContainer 
+    class PersonContainer
     {
         public PersonsOfInterest PersonsOfInterest { get; set; }
         public bool IsDupe { get; set; }
     }
 
-    public class Tools {
-
+    public class PDLMethods
+    {
+        /// <summary>
+        /// Deletes contents of personsofinterests
+        /// Reload from Persons where Person country is England or Wales
+        /// </summary>
         public static void ResetPersonsOfInterest()
         {
             DNAGEDContext dnagedContext = new DNAGEDContext();
@@ -41,7 +46,7 @@ namespace DNAGedLib
                 // ... The SQL text works with a specific database.
                 //
                 using (SqlCommand command = new SqlCommand(
-                    "SELECT dbo.Persons.Id, dbo.Persons.ChristianName, dbo.Persons.Surname, dbo.Persons.BirthYear, dbo.Persons.BirthPlace, dbo.Persons.BirthCounty, dbo.Persons.BirthCountry, dbo.MatchGroups.TestDisplayName, \r\n                         dbo.MatchGroups.TestAdminDisplayName, dbo.MatchGroups.TreeId AS TreeURL, dbo.MatchGroups.TestGuid, dbo.MatchGroups.Confidence, dbo.MatchGroups.SharedCentimorgans AS SharedCM, dbo.Persons.CreatedDate, \r\n                         dbo.Persons.RootsEntry, dbo.Persons.Memory, dbo.MatchKitName.Id AS KitIId, dbo.MatchKitName.Name, dbo.MatchTrees.CreatedDate AS MTCreated\r\nFROM            dbo.MatchTrees INNER JOIN\r\n                         dbo.MatchGroups ON dbo.MatchTrees.MatchId = dbo.MatchGroups.MatchGuid INNER JOIN\r\n                         dbo.MatchKitName ON dbo.MatchGroups.TestGuid = dbo.MatchKitName.Id RIGHT OUTER JOIN\r\n                         dbo.Persons ON dbo.MatchTrees.PersonId = dbo.Persons.Id\r\nWHERE        (dbo.Persons.BirthCountry = \'England\') OR\r\n                         (dbo.Persons.BirthCountry = \'Wales\')",
+                    "SELECT dbo.Persons.Id, dbo.Persons.ChristianName, dbo.Persons.Surname, dbo.Persons.BirthYear, dbo.Persons.BirthPlace, dbo.Persons.BirthCounty, dbo.Persons.BirthCountry, dbo.MatchGroups.TestDisplayName, \r\n                         dbo.MatchGroups.TestAdminDisplayName, dbo.MatchGroups.TreeId AS TreeURL, dbo.MatchGroups.TestGuid, dbo.MatchGroups.Confidence, dbo.MatchGroups.SharedCentimorgans AS SharedCM, dbo.Persons.CreatedDate, \r\n                         dbo.Persons.RootsEntry, dbo.Persons.Memory, dbo.MatchKitName.Id AS KitIId, dbo.MatchKitName.Name, dbo.MatchTrees.CreatedDate AS MTCreated\r\nFROM            dbo.MatchTrees INNER JOIN\r\n                         dbo.MatchGroups ON dbo.MatchTrees.MatchId = dbo.MatchGroups.MatchGuid INNER JOIN\r\n                         dbo.MatchKitName ON dbo.MatchGroups.TestGuid = dbo.MatchKitName.Id RIGHT OUTER JOIN\r\n                         dbo.Persons ON dbo.MatchTrees.PersonId = dbo.Persons.Id\r\nWHERE        (dbo.Persons.BirthCountry = \'England\') OR\r\n                         (dbo.Persons.BirthCountry = \'Wales\') OR\r\n                         (dbo.Persons.RootsEntry = 1)",
                     connection))
                 {
                     //
@@ -52,8 +57,8 @@ namespace DNAGedLib
                     {
                         long idx = 0;
                         while (reader.Read())
-                        {                           
-                          //  long.TryParse(reader.GetValue(0).ToString(), out long id);
+                        {
+                            //  long.TryParse(reader.GetValue(0).ToString(), out long id);
                             long.TryParse(reader.GetValue(0).ToString(), out long personId);
                             string christianName = reader.GetValue(1).ToString();
                             string surname = reader.GetValue(2).ToString();
@@ -70,7 +75,7 @@ namespace DNAGedLib
 
                             DateTime createDateTime = DateTime.Today;
 
-                         //   DateTime.TryParse(reader.GetValue(13).ToString(), out createDateTime);
+                            //   DateTime.TryParse(reader.GetValue(13).ToString(), out createDateTime);
 
                             bool.TryParse(reader.GetValue(14).ToString(), out bool rootsEntry);
                             string memory = reader.GetValue(15).ToString();
@@ -102,7 +107,7 @@ namespace DNAGedLib
                                 TreeURL = treeURL
                             });
                             idx++;
-                         //   Console.WriteLine();
+                            //   Console.WriteLine();
                         }
                     }
                 }
@@ -116,9 +121,9 @@ namespace DNAGedLib
 
             Console.WriteLine("Finished");
         }
-    
+
         public static void CreateGroup()
-        {            
+        {
             int idx = 0;
             Console.WriteLine("");
             Console.WriteLine("Deleting contents of PersonGroups");
@@ -130,16 +135,16 @@ namespace DNAGedLib
 
             // List<UtilityPersonGroup> pgroups = new List<UtilityPersonGroup>();
 
-            Func<PersonsOfInterest,bool> myQ = (w) => w.Name == "GNT" || w.Name == "ATH" || w.Name == "GRT" || w.Name == "" ;
+            Func<PersonsOfInterest, bool> myQ = (w) => w.Name == "GNT" || w.Name == "ATH" || w.Name == "GRT" || w.Name == "";
 
-        //    Func<PersonsOfInterest, bool> myQ = (w) => (w.Name == "GNT" || w.Name == "ATH" || w.Name == "GRT" || w.Name == "") && w.Surname == "Herbert" && w.ChristianName == "James" && w.BirthYear == 1786;
+            //    Func<PersonsOfInterest, bool> myQ = (w) => (w.Name == "GNT" || w.Name == "ATH" || w.Name == "GRT" || w.Name == "") && w.Surname == "Herbert" && w.ChristianName == "James" && w.BirthYear == 1786;
 
             int recCount = dnagedContext.PersonsOfInterest.Count(myQ);
 
             List<PersonContainer> records = dnagedContext.PersonsOfInterest
                 .Where(myQ)
-                .Select(s=> new PersonContainer{PersonsOfInterest = s}).OrderBy(o=>o.PersonsOfInterest.BirthYear).ToList();
-            
+                .Select(s => new PersonContainer { PersonsOfInterest = s }).OrderBy(o => o.PersonsOfInterest.BirthYear).ToList();
+
             Console.WriteLine(recCount + " records in people of interest table");
 
             List<List<PersonGroupContainer>> listPersonGroups = new List<List<PersonGroupContainer>>();
@@ -155,7 +160,7 @@ namespace DNAGedLib
 
                 }
 
-                
+
                 groupId++;
 
                 if (!records[idx].IsDupe) //.PersonsOfInterest.Memory != "ADDED")
@@ -166,18 +171,21 @@ namespace DNAGedLib
                     {
                         CreatedDate = DateTime.Now,
                         Description = records[idx].PersonsOfInterest.BirthCounty +
-                                      records[idx].PersonsOfInterest.BirthYear + 
-                                      records[idx].PersonsOfInterest.ChristianName + 
-                                      records[idx].PersonsOfInterest.Surname, 
+                                      records[idx].PersonsOfInterest.BirthYear +
+                                      records[idx].PersonsOfInterest.ChristianName +
+                                      records[idx].PersonsOfInterest.Surname,
                         GroupingKey = "",
                         PersonGroupId = groupId,
                         PersonId = records[idx].PersonsOfInterest.PersonId,
                         PersonGroupCount = 0,
-                        PersonGroupIndex = 0           
+                        PersonGroupIndex = 0
                     };
 
-                    personGroups.Add(new PersonGroupContainer{PersonGroup = pg,
-                        TestAdminDisplayName = records[idx].PersonsOfInterest.TestAdminDisplayName } );
+                    personGroups.Add(new PersonGroupContainer
+                    {
+                        PersonGroup = pg,
+                        TestAdminDisplayName = records[idx].PersonsOfInterest.TestAdminDisplayName
+                    });
 
                     SearchForDupes(personGroups, records, idx, groupId);
 
@@ -185,7 +193,7 @@ namespace DNAGedLib
                         listPersonGroups.Add(personGroups);
                 }
 
-              
+
 
                 //search for dupes 
 
@@ -227,7 +235,7 @@ namespace DNAGedLib
             int idx = location + 1;
             while (idx < records.Count)
             {
-                if (records[idx].PersonsOfInterest.BirthYear == comparisonPerson.PersonsOfInterest.BirthYear +1)
+                if (records[idx].PersonsOfInterest.BirthYear == comparisonPerson.PersonsOfInterest.BirthYear + 1)
                     break;
 
                 //
@@ -242,9 +250,9 @@ namespace DNAGedLib
                         {
                             CreatedDate = DateTime.Now,
                             Description = records[idx].PersonsOfInterest.BirthCounty +
-                                          records[idx].PersonsOfInterest.BirthYear + 
-                                          records[idx].PersonsOfInterest.ChristianName + 
-                                          records[idx].PersonsOfInterest.Surname                                          
+                                          records[idx].PersonsOfInterest.BirthYear +
+                                          records[idx].PersonsOfInterest.ChristianName +
+                                          records[idx].PersonsOfInterest.Surname
                             ,
                             GroupingKey = "",
                             PersonGroupId = groupId,
@@ -328,7 +336,8 @@ namespace DNAGedLib
         }
 
 
-        public static void FindGroups() {
+        public static void FindGroups()
+        {
             var ignoreList = new List<Guid>();
 
 
@@ -388,7 +397,7 @@ namespace DNAGedLib
             var test = temp.GroupBy(x => new { x.Surname }, (key, group) => new
             {
                 //  BirthYear = key.BirthYear,
-                Surname = key.Surname,
+                key.Surname,
                 //Surname = key.Surname,
                 Result = group.ToList()
             });

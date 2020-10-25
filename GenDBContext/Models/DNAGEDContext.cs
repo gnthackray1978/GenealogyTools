@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using DNAGedLib.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace DNAGedLib.Models
+namespace GenDBContext.Models
 {
     public class DebugLoggerProvider : ILoggerProvider
     {
@@ -54,7 +55,7 @@ namespace DNAGedLib.Models
 
 
         public static readonly ILoggerFactory MyLoggerFactory
-            = LoggerFactory.Create(builder => { builder.AddProvider(new DebugLoggerProvider());});
+            = LoggerFactory.Create(builder => { builder.AddProvider(new DebugLoggerProvider()); });
 
         public virtual DbSet<MatchDetail> MatchDetail { get; set; }
         public virtual DbSet<MatchGroups> MatchGroups { get; set; }
@@ -68,7 +69,7 @@ namespace DNAGedLib.Models
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-          //  optionsBuilder.UseLoggerFactory(MyLoggerFactory);
+            //  optionsBuilder.UseLoggerFactory(MyLoggerFactory);
 
             if (!optionsBuilder.IsConfigured)
             {
@@ -91,7 +92,7 @@ namespace DNAGedLib.Models
 
             modelBuilder.Entity<PersonGroups>(entity =>
             {
-                entity.Property(e => e.Id).ValueGeneratedNever();                 
+                entity.Property(e => e.Id).ValueGeneratedNever();
             });
 
             modelBuilder.Entity<MatchKitName>(entity =>
@@ -103,7 +104,7 @@ namespace DNAGedLib.Models
             {
                 entity.HasKey(e => e.Id);
 
-               // entity.Property(e => e.MatchGuid).ValueGeneratedNever();
+                // entity.Property(e => e.MatchGuid).ValueGeneratedNever();
 
                 entity.Property(e => e.GroupName).IsUnicode(false);
 
@@ -168,7 +169,7 @@ namespace DNAGedLib.Models
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
                 entity.HasMany(d => d.MatchTrees)
-                  .WithOne(p => p.Person).HasForeignKey(d=>d.PersonId)
+                  .WithOne(p => p.Person).HasForeignKey(d => d.PersonId)
                   .OnDelete(DeleteBehavior.ClientSetNull)
                   .HasConstraintName("FK_MatchTrees_Persons");
             });
@@ -176,7 +177,7 @@ namespace DNAGedLib.Models
             modelBuilder.Entity<MyPersons>(entity =>
             {
                 entity.Property(e => e.Id).ValueGeneratedNever();
-                
+
             });
 
             modelBuilder.Entity<PersonsOfInterest>(entity =>

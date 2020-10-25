@@ -1,6 +1,7 @@
+using CSVAnalyser;
 using System.Collections.Generic;
 
-namespace CSVAnalyser
+namespace PlaceLib
 {
     public interface ILocationList
     {

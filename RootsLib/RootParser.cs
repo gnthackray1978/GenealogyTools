@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using DNAGedLib;
 using DNAGedLib.Models;
+using GenDBContext.Models;
 using Microsoft.EntityFrameworkCore;
 using RootsLib.Model;
 

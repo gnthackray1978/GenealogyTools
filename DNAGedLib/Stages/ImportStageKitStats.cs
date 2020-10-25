@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using DNAGedLib.Models;
+using GenDBContext.Models;
 using Microsoft.Data.SqlClient;
 
 namespace DNAGedLib

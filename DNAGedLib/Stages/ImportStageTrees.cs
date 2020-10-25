@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using DNAGedLib.Models;
+using GenDBContext.Models;
 
 namespace DNAGedLib
 {

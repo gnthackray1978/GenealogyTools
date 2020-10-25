@@ -6,6 +6,7 @@ using PlaceLib;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Security.Permissions;
+using GenDBContext.Models;
 
 namespace DNAGedLib
 {

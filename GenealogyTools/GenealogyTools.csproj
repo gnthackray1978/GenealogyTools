@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DNAGedLib\DNAGedLib.csproj" />
+    <ProjectReference Include="..\GedcomImporter\GedcomImporter.csproj" />
+    <ProjectReference Include="..\GenDBContext\GenDBContext.csproj" />
+    <ProjectReference Include="..\PersonDupeLib\PersonDupeLib.csproj" />
+    <ProjectReference Include="..\PlaceLib\PlaceLib.csproj" />
+  </ItemGroup>
+
+</Project>

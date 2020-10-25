@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Z.EntityFramework.Extensions.EFCore" Version="5.0.0-preview.8.20407.4-06" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GenDBContext\GenDBContext.csproj" />
+  </ItemGroup>
+
+</Project>
