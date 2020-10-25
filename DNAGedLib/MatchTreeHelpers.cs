@@ -3,8 +3,17 @@ using System.Text.RegularExpressions;
 
 namespace DNAGedLib
 {
+    public struct DateObj
+    {
+        public int YearInt { get; set; }
+        public string DateStr { get; set; }
+        public string Place { get; set; }
+    }
+
     public class MatchTreeHelpers
     {
+      
+
         public static DateTime ExtractDate(object originalText)
         {
             DateTime dt = DateTime.Today;

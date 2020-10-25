@@ -8,6 +8,7 @@ using DNAGedLib;
 using Microsoft.EntityFrameworkCore;
 using GenDBContext.Models;
 using DNAGedLib.Models;
+using GedcomParser.Entities;
 
 namespace GedcomImporter
 {
@@ -27,7 +28,55 @@ namespace GedcomImporter
 
             }
         }
-        
+
+        public static DateObj GetDateObj(DatePlace birthPlace, DatePlace baptismPlace)
+        {
+            var returnObj = new DateObj() { 
+                Place="unset",
+                DateStr="",
+                YearInt=0
+            };
+
+            if (birthPlace != null)
+            {
+                if (!string.IsNullOrEmpty(birthPlace.Date))
+                {
+                    returnObj.YearInt = MatchTreeHelpers.ExtractInt(birthPlace.Date);
+                    returnObj.DateStr = birthPlace.Date;
+                }
+
+                if (!string.IsNullOrEmpty(birthPlace.Place))
+                {
+                    returnObj.Place = birthPlace.Place;
+                }
+            }
+
+            if (baptismPlace != null)
+            {
+                if (!string.IsNullOrEmpty(baptismPlace.Date))
+                {
+                    int bapInt = MatchTreeHelpers.ExtractInt(baptismPlace.Date);
+                    string bapStr = baptismPlace.Date;
+
+                    if (returnObj.YearInt == 0)
+                    {
+                        returnObj.YearInt = bapInt;
+                        returnObj.DateStr = bapStr;
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(baptismPlace.Place))
+                {
+                    if (returnObj.Place == "")
+                    {
+                        returnObj.Place = baptismPlace.Place;
+                    }
+                }
+            }
+
+            return returnObj;
+        }
+
         public static void Run(string filePath)
         {
 
@@ -46,24 +95,50 @@ namespace GedcomImporter
             {
                 // fileParser.PersonContainer.ChildRelations[0].From.Id
                 var parents = fileParser.PersonContainer.ChildRelations.Where(w => w.From.Id == p.Id).ToList();
-
+                string fatherId = "";
+                string motherId = "";
                 Console.WriteLine(p.FirstName + " " + p.LastName);
-                if(parents.Count() > 1)
+
+                if(parents.Count() == 2)
                 {
-                    Console.WriteLine(" " + parents[0].To.FirstName + " " + parents[0].To.LastName);
-                    Console.WriteLine(" " + parents[1].To.FirstName + " " + parents[1].To.LastName);
+                    fatherId = parents[0].To.Id;
+                    motherId = parents[1].To.Id; 
                 }
-                //p.FirstName + p.LastName + p.Baptized + p.Birth.Place;
+
+                if (parents.Count() == 1)
+                {                     
+                    motherId = parents[0].To.Id;
+                }
+                 
+                using (var context = new DNAGEDContext())
+                {
+                    var birth = GetDateObj(p.Birth, p.Baptized);
+                    var death = GetDateObj(p.Death, null);
+
+                    context.Persons.Add(new Persons()
+                    {
+                        AmericanParentsChecked = false,
+                        ChristianName = p.FirstName,
+                        Surname = p.LastName,
+                        CreatedDate = DateTime.Now,
+                        RootsEntry = true,
+                        BirthYear = birth.YearInt,
+                        BirthPlace = birth.Place,
+                        BirthDate = birth.DateStr,
+                        DeathYear = death.YearInt,
+                        DeathDate = death.DateStr,
+                        DeathPlace = death.Place,
+                        CountryUpdated =false,
+                        CountyUpdated =false,
+                        Memory = p.Id ,
+                        BirthCountry = fatherId,
+                        DeathCountry = motherId
+                    });
+
+                }
             }
 
-            using (var context = new DNAGEDContext())
-            {
-                context.Persons.Add(new Persons()
-                {
-                    
-                });
-               
-            }
+           
         }
            
 
