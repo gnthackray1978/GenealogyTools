@@ -1,0 +1,1 @@
+@java -jar C:\Users\george\Documents\Repos\GenealogyTools\bfg-1.13.0.jar %*
