@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Data.Common;
 using System.Diagnostics;
 using System.Linq;
 using DNAGedLib;
 using DNAGedLib.Models;
 using GenDBContext.Models;
 using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
 namespace PersonDupeLib
@@ -19,6 +21,50 @@ namespace PersonDupeLib
 
     public class PDLMethods
     {
+
+
+        public static void CheckCon()
+        {
+            DNAGEDContext dnagedContext = new DNAGEDContext();
+            var c = dnagedContext.Persons.Count();
+
+
+            Console.WriteLine("Fetching new data");
+
+            var connString = dnagedContext.Database.GetDbConnection().ConnectionString;
+
+            using (SqliteConnection connection = new SqliteConnection(connString))
+            {
+                connection.Open();
+                 
+                using (var command = new SqliteCommand(
+                    "SELECT count(*) from persons",
+                    connection))
+                {
+         
+                    using (var reader = command.ExecuteReader())
+                    {
+                        long idx = 0;
+                        while (reader.Read())
+                        { 
+                            Console.WriteLine("reading");
+                    
+                            idx++;
+                    
+                        }
+                    }
+                }
+
+
+            }
+
+
+
+            Console.WriteLine("count: " + c);
+            Console.WriteLine("press a key");
+            Console.ReadKey();
+        }
+
         /// <summary>
         /// Deletes contents of personsofinterests
         /// Reload from Persons where Person country is England or Wales
@@ -36,90 +82,262 @@ namespace PersonDupeLib
 
             Console.WriteLine("Fetching new data");
 
+            // FillBySQLServer(dnagedContext, personsOfInterests);
+            personsOfInterests = FillBySQLite(dnagedContext);
+
+            Console.WriteLine("Attempting to write new data");
+
+           
+            BulkInsert(personsOfInterests, dnagedContext.Database.GetDbConnection().ConnectionString);
+   
+
+            Console.WriteLine("Finished : " + personsOfInterests.Count);
+        //    Console.ReadKey();
+        }
+
+        private static void DedupeSQLite(DNAGEDContext dnagedContext, List<PersonsOfInterest> personsOfInterests)
+        {
+            using (var connection = new SqliteConnection(dnagedContext.Database.GetDbConnection().ConnectionString))
+            {
+                connection.Open();
+
+                using (var command = new SqliteCommand( "SELECT Id, PersonId FROM PersonsOfInterest", connection))
+                {
+                    using (var reader = command.ExecuteReader())
+                    {
+                       
+                        while (reader.Read())
+                        {
+                            long.TryParse(reader.GetValue(0).ToString(), out long Id);
+                            long.TryParse(reader.GetValue(1).ToString(), out long personId);
+
+                            personsOfInterests.Add(new PersonsOfInterest()
+                            {
+                                Id = Id,
+                                PersonId = personId
+                            });
+                        }
+                    }
+                }
+            }
+
+            List<PersonsOfInterest> newIds = new List<PersonsOfInterest>();
+            List<long> deleteList = new List<long>();
+            foreach (var poi in personsOfInterests)
+            {
+                if (!newIds.Exists(e => e.PersonId == poi.PersonId))
+                {
+                    newIds.Add(poi);
+                }
+                else
+                {
+                    deleteList.Add(poi.Id);
+                }
+            }
+
+
+
+        }
+
+        private static List<PersonsOfInterest> FillBySQLite(DNAGEDContext dnagedContext)
+        {
+
+            var personsOfInterests = new List<PersonsOfInterest>();
+
+            using (var connection = new SqliteConnection(dnagedContext.Database.GetDbConnection().ConnectionString))
+            {
+                connection.Open();
+
+                using (var command = new SqliteCommand(
+                    "SELECT Persons.Id, Persons.ChristianName, Persons.Surname, Persons.BirthYear, Persons.BirthPlace, Persons.BirthCounty, Persons.BirthCountry, MatchGroups.TestDisplayName, MatchGroups.TestAdminDisplayName, MatchGroups.TreeId AS TreeURL, MatchGroups.TestGuid, MatchGroups.Confidence, MatchGroups.SharedCentimorgans AS SharedCM, Persons.CreatedDate,  Persons.RootsEntry, Persons.Memory, MatchKitName.Id AS KitIId, MatchKitName.Name, MatchTrees.CreatedDate AS MTCreated" +
+                    " FROM Persons LEFT OUTER JOIN MatchTrees on Persons.Id = MatchTrees.PersonId INNER JOIN MatchGroups ON MatchGroups.MatchGuid = MatchTrees.MatchId INNER JOIN MatchKitName ON MatchGroups.TestGuid = MatchKitName.Id"+
+                    " WHERE (Persons.BirthCountry = 'England') OR (Persons.BirthCountry = 'Wales') OR (Persons.RootsEntry = 1) Order By Persons.Id",
+                    connection))
+                {
+                    using (var reader = command.ExecuteReader())
+                    {
+
+                        long idx = 0;
+                        long personIdOut = 0;
+                        while (reader.Read())
+                        {
+                            idx = AddPerson(reader, personsOfInterests, idx, ref personIdOut);
+                        }
+                    }
+                }
+            }
+
+         
+
+            return personsOfInterests;
+        }
+
+        private static object SetCol(string val )
+        {
+            if (val == null)
+            {
+                return DBNull.Value;
+            }
+            else
+            {
+                return val;
+            }
+        }
+
+        private static void BulkInsert(List<PersonsOfInterest> rows,string connectionString)
+        {
+            using (var connection = new SqliteConnection(connectionString))
+            {
+                var command = connection.CreateCommand();
+                command.CommandText = "INSERT INTO PersonsOfInterest(Id, PersonId, ChristianName,Surname,BirthYear,BirthPlace, BirthCounty,BirthCountry,TestDisplayName,TestAdminDisplayName,TreeURL,TestGuid,Confidence,SharedCentimorgans,CreatedDate,RootsEntry,Memory,KitId,Name )" +
+                                      " VALUES ($Id,$PersonId,$ChristianName,$Surname,$BirthYear,$BirthPlace,$BirthCounty,$BirthCountry,$TestDisplayName,$TestAdminDisplayName,$TreeURL," +
+                                      "$TestGuid,$Confidence,$SharedCentimorgans,$CreatedDate,$RootsEntry,$Memory,$KitId,$Name );";
+
+                command.Parameters.Add("$Id", SqliteType.Integer);
+                command.Parameters.Add("$PersonId",SqliteType.Integer);
+                command.Parameters.Add("$ChristianName",SqliteType.Text);
+                command.Parameters.Add("$Surname", SqliteType.Text);
+                command.Parameters.Add("$BirthYear", SqliteType.Integer);
+                command.Parameters.Add("$BirthPlace", SqliteType.Text);
+                command.Parameters.Add("$BirthCounty", SqliteType.Text);
+                command.Parameters.Add("$BirthCountry", SqliteType.Text);
+                command.Parameters.Add("$TestDisplayName", SqliteType.Text); 
+                command.Parameters.Add("$TestAdminDisplayName", SqliteType.Text);
+                command.Parameters.Add("$TreeURL", SqliteType.Text);
+                command.Parameters.Add("$TestGuid", SqliteType.Blob);
+                command.Parameters.Add("$Confidence", SqliteType.Real);
+                command.Parameters.Add("$SharedCentimorgans", SqliteType.Real);
+                command.Parameters.Add("$CreatedDate", SqliteType.Text);
+                command.Parameters.Add("$RootsEntry", SqliteType.Text);
+                command.Parameters.Add("$Memory", SqliteType.Text);
+                command.Parameters.Add("$KitId", SqliteType.Blob);
+                command.Parameters.Add("$Name", SqliteType.Text);
+
+                
+
+                connection.Open();
+
+                using (var transaction = connection.BeginTransaction())
+                {
+                    command.Transaction = transaction;
+                    command.Prepare();
+                    int idx = 0;
+                    foreach (var row in rows)
+                    {
+                        command.Parameters["$Id"].Value = idx;
+                        command.Parameters["$PersonId"].Value = row.PersonId;
+                        command.Parameters["$ChristianName"].Value = SetCol(row.ChristianName);
+                        command.Parameters["$Surname"].Value = SetCol(row.Surname);
+                        command.Parameters["$BirthYear"].Value = row.BirthYear;
+                        command.Parameters["$BirthPlace"].Value = SetCol(row.BirthPlace);
+                        command.Parameters["$BirthCounty"].Value = SetCol(row.BirthCounty);
+                        command.Parameters["$BirthCountry"].Value = SetCol(row.BirthCountry);
+                        command.Parameters["$TestDisplayName"].Value = SetCol(row.TestDisplayName);// row.TestDisplayName != null ? row.TestDisplayName : DBNull.Value;                         
+                        command.Parameters["$TestAdminDisplayName"].Value = SetCol(row.TestAdminDisplayName);
+                        command.Parameters["$TreeURL"].Value = SetCol(row.TreeURL);
+                        command.Parameters["$TestGuid"].Value = row.TestGuid;
+                        command.Parameters["$Confidence"].Value = row.Confidence;
+                        command.Parameters["$SharedCentimorgans"].Value = row.SharedCentimorgans;
+                        command.Parameters["$CreatedDate"].Value = row.CreatedDate;
+                        command.Parameters["$RootsEntry"].Value = row.RootsEntry;
+                        command.Parameters["$Memory"].Value = SetCol(row.Memory);
+                        command.Parameters["$KitId"].Value = row.KitId;
+                        command.Parameters["$Name"].Value = SetCol(row.Name);
+
+
+                        command.ExecuteNonQuery();
+                        idx++;
+                    }
+
+                    transaction.Commit();
+                }
+            }
+
+        }
+
+
+        private static void FillBySQLServer(DNAGEDContext dnagedContext, List<PersonsOfInterest> personsOfInterests)
+        {
             using (SqlConnection connection = new SqlConnection(dnagedContext.Database.GetDbConnection().ConnectionString))
             {
                 connection.Open();
-                //
-                // SqlCommand should be created inside using.
-                // ... It receives the SQL statement.
-                // ... It receives the connection object.
-                // ... The SQL text works with a specific database.
-                //
+
                 using (SqlCommand command = new SqlCommand(
                     "SELECT dbo.Persons.Id, dbo.Persons.ChristianName, dbo.Persons.Surname, dbo.Persons.BirthYear, dbo.Persons.BirthPlace, dbo.Persons.BirthCounty, dbo.Persons.BirthCountry, dbo.MatchGroups.TestDisplayName, \r\n                         dbo.MatchGroups.TestAdminDisplayName, dbo.MatchGroups.TreeId AS TreeURL, dbo.MatchGroups.TestGuid, dbo.MatchGroups.Confidence, dbo.MatchGroups.SharedCentimorgans AS SharedCM, dbo.Persons.CreatedDate, \r\n                         dbo.Persons.RootsEntry, dbo.Persons.Memory, dbo.MatchKitName.Id AS KitIId, dbo.MatchKitName.Name, dbo.MatchTrees.CreatedDate AS MTCreated\r\nFROM            dbo.MatchTrees INNER JOIN\r\n                         dbo.MatchGroups ON dbo.MatchTrees.MatchId = dbo.MatchGroups.MatchGuid INNER JOIN\r\n                         dbo.MatchKitName ON dbo.MatchGroups.TestGuid = dbo.MatchKitName.Id RIGHT OUTER JOIN\r\n                         dbo.Persons ON dbo.MatchTrees.PersonId = dbo.Persons.Id\r\nWHERE        (dbo.Persons.BirthCountry = \'England\') OR\r\n                         (dbo.Persons.BirthCountry = \'Wales\') OR\r\n                         (dbo.Persons.RootsEntry = 1)",
                     connection))
                 {
-                    //
-                    // Instance methods can be used on the SqlCommand.
-                    // ... These read data.
-                    //
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         long idx = 0;
+                        long personIdOut = 0;
                         while (reader.Read())
                         {
-                            //  long.TryParse(reader.GetValue(0).ToString(), out long id);
-                            long.TryParse(reader.GetValue(0).ToString(), out long personId);
-                            string christianName = reader.GetValue(1).ToString();
-                            string surname = reader.GetValue(2).ToString();
-                            int.TryParse(reader.GetValue(3).ToString(), out int birthYear);
-                            string birthPlace = reader.GetValue(4).ToString();
-                            string birthCounty = reader.GetValue(5).ToString();
-                            string birthCountry = reader.GetValue(6).ToString();
-                            string testDisplayName = reader.GetValue(7).ToString();
-                            string testAdminDisplayName = reader.GetValue(8).ToString();
-                            string treeURL = reader.GetValue(9).ToString();
-                            Guid.TryParse(reader.GetValue(10).ToString(), out Guid testGuid);
-                            double.TryParse(reader.GetValue(11).ToString(), out double confidence);
-                            double.TryParse(reader.GetValue(12).ToString(), out double sharedCM);
-
-                            DateTime createDateTime = DateTime.Today;
-
-                            //   DateTime.TryParse(reader.GetValue(13).ToString(), out createDateTime);
-
-                            bool.TryParse(reader.GetValue(14).ToString(), out bool rootsEntry);
-                            string memory = reader.GetValue(15).ToString();
-
-                            Guid.TryParse(reader.GetValue(16).ToString(), out Guid kitId);
-
-                            string name = reader.GetValue(17).ToString();
-
-                            personsOfInterests.Add(new PersonsOfInterest()
-                            {
-                                Id = idx,
-                                BirthCountry = birthCountry,
-                                BirthCounty = birthCounty,
-                                BirthPlace = birthPlace,
-                                BirthYear = birthYear,
-                                ChristianName = christianName,
-                                Confidence = confidence,
-                                CreatedDate = createDateTime,
-                                KitId = kitId,
-                                Memory = memory,
-                                Name = name,
-                                PersonId = personId,
-                                RootsEntry = rootsEntry,
-                                SharedCentimorgans = sharedCM,
-                                Surname = surname,
-                                TestAdminDisplayName = testAdminDisplayName,
-                                TestDisplayName = testDisplayName,
-                                TestGuid = testGuid,
-                                TreeURL = treeURL
-                            });
-                            idx++;
-                            //   Console.WriteLine();
+                            idx = AddPerson(reader, personsOfInterests, idx,ref personIdOut);
                         }
                     }
                 }
+            }
+        }
+
+        private static long AddPerson(DbDataReader reader, List<PersonsOfInterest> personsOfInterests, long idx, ref long personIdOut)
+        {
+            long.TryParse(reader.GetValue(0).ToString(), out long personId);
+            string christianName = reader.GetValue(1).ToString();
+            string surname = reader.GetValue(2).ToString();
+            int.TryParse(reader.GetValue(3).ToString(), out int birthYear);
+            string birthPlace = reader.GetValue(4).ToString();
+            string birthCounty = reader.GetValue(5).ToString();
+            string birthCountry = reader.GetValue(6).ToString();
+            string testDisplayName = reader.GetValue(7).ToString();
+            string testAdminDisplayName = reader.GetValue(8).ToString();
+            string treeURL = reader.GetValue(9).ToString();
+            Guid.TryParse(reader.GetValue(10).ToString(), out Guid testGuid);
+            double.TryParse(reader.GetValue(11).ToString(), out double confidence);
+            double.TryParse(reader.GetValue(12).ToString(), out double sharedCM);
+
+            DateTime createDateTime = DateTime.Today;
+
+            //   DateTime.TryParse(reader.GetValue(13).ToString(), out createDateTime);
+
+            bool.TryParse(reader.GetValue(14).ToString(), out bool rootsEntry);
+            string memory = reader.GetValue(15).ToString();
+
+            Guid.TryParse(reader.GetValue(16).ToString(), out Guid kitId);
+
+            string name = reader.GetValue(17).ToString();
 
 
+            if (idx == 0 || personIdOut != personId)
+            {                
+                personsOfInterests.Add(new PersonsOfInterest()
+                {
+                    Id = idx,
+                    BirthCountry = birthCountry,
+                    BirthCounty = birthCounty,
+                    BirthPlace = birthPlace,
+                    BirthYear = birthYear,
+                    ChristianName = christianName,
+                    Confidence = confidence,
+                    CreatedDate = createDateTime,
+                    KitId = kitId,
+                    Memory = memory,
+                    Name = name,
+                    PersonId = personId,
+                    RootsEntry = rootsEntry,
+                    SharedCentimorgans = sharedCM,
+                    Surname = surname,
+                    TestAdminDisplayName = testAdminDisplayName,
+                    TestDisplayName = testDisplayName,
+                    TestGuid = testGuid,
+                    TreeURL = treeURL
+                });
+
+                idx++;
             }
 
-            Console.WriteLine("Attempting to write new data");
+            personIdOut = personId;
 
-            dnagedContext.BulkInsert(personsOfInterests);
-
-            Console.WriteLine("Finished");
+            return idx;
         }
 
         public static void CreateGroup()

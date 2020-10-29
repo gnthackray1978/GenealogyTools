@@ -2,6 +2,8 @@
 using System.Linq;
 using GenDBContext.Models;
 using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 
 namespace DNAGedLib
 {
@@ -45,16 +47,50 @@ namespace DNAGedLib
 
 
         private int GetTestKitRecords()
-        {
-         //   string connectionString = @"Data Source=DESKTOP-KGS70RI\SQL2016EX;Initial Catalog=DNAGED;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
-
+        {     
             int result = 0;
+
+            //result = GetBySqlServer(result);
+            result = GetBySqlite(result);
+
+            return result;
+        }
+
+        private int GetBySqlite(int result)
+        {
+            var dnagedContext = new DNAGEDContext();
+
+            using (var connection = new SqliteConnection(dnagedContext.Database.GetDbConnection().ConnectionString))
+            {
+                connection.Open();
+
+                using (var command = new SqliteCommand(
+                    @"SELECT count(*) as PersonNo FROM MatchTrees INNER JOIN MatchGroups ON MatchTrees.MatchId = MatchGroups.MatchGuid WHERE MatchGroups.TestGuid LIKE @TestGuid",                    
+                    connection))
+                {
+                    command.Parameters.Add(new SqlParameter("TestGuid", base.personImporter.ImportTestId));
+
+                    var reader = command.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        result = reader.GetInt32(0);
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private int GetBySqlServer(int result)
+        {
             using (SqlConnection connection = new SqlConnection(base.personImporter.Destination))
             {
                 connection.Open();
 
                 using (SqlCommand command = new SqlCommand(
-                    "SELECT count(*) as PersonNo FROM dbo.MatchTrees INNER JOIN dbo.MatchGroups ON dbo.MatchTrees.MatchId = dbo.MatchGroups.MatchGuid WHERE dbo.MatchGroups.TestGuid LIKE @TestGuid", connection))
+                    "SELECT count(*) as PersonNo FROM dbo.MatchTrees INNER JOIN dbo.MatchGroups ON dbo.MatchTrees.MatchId = dbo.MatchGroups.MatchGuid WHERE dbo.MatchGroups.TestGuid LIKE @TestGuid",
+                    connection))
                 {
                     command.Parameters.Add(new SqlParameter("TestGuid", base.personImporter.ImportTestId));
 
@@ -68,8 +104,6 @@ namespace DNAGedLib
 
             return result;
         }
-
-
     }
 
 

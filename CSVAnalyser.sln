@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30611.23
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2041
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LincsWillScraper", "LincsWillScraper\LincsWillScraper.csproj", "{47729E84-B15F-4A93-89A6-24C2B2FDDF74}"
 EndProject
@@ -13,13 +13,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DNAGedLib", "DNAGedLib\DNAG
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlaceLib", "PlaceLib\PlaceLib.csproj", "{98717879-840C-4FA3-9543-DD2B05F8D375}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GedcomImporter", "GedcomImporter\GedcomImporter.csproj", "{A2EA3D5C-36E8-4186-92FC-61AA1E20536A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GedcomImporter", "GedcomImporter\GedcomImporter.csproj", "{A2EA3D5C-36E8-4186-92FC-61AA1E20536A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenDBContext", "GenDBContext\GenDBContext.csproj", "{2CBCCDD8-DBAF-481A-84D0-BC63EAE82B45}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GenDBContext", "GenDBContext\GenDBContext.csproj", "{2CBCCDD8-DBAF-481A-84D0-BC63EAE82B45}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PersonDupeLib", "PersonDupeLib\PersonDupeLib.csproj", "{ACB08235-F7D9-4373-9454-4B57EAF9B22C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PersonDupeLib", "PersonDupeLib\PersonDupeLib.csproj", "{ACB08235-F7D9-4373-9454-4B57EAF9B22C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenealogyTools", "GenealogyTools\GenealogyTools.csproj", "{CAC30D30-8060-43B3-89A3-8D3F171903A1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GenealogyTools", "GenealogyTools\GenealogyTools.csproj", "{CAC30D30-8060-43B3-89A3-8D3F171903A1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureContext", "AzureContext\AzureContext.csproj", "{2034D27F-72FF-41DA-9955-C42304190435}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -63,6 +65,10 @@ Global
 		{CAC30D30-8060-43B3-89A3-8D3F171903A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CAC30D30-8060-43B3-89A3-8D3F171903A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CAC30D30-8060-43B3-89A3-8D3F171903A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2034D27F-72FF-41DA-9955-C42304190435}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2034D27F-72FF-41DA-9955-C42304190435}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2034D27F-72FF-41DA-9955-C42304190435}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2034D27F-72FF-41DA-9955-C42304190435}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

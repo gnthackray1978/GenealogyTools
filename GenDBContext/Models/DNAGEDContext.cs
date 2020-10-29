@@ -50,6 +50,7 @@ namespace GenDBContext.Models
         }
     }
 
+
     public partial class DNAGEDContext : DbContext
     {
 
@@ -73,8 +74,12 @@ namespace GenDBContext.Models
 
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer(@"Data Source=DESKTOP-KGS70RI\SQL2016EX;Initial Catalog=DNAGED;Integrated Security=SSPI;");
+               // optionsBuilder.UseSqlServer(@"Data Source=DESKTOP-KGS70RI\SQL2016EX;Initial Catalog=DNAGED;Integrated Security=SSPI;");
+
+                optionsBuilder.UseSqlite(@"Data Source=C:\Users\george\Documents\genDB.db");
             }
+
+
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
