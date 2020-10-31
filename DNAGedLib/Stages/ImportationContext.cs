@@ -20,6 +20,7 @@ namespace DNAGedLib
         public string Destination { get; set; }
 
         public DNAGEDContext DNAGedContext { get; set; }
+
         public List<MatchTreeEntry> SQLliteTrees { get; set; } = new List<MatchTreeEntry>();
 
         public List<ICW> ICWs { get; set; } = new List<ICW>();

@@ -10,5 +10,6 @@ namespace DNAGedLib.Models
         public long PersonId { get; set; }
         public DateTime? CreatedDate { get; set; }         
         public Persons Person { get; set; }
+        public TreePersons TreePerson { get; set; }
     }
 }

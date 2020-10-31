@@ -16,8 +16,8 @@ namespace DNAGedLib
             var stages = new List<ImportStage>()
             {
                 new SelectProfile(p),
-                new LoadDNAGedComSQLLiteDB(p),
-                new ImportStagePeople(p),
+                new ReadDNAGedComSQLLiteDB(p),
+                new WriteStagePeople(p),
                 new ImportStageTrees(p),
                 new ImportStageICW(p),
                 new ImportStageMatchDetailsWithGroups(p),

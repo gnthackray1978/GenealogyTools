@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
@@ -21,8 +22,10 @@ namespace PlaceLib.Model
         {
             if (!optionsBuilder.IsConfigured)
             {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseSqlServer("Server=DESKTOP-KGS70RI\\SQL2016EX;Database=UKPlaces;Trusted_Connection=True;");
+                //#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
+                //                optionsBuilder.UseSqlServer("Server=DESKTOP-KGS70RI\\SQL2016EX;Database=UKPlaces;Trusted_Connection=True;");
+
+                optionsBuilder.UseSqlite(@"Data Source=C:\Users\george\Documents\placeDB.db");
             }
         }
 

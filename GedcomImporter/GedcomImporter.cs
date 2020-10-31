@@ -9,30 +9,16 @@ using Microsoft.EntityFrameworkCore;
 using GenDBContext.Models;
 using DNAGedLib.Models;
 using GedcomParser.Entities;
+using Microsoft.Data.Sqlite;
 
 namespace GedcomImporter
 {
     public class GedcomImporter
-    {
-        public static void DeleteFamilyTreePersons() {
-            using (var context = new DNAGEDContext())
-            {
-
-                var oldPersons = context.Persons.Where(pid => pid.RootsEntry);
-
-                Console.WriteLine("Removing  " + oldPersons.Count() + " old records");
-
-                context.RemoveRange(oldPersons);
-
-                context.SaveChanges();
-
-            }
-        }
-
+    {        
         public static DateObj GetDateObj(DatePlace birthPlace, DatePlace baptismPlace)
         {
             var returnObj = new DateObj() { 
-                Place="unset",
+                Place="",
                 DateStr="",
                 YearInt=0
             };
@@ -76,13 +62,14 @@ namespace GedcomImporter
 
             return returnObj;
         }
-
+        
         public static void Run(string filePath)
         {
+            //fills new treepersons tables which is clone of persons table
+            //reason for this is that deleting the existing tree persons from the old persons table
+            //couldn't be made to work in a reasonable time frame!
 
-            //DeleteFamilyTreePersons();
-
-             var fileParser = new FileParser();
+            var fileParser = new FileParser();
 
             fileParser.Parse(filePath);
 
@@ -90,6 +77,17 @@ namespace GedcomImporter
                 fileParser.PersonContainer.ChildRelations.Count +
                 fileParser.PersonContainer.SpouseRelations.Count +
                 fileParser.PersonContainer.SiblingRelations.Count;
+
+
+            var persons = new List<Persons>();
+
+
+            var context = new DNAGEDContext();
+
+
+            context.DeleteTreePersons();
+
+            int countPeople =0;
 
             foreach (var p in fileParser.PersonContainer.Persons)
             {
@@ -109,36 +107,44 @@ namespace GedcomImporter
                 {                     
                     motherId = parents[0].To.Id;
                 }
-                 
-                using (var context = new DNAGEDContext())
+
+            
+ 
+                var birth = GetDateObj(p.Birth, p.Baptized);
+                var death = GetDateObj(p.Death, null);
+
+                persons.Add(new Persons()
                 {
-                    var birth = GetDateObj(p.Birth, p.Baptized);
-                    var death = GetDateObj(p.Death, null);
+                    Id = countPeople,
+                    ChristianName = p.FirstName,
+                    Surname = p.LastName,
+                    FatherId = 0,
+                    MotherId = 0,
+                    BirthDate = birth.DateStr,
+                    BirthYear = birth.YearInt,
+                    BirthPlace = birth.Place,                    
+                    BirthCountry = fatherId,
+                    BirthCounty = "",
 
-                    context.Persons.Add(new Persons()
-                    {
-                        AmericanParentsChecked = false,
-                        ChristianName = p.FirstName,
-                        Surname = p.LastName,
-                        CreatedDate = DateTime.Now,
-                        RootsEntry = true,
-                        BirthYear = birth.YearInt,
-                        BirthPlace = birth.Place,
-                        BirthDate = birth.DateStr,
-                        DeathYear = death.YearInt,
-                        DeathDate = death.DateStr,
-                        DeathPlace = death.Place,
-                        CountryUpdated =false,
-                        CountyUpdated =false,
-                        Memory = p.Id ,
-                        BirthCountry = fatherId,
-                        DeathCountry = motherId
-                    });
+                    DeathYear = death.YearInt,
+                    DeathDate = death.DateStr,
+                    DeathPlace = death.Place,
+                    DeathCountry = motherId,
+                    DeathCounty = "",
+                    Memory = p.Id,
+                    CreatedDate = DateTime.Now,
+                    RootsEntry = true,
+                    Fix = false,
+                    EnglishParentsChecked = false,
+                    CountryUpdated =false,
+                    AmericanParentsChecked = false,
+                    CountyUpdated =false                                                           
+                });
 
-                }
+                countPeople++;
             }
 
-           
+            context.BulkInsertTreePersons(persons);
         }
            
 

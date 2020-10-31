@@ -3,8 +3,8 @@ using System.Collections.Generic;
 
 namespace DNAGedLib.Models
 {
-    public partial class Persons
-    {
+    public partial class Persons : IPersons
+    { 
         public Persons()
         {
             MatchTrees = new HashSet<MatchTrees>();
