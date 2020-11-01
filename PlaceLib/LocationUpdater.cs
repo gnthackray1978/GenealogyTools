@@ -34,12 +34,31 @@ namespace PlaceLib
 
     public class ConsoleWrapper
     {
+        public static void ClearCurrentConsoleLine()
+        {
+            int currentLineCursor = Console.CursorTop;
+            Console.SetCursorPosition(0, Console.CursorTop);
+            Console.Write(new string(' ', Console.WindowWidth));
+            Console.SetCursorPosition(0, currentLineCursor);
+        }
+
         public static void ProgressSearch(double counter, double total, string message, string tailMessage = "")
         {
             double percentage = 0.0;
 
             percentage = counter / total * 100;
-            Console.Write("\r SEARCHING " + message.Trim() + " " + percentage + " %   of " + total + " " + tailMessage.Trim());
+
+            if (counter < 1)
+            {
+                Console.WriteLine("");
+                Console.WriteLine("SEARCHING " + message.Trim() + " " + percentage + " %   of " + total + " " +
+                              tailMessage.Trim());
+            }
+            else
+            {
+                Console.Write("\rSEARCHING " + message.Trim() + " " + percentage + " %   of " + total + " " +
+                              tailMessage.Trim());
+            }
 
         }
 
@@ -48,8 +67,37 @@ namespace PlaceLib
             double percentage = 0.0;
 
             percentage = counter / total * 100;
-            Console.Write("\r UPDATING " + message.Trim() + " " + percentage + " %   of " + total + " " + tailMessage.Trim());
 
+            //  Console.SetCursorPosition(0, Console.CursorTop - 1);
+
+            // ClearCurrentConsoleLine();
+            if (counter < 1)
+            {
+                Console.WriteLine("");
+                Console.WriteLine("UPDATING " + message.Trim() + " " + percentage + " %   of " + total + " " + tailMessage.Trim());
+            }
+            else
+            {
+                Console.Write("\rUPDATING " + message.Trim() + " " + percentage + " %   of " + total + " " + tailMessage.Trim());
+
+            }
+
+
+        }
+
+        public static void StatusReport(string message,bool forceNewLine,  bool pause =false)
+        {
+         //   Console.WriteLine("");
+            if(forceNewLine)
+                Console.WriteLine("");
+
+            Console.WriteLine(message);
+
+            if (pause)
+            {
+                Console.WriteLine("press any key to continue");
+                Console.ReadKey();
+            }
         }
 
         public static void HandleSave(DNAGEDContext dnagedContext, string message)
@@ -121,14 +169,23 @@ namespace PlaceLib
 
             if (!personsOfUnknownOrigins.Any())
             {
-                Console.WriteLine("No English Parents");
+                ConsoleWrapper.StatusReport("No English Parents",true);
                 return;
             }
 
-            _locationDataContext.SaveEnglishParents(personsOfUnknownOrigins, englishParents,true);
+            var progress = new Progress<string>();
 
+            _locationDataContext.SaveEnglishParents(personsOfUnknownOrigins, englishParents,true, progress);
 
+            progress.ProgressChanged += (sender, e) =>
+            {
+                ConsoleWrapper.StatusReport(e,true);
+            };
+
+            ConsoleWrapper.StatusReport("Set country as England based on parents",true);
         }
+
+        
 
         public void UpdateAmericanParents()
         {
@@ -156,7 +213,7 @@ namespace PlaceLib
                         englishParents.Add(p.MotherId.Value);
                 }
 
-                ConsoleWrapper.ProgressSearch(counter, total, "English Parents", "possible records");
+                ConsoleWrapper.ProgressSearch(counter, total, "American Parents", "possible records");
 
                 counter++;
             }
@@ -165,12 +222,19 @@ namespace PlaceLib
 
             if (!personsOfUnknownOrigins.Any())
             {
-                Console.WriteLine("No English Parents");
+                ConsoleWrapper.StatusReport("No American Parents",true);
                 return;
             }
+            var progress = new Progress<string>();
 
-            _locationDataContext.SaveEnglishParents(personsOfUnknownOrigins, englishParents,false);
+            _locationDataContext.SaveEnglishParents(personsOfUnknownOrigins, englishParents,false, progress);
 
+            progress.ProgressChanged += (sender, e) =>
+            {
+                ConsoleWrapper.StatusReport(e,true);
+            };
+
+            ConsoleWrapper.StatusReport("Set country as America based on parents",true);
 
         }
 
@@ -194,6 +258,8 @@ namespace PlaceLib
             }
 
             _locationDataContext.SavePlaces(countryDictionary, PlaceCriteria.ForMappings);
+
+            ConsoleWrapper.StatusReport("Set known countries",false);
         }
 
         public void MapPlaceListToCounties(List<PlaceDto> knowns)
@@ -276,6 +342,8 @@ namespace PlaceLib
         public void EnsureUnknowns()
         {
             _locationDataContext.MarkUnknowns();
+
+            ConsoleWrapper.StatusReport("Marked unknown birth places as Unknown",false,false);
         }
 
         public static void UpdateLocations()
@@ -292,7 +360,7 @@ namespace PlaceLib
 
             locationFixer.UpdateAmericanParents();
 
-            Console.WriteLine("Finished press any key to exit");
+            ConsoleWrapper.StatusReport("Finished press any key to exit",false, true);
         }
 
         public static void MapPlaceListToCounties()
@@ -301,7 +369,7 @@ namespace PlaceLib
 
             locationFixer.MapPlaceListToCounties(PlaceMapCounty.GetMappings());
 
-            Console.WriteLine("Finished press any key to exit");
+            ConsoleWrapper.StatusReport("Finished press any key to exit", true);
         }
     }
      

@@ -7,7 +7,6 @@ namespace DNAGedLib.Models
     {
         public TreePersons()
         {
-            MatchTrees = new HashSet<MatchTrees>();
         }
 
         public long Id { get; set; }
@@ -33,6 +32,5 @@ namespace DNAGedLib.Models
         public bool CountyUpdated { get; set; }
         public bool CountryUpdated { get; set; }
         public DateTime? CreatedDate { get; set; }
-        public ICollection<MatchTrees> MatchTrees { get; set; }
     }
 }

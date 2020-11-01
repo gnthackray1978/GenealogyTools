@@ -2,7 +2,5 @@
 
 namespace GenDBContext
 {
-    public class Class1
-    {
-    }
+     
 }

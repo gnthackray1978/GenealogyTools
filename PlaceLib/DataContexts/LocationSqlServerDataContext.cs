@@ -87,7 +87,8 @@ namespace PlaceLib
             return personsOfUnknownOrigins;
         }
 
-        public void SaveEnglishParents(List<long> unknownOriginsPersons, HashSet<long> englishParentsPersons, bool isEnglish)
+        public void SaveEnglishParents(List<long> unknownOriginsPersons, 
+            HashSet<long> englishParentsPersons, bool isEnglish, IProgress<string> progress)
         {
             using (var dnagedContext = new DNAGEDContext())
             {

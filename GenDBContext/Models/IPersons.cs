@@ -8,8 +8,8 @@
         string BirthCountry { get; set; }
         bool CountyUpdated { get; set; }
         bool CountryUpdated { get; set; }
-        long FatherId { get; set; }
-        long MotherId { get; set; }
+        long? FatherId { get; set; }
+        long? MotherId { get; set; }
         bool EnglishParentsChecked { get; set; }
         bool AmericanParentsChecked { get; set; }
     }

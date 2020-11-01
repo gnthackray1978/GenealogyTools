@@ -193,12 +193,7 @@ namespace GenDBContext.Models
 
             modelBuilder.Entity<TreePersons>(entity =>
             {
-                entity.Property(e => e.Id).ValueGeneratedNever();
-
-                entity.HasMany(d => d.MatchTrees)
-                    .WithOne(p => p.TreePerson).HasForeignKey(d => d.PersonId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_MatchTrees_Persons");
+                entity.Property(e => e.Id).ValueGeneratedNever();             
             });
 
             modelBuilder.Entity<MyPersons>(entity =>
@@ -436,48 +431,112 @@ namespace GenDBContext.Models
         }
 
 
-         
-
-        public List<(long personId, string place)> FillPersonMapPlacesBySQLite(bool countryUpdated, PlaceCriteria placeCriteria)
+        public List<long> GetPersonsOfUnknownOrigins(bool isEnglish)
         {
+            var personsOfUnknownOrigins = new List<long>();
 
-            Func<T, bool> getWhereClause<T>(bool countryUpdatedi,
-                PlaceCriteria placeCriteriai) where T : IPersons
+            List<long> GetPersonIds(string table)
             {
-                Func<T, bool> whereClausei = w => w.Id != 0;
-                
-                switch (placeCriteriai)
+                var personsBornInEngland = new List<long>();
+
+                using (var connection = new SqliteConnection(this.Database.GetDbConnection().ConnectionString))
                 {
-                    case PlaceCriteria.ForAllUnknownCounties:
-                        whereClausei = w => (w.BirthCountry == "England" || w.BirthCountry == "Scotland" ||
-                                            w.BirthCountry == "Wales" ||
-                                            w.BirthCountry == "Unknown") &&
-                                           (w.BirthCounty == "Unknown" ||
-                                            w.BirthCounty == "") &&
-                                           w.BirthPlace != "";
-                        break;
-                    case PlaceCriteria.ForEnglishCounties:
-                        whereClausei = w => w.BirthCountry == "England" && w.BirthCounty == "Unknown" && w.BirthPlace != "";
-                        break;
-                    case PlaceCriteria.ForMappings:
-                        whereClausei = w => w.BirthCountry == "Unknown" && !string.IsNullOrEmpty(w.BirthPlace) && w.CountryUpdated == countryUpdatedi;
-                        break;
+                    connection.Open();
+
+
+                    string qry = "SELECT Id FROM " + table + " WHERE BirthCountry = 'Unknown' AND EnglishParentsChecked = 0";
+
+                    if (!isEnglish)
+                        qry = "SELECT Id FROM " + table + " WHERE BirthCountry = 'Unknown' AND AmericanParentsChecked = 0";
+
+                    using (var command = new SqliteCommand( qry, connection))
+                    {
+                        using (var reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                long.TryParse(reader.GetValue(0).ToString(), out long personId);
+                             
+                                    personsBornInEngland.Add(personId);
+                            }
+                        }
+                    }
+
+
                 }
 
-                return whereClausei;
+                return personsBornInEngland;
             }
+             
+            personsOfUnknownOrigins.AddRange(GetPersonIds("Persons"));
+            personsOfUnknownOrigins.AddRange(GetPersonIds("TreePersons"));
+
+            return personsOfUnknownOrigins;
+        }
+
+        public List<(long personId, string place)> FillPersonMapPlacesBySQLite(bool countryUpdated,
+                                                            PlaceCriteria placeCriteria)
+        {
+
+       
+
+            List<(long personId, string place)> GetBirthPlace(string table)
+            {
+                var personsBornInEngland = new List<(long personId, string place)>();
+
+                using (var connection = new SqliteConnection(this.Database.GetDbConnection().ConnectionString))
+                {
+                    connection.Open();
+                    long idx = 0;
+
+                    string qry = @"SELECT Id, BirthPlace FROM " + table + " WHERE ";
+
+                    string whereClause = "";
+
+                    switch (placeCriteria)
+                    {
+                        case PlaceCriteria.ForAllUnknownCounties:
+                            whereClause = "BirthCountry IN ('England','Scotland','Wales','Unknown') AND " +
+                                          "BirthCounty IN ('Unknown', 'BirthCounty') AND BirthPlace <> ''";
+                               
+                            break;
+                        case PlaceCriteria.ForEnglishCounties:
+                            whereClause =  "BirthCountry = 'England' AND BirthCounty = 'Unknown' AND BirthPlace <> ''";
+                            break;
+                        case PlaceCriteria.ForMappings:
+                            whereClause = "BirthCountry = 'Unknown' AND BirthPlace <> '' AND BirthPlace IS NOT NULL AND CountryUpdated = " + (countryUpdated ? "1": "0") + "";
+                            break;
+                    }
+
+                    qry += whereClause;
+
+                    using (var command = new SqliteCommand(qry,connection))
+                    {
+                        using (var reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                long.TryParse(reader.GetValue(0).ToString(), out long id);
+                               
+                                personsBornInEngland.Add((id, reader.GetValue(1).ToString()));
+                            }
+                        }
+                    }
+
+
+                }
+
+                return personsBornInEngland;
+            }
+
+
+           
 
             List<(long personId, string place)> personsList;
                         
-            personsList = this.TreePersons.Where(getWhereClause<TreePersons>(countryUpdated, placeCriteria))
-                .AsEnumerable()
-                .Select(c => (personId: c.Id, place: c.BirthPlace))
-                .ToList();
+            personsList = GetBirthPlace("Persons");
           
-            personsList.AddRange(this.Persons.Where(getWhereClause<Persons>(countryUpdated, placeCriteria))
-                .AsEnumerable()
-                .Select(c => (personId: c.Id, place: c.BirthPlace))
-                .ToList());
+            personsList.AddRange(GetBirthPlace("TreePersons"));
        
 
             return personsList;
@@ -485,30 +544,48 @@ namespace GenDBContext.Models
 
         public List<(long? FatherId, long? MotherId)> GetPersonsOfGivenNationality(string origin)
         {
-            List<(long? FatherId, long? MotherId)> personsBornInEngland;
+            var results = new List<(long? FatherId, long? MotherId)>();
 
-
-            Func<T, bool> getWhereClause<T>() where T : IPersons
+            List<(long? FatherId, long? MotherId)> GetParents(string table)
             {
-                Func<T, bool> whereClause = w =>
-                    w.BirthCountry == origin && (w.FatherId != 0 || w.MotherId != 0);
+                var personsBornInEngland = new List<(long? FatherId, long? MotherId)>();
 
-                return whereClause;
+                using (var connection = new SqliteConnection(this.Database.GetDbConnection().ConnectionString))
+                {
+                    connection.Open();
+                  
+
+                    using (var command = new SqliteCommand(
+                        "SELECT FatherId, MotherId FROM "+ table + " WHERE BirthCountry = '" + origin + "'",
+                        connection))
+                    {
+                        using (var reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                long.TryParse(reader.GetValue(0).ToString(), out long fatherId);
+                                long.TryParse(reader.GetValue(0).ToString(), out long motherId);
+
+                                if(fatherId!= 0 || motherId!=0)
+                                    personsBornInEngland.Add((fatherId, motherId));
+                            }
+                        }
+                    }
+
+
+                }
+
+                return personsBornInEngland;
             }
 
-            personsBornInEngland = this.Persons.Where(getWhereClause<Persons>())
-                .AsEnumerable()
-                .Select(c => (FatherId: c.FatherId, MotherId: c.MotherId))
-                .ToList();
 
-            personsBornInEngland.AddRange(
-                this.TreePersons.Where(getWhereClause<TreePersons>())
-                    .AsEnumerable()
-                    .Select(c => (FatherId: c.FatherId, MotherId: c.MotherId))
-                    .ToList()
-                );
 
-            return personsBornInEngland;
+            results.AddRange(GetParents("Persons"));
+            results.AddRange(GetParents("TreePersons"));
+
+
+
+            return results;
         }
 
 
@@ -688,7 +765,8 @@ namespace GenDBContext.Models
 
         }
 
-        public void BulkUpdatePersonsNationality(List<long> unknownOriginsPersons, HashSet<long> knownNationalityParent, bool isEnglish)
+        public void BulkUpdatePersonsNationality(List<long> unknownOriginsPersons,
+            HashSet<long> knownNationalityParent, bool isEnglish, IProgress<string> progress)
         {
             var s = this.Database.GetDbConnection().ConnectionString;
 
@@ -745,17 +823,30 @@ namespace GenDBContext.Models
             if (isEnglish)
             {
                 UpdateCheckStatus("Persons", "EnglishParentsChecked");
-                UpdateCheckStatus("TreePersons", "EnglishParentsChecked");
-                UpdateBirthCountry("Persons", "England");
-                UpdateBirthCountry("TreePersons", "England");
+                progress.Report("Persons EnglishParentsChecked Checked");
 
+                UpdateCheckStatus("TreePersons", "EnglishParentsChecked");
+                progress.Report("TreePersons EnglishParentsChecked Checked");
+
+                UpdateBirthCountry("Persons", "England");
+                progress.Report("Persons Set Birth Country as England based on parents");
+
+                UpdateBirthCountry("TreePersons", "England");
+                progress.Report("TreePersons Set Birth Country as England based on parents");
             }
             else
             {
                 UpdateCheckStatus("Persons", "AmericanParentsChecked");
+                progress.Report("Persons AmericanParentsChecked Checked");
+
                 UpdateCheckStatus("TreePersons", "AmericanParentsChecked");
+                progress.Report("TreePersons AmericanParentsChecked Checked");
+
                 UpdateBirthCountry("Persons", "USA");
+                progress.Report("Persons Set Birth Country as USA based on parents");
+
                 UpdateBirthCountry("TreePersons", "USA");
+                progress.Report("TreePersons Set Birth Country as USA based on parents");
             }
 
 

@@ -37,41 +37,21 @@ namespace PlaceLib
         {
             List<long> personsOfUnknownOrigins;
              
-            Func<T, bool> getWhereClause<T>() where T : IPersons
-            {
-                Func<T, bool> whereClause;
-                if (isEnglish)
-                {
-                    whereClause = w => w.BirthCountry == "Unknown" && w.EnglishParentsChecked == false;
-                }
-                else
-                {
-                    whereClause = w => w.BirthCountry == "Unknown" && w.AmericanParentsChecked == false;
-                }
-                return whereClause;
-            }
-
             using (var dnagedContext = new DNAGEDContext())
             {
-              
-                personsOfUnknownOrigins = dnagedContext.Persons.Where(getWhereClause<Persons>())
-                    .Select(s => s.Id)
-                    .ToList();
 
-                personsOfUnknownOrigins.AddRange(dnagedContext.TreePersons.Where(getWhereClause<TreePersons>())
-                    .Select(s => s.Id)
-                    .ToList());
+                personsOfUnknownOrigins = dnagedContext.GetPersonsOfUnknownOrigins(isEnglish);
 
             }
 
             return personsOfUnknownOrigins;
         }
 
-        public void SaveEnglishParents(List<long> unknownOriginsPersons, HashSet<long> englishParentsPersons, bool isEnglish)
+        public void SaveEnglishParents(List<long> unknownOriginsPersons, HashSet<long> englishParentsPersons, bool isEnglish, IProgress<string> progress)
         {
             using (var dnagedContext = new DNAGEDContext())
             {            
-                dnagedContext.BulkUpdatePersonsNationality(unknownOriginsPersons, englishParentsPersons, isEnglish);
+                dnagedContext.BulkUpdatePersonsNationality(unknownOriginsPersons, englishParentsPersons, isEnglish, progress);
             }
         }
 
