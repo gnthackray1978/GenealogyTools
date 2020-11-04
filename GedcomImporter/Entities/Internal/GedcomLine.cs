@@ -36,11 +36,13 @@ namespace GedcomParser.Entities.Internal
             var sections = line.Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
             if (sections.Length < 2)
             {
-                throw new ArgumentException("Line must have at least Level and Type");
+                //  throw new ArgumentException("Line must have at least Level and Type");
+                return null;
             }
             if (!int.TryParse(sections[0], out var level))
             {
-                throw new ArgumentException($"'{sections[0]}' can not be interpreted as valid Level integer");
+                //throw new ArgumentException($"'{sections[0]}' can not be interpreted as valid Level integer");
+                return null;
             }
 
             // Normal case is no Id

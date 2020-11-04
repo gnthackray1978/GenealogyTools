@@ -32,7 +32,7 @@ namespace PlaceLib
             knowns.Add(new PlaceDto { Place = "(otley)", County = "" });
 
             knowns.Add(new PlaceDto { Place = "(shipley", County = "" });
-            knowns.Add(new PlaceDto { Place = "(spofforth)", County = "" });
+            knowns.Add(new PlaceDto { Place = "(spofforth)", County = "Yorkshire" });
 
             knowns.Add(new PlaceDto { Place = "abberley", County = "Worcestershire" });
             knowns.Add(new PlaceDto { Place = "abbey", County = "Cumberland" });
@@ -1364,7 +1364,6 @@ namespace PlaceLib
             knowns.Add(new PlaceDto { Place = "dusseldorf", County = "" });
             knowns.Add(new PlaceDto { Place = "duxford", County = "Cambridgeshire" });
             knowns.Add(new PlaceDto { Place = "duxford?", County = "" });
-            knowns.Add(new PlaceDto { Place = "e", County = "" });
             knowns.Add(new PlaceDto { Place = "eaglehurst", County = "" });
             knowns.Add(new PlaceDto { Place = "ealing", County = "Middlesex" });
             knowns.Add(new PlaceDto { Place = "earby", County = "Yorkshire" });
@@ -2607,10 +2606,11 @@ namespace PlaceLib
             knowns.Add(new PlaceDto { Place = "location", County = "" });
             knowns.Add(new PlaceDto { Place = "lockenock", County = "" });
             knowns.Add(new PlaceDto { Place = "lockington", County = "Yorkshire" });
-            knowns.Add(new PlaceDto { Place = "lodon", County = "" });
+            knowns.Add(new PlaceDto { Place = "lodon", County = "Middlesex" });
             knowns.Add(new PlaceDto { Place = "londen", County = "Middlesex" });
             knowns.Add(new PlaceDto { Place = "londenderry", County = "Ireland" });
             knowns.Add(new PlaceDto { Place = "londom", County = "Middlesex" });
+            knowns.Add(new PlaceDto { Place = "london", County = "Middlesex" });
             knowns.Add(new PlaceDto { Place = "long", County = "" });
             knowns.Add(new PlaceDto { Place = "longbow", County = "" });
             knowns.Add(new PlaceDto { Place = "longbridge", County = "Worcestershire" });
@@ -2769,8 +2769,8 @@ namespace PlaceLib
             knowns.Add(new PlaceDto { Place = "mayfield", County = "Staffordshire" });
             knowns.Add(new PlaceDto { Place = "maysfield", County = "" });
             knowns.Add(new PlaceDto { Place = "mckee", County = "" });
-            knowns.Add(new PlaceDto { Place = "md", County = "" });
-            knowns.Add(new PlaceDto { Place = "mdx", County = "" });
+            //knowns.Add(new PlaceDto { Place = "md", County = "" });
+            //knowns.Add(new PlaceDto { Place = "mdx", County = "" });
             knowns.Add(new PlaceDto { Place = "mears", County = "" });
             knowns.Add(new PlaceDto { Place = "meddlesey", County = "" });
             knowns.Add(new PlaceDto { Place = "medera", County = "" });
@@ -2924,11 +2924,11 @@ namespace PlaceLib
             knowns.Add(new PlaceDto { Place = "muston", County = "Yorkshire" });
             knowns.Add(new PlaceDto { Place = "myrescough", County = "" });
             knowns.Add(new PlaceDto { Place = "myton", County = "Warwickshire" });
-            knowns.Add(new PlaceDto { Place = "n", County = "" });
-            knowns.Add(new PlaceDto { Place = "n.", County = "" });
-            knowns.Add(new PlaceDto { Place = "n.lees", County = "" });
-            knowns.Add(new PlaceDto { Place = "n/a", County = "" });
-            knowns.Add(new PlaceDto { Place = "na", County = "" });
+            //knowns.Add(new PlaceDto { Place = "n", County = "" });
+            //knowns.Add(new PlaceDto { Place = "n.", County = "" });
+            //knowns.Add(new PlaceDto { Place = "n.lees", County = "" });
+            //knowns.Add(new PlaceDto { Place = "n/a", County = "" });
+            //knowns.Add(new PlaceDto { Place = "na", County = "" });
             knowns.Add(new PlaceDto { Place = "naburn", County = "Yorkshire" });
             knowns.Add(new PlaceDto { Place = "nackerau", County = "" });
             knowns.Add(new PlaceDto { Place = "nailsworth", County = "Gloucestershire" });

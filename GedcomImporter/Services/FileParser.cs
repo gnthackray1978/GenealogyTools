@@ -35,6 +35,8 @@ namespace GedcomParser.Services
 
             foreach (var gedcomLine in gedcomLines)
             {
+                if (gedcomLine == null) continue;
+
                 var chunk = new GedcomChunk(gedcomLine);
                 if (gedcomLine.Level == 0)
                 {
@@ -45,6 +47,7 @@ namespace GedcomParser.Services
                     var parent = _gedcomChunkLevels.GetParentChunk(chunk);
                     parent.SubChunks.Add(chunk);
                 }
+
                 _gedcomChunkLevels.Set(chunk);
             }
 
@@ -216,10 +219,12 @@ namespace GedcomParser.Services
                     case "PAGE":
                     case "RIN":
                     case "SOUR":
+                    case "MARR":
                         break;
 
                     default:
-                        throw new NotImplementedException($"ParseIndividual: Type='{chunk.Type}' is not handled");
+                        break;
+                       // throw new NotImplementedException($"ParseIndividual: Type='{chunk.Type}' is not handled");
                 }
             }
 

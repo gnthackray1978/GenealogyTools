@@ -287,10 +287,24 @@ namespace PlaceLib
 
                 foreach (var pair in knowns)
                 {
-                    if (!birthPlace.Contains(pair.Place)) continue;
+                    if (pair.County == "") continue;
 
-                    if (!countryDictionary.ContainsKey(p.personId))
-                        countryDictionary.Add(p.personId, pair.County);
+                    var parts = birthPlace.Contains(',') ? birthPlace.Split(',').ToList() : birthPlace.Split(' ').ToList();
+
+                    
+
+                    foreach (var part in parts)
+                    {
+                        if(part.Trim() == "England") continue;
+
+                        if (part.ToLower().Trim() == pair.Place.Trim().ToLower()) continue;
+
+                        if (!countryDictionary.ContainsKey(p.personId))
+                            countryDictionary.Add(p.personId, pair.County);
+                    }
+                  
+
+                    
                 }
                 
                 ConsoleWrapper.ProgressUpdate(counter, total, "Birth County", "Unset counties");
@@ -334,9 +348,10 @@ namespace PlaceLib
                 counter++;
                  
             }
+            _locationDataContext.SavePlaces(countryDictionary,PlaceCriteria.ForAllUnknownCounties);
 
-                
-            
+
+
         }
 
         public void EnsureUnknowns()

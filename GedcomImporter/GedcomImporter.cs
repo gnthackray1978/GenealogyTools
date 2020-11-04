@@ -84,18 +84,18 @@ namespace GedcomImporter
 
             var context = new DNAGEDContext();
 
-
+            Console.WriteLine("Deleting existing tree");
             context.DeleteTreePersons();
 
             int countPeople =0;
-
+            Console.WriteLine("Importing " + fileParser.PersonContainer.Persons.Count + " persons");
             foreach (var p in fileParser.PersonContainer.Persons)
             {
                 // fileParser.PersonContainer.ChildRelations[0].From.Id
                 var parents = fileParser.PersonContainer.ChildRelations.Where(w => w.From.Id == p.Id).ToList();
                 string fatherId = "";
                 string motherId = "";
-                Console.WriteLine(p.FirstName + " " + p.LastName);
+            //   
 
                 if(parents.Count() == 2)
                 {
@@ -123,13 +123,13 @@ namespace GedcomImporter
                     BirthDate = birth.DateStr,
                     BirthYear = birth.YearInt,
                     BirthPlace = birth.Place,                    
-                    BirthCountry = fatherId,
-                    BirthCounty = "",
+                    BirthCountry = "Unknown",
+                    BirthCounty = "Unknown",
 
                     DeathYear = death.YearInt,
                     DeathDate = death.DateStr,
                     DeathPlace = death.Place,
-                    DeathCountry = motherId,
+                    DeathCountry = "Unknown",
                     DeathCounty = "",
                     Memory = p.Id,
                     CreatedDate = DateTime.Now,
@@ -143,7 +143,7 @@ namespace GedcomImporter
 
                 countPeople++;
             }
-
+            Console.WriteLine("attempting to save");
             context.BulkInsertTreePersons(persons);
         }
            
