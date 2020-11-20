@@ -4814,7 +4814,7 @@ namespace PlaceLib
                 {
                     if (Locationcheck(place, "USA", "United States"))
                     {
-                        //the location string probably has garbage in it, ie USA or England etc
+                        //the location string probably has garbage in it, ie 'USA or England' etc
                         nation = "Unknown";
                     }
                     else

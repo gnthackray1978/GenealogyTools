@@ -86,9 +86,9 @@ namespace GenDBContext.Models
 
             if (!optionsBuilder.IsConfigured)
             {
-               // optionsBuilder.UseSqlServer(@"Data Source=DESKTOP-KGS70RI\SQL2016EX;Initial Catalog=DNAGED;Integrated Security=SSPI;");
-
-                optionsBuilder.UseSqlite(@"Data Source=C:\Users\george\Documents\genDB.db");
+                // optionsBuilder.UseSqlServer(@"Data Source=DESKTOP-KGS70RI\SQL2016EX;Initial Catalog=DNAGED;Integrated Security=SSPI;");
+                //C:\Users\GeorgePickworth\Downloads\
+                optionsBuilder.UseSqlite(@"Data Source=C:\Users\GeorgePickworth\Documents\genDB.db");
             }
 
 
@@ -388,7 +388,7 @@ namespace GenDBContext.Models
                 using (var command = new SqliteCommand(
                     "SELECT Persons.Id, Persons.ChristianName, Persons.Surname, Persons.BirthYear, Persons.BirthPlace, Persons.BirthCounty, Persons.BirthCountry, MatchGroups.TestDisplayName, MatchGroups.TestAdminDisplayName, MatchGroups.TreeId AS TreeURL, MatchGroups.TestGuid, MatchGroups.Confidence, MatchGroups.SharedCentimorgans AS SharedCM, Persons.CreatedDate,  Persons.RootsEntry, Persons.Memory, MatchKitName.Id AS KitIId, MatchKitName.Name, MatchTrees.CreatedDate AS MTCreated" +
                     " FROM Persons LEFT OUTER JOIN MatchTrees on Persons.Id = MatchTrees.PersonId INNER JOIN MatchGroups ON MatchGroups.MatchGuid = MatchTrees.MatchId INNER JOIN MatchKitName ON MatchGroups.TestGuid = MatchKitName.Id" +
-                    " WHERE (Persons.BirthCountry = 'England') OR (Persons.BirthCountry = 'Wales') OR (Persons.RootsEntry = 0) Order By Persons.Id",
+                    " WHERE ((Persons.BirthCountry = 'England') OR (Persons.BirthCountry = 'Wales')) AND (Persons.RootsEntry = 0)",
                     connection))
                 {
                     using (var reader = command.ExecuteReader())
@@ -405,9 +405,9 @@ namespace GenDBContext.Models
 
 
                 using (var command = new SqliteCommand(
-                    "SELECT Persons.Id, Persons.ChristianName, Persons.Surname, Persons.BirthYear, Persons.BirthPlace, Persons.BirthCounty, Persons.BirthCountry, " +
+                    "SELECT Id, ChristianName, Surname, BirthYear, BirthPlace, BirthCounty, BirthCountry, " +
                     "'' AS TestDisplayName, '' AS TestAdminDisplayName, '' AS TreeURL, '' AS TestGuid, 0 AS Confidence, " +
-                    "0 AS SharedCM, Persons.CreatedDate,  Persons.RootsEntry, Persons.Memory, '' AS KitIId, " +
+                    "0 AS SharedCM, CreatedDate,  RootsEntry, Memory, '' AS KitIId, " +
                     "'' AS Name, '' AS MTCreated" +
                     " FROM TreePersons" +
                     " Order By TreePersons.Id",

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DNAGedLib.Models
 {
@@ -11,8 +12,19 @@ namespace DNAGedLib.Models
         }
 
         public long Id { get; set; }
+
+        [NotMapped]
+        public string IDString { get; set; }
+
         public string ChristianName { get; set; }
         public string Surname { get; set; }
+        
+        [NotMapped]
+        public string FatherString { get; set; }
+        [NotMapped]
+        public string MotherString { get; set; }
+
+
         public long? FatherId { get; set; }
         public long? MotherId { get; set; }
         public string BirthDate { get; set; }

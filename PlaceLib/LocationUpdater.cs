@@ -4,127 +4,12 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
+using ConsoleTools;
 using GenDBContext.Models;
 using Microsoft.Data.SqlClient;
 
 namespace PlaceLib
-{
-    public class MissingCounties
-    {
-        public List<string> unknowns { get; set; }
-
-        public MissingCounties()
-        {
-
-        }
-
-
-        public void FindCounty()
-        {
-
-
-        }
-    }
-
-    public class LookupPair
-    {
-        public string SearchString { get; set; }
-        public string County { get; set; }
-    }
-
-    public class ConsoleWrapper
-    {
-        public static void ClearCurrentConsoleLine()
-        {
-            int currentLineCursor = Console.CursorTop;
-            Console.SetCursorPosition(0, Console.CursorTop);
-            Console.Write(new string(' ', Console.WindowWidth));
-            Console.SetCursorPosition(0, currentLineCursor);
-        }
-
-        public static void ProgressSearch(double counter, double total, string message, string tailMessage = "")
-        {
-            double percentage = 0.0;
-
-            percentage = counter / total * 100;
-
-            if (counter < 1)
-            {
-                Console.WriteLine("");
-                Console.WriteLine("SEARCHING " + message.Trim() + " " + percentage + " %   of " + total + " " +
-                              tailMessage.Trim());
-            }
-            else
-            {
-                Console.Write("\rSEARCHING " + message.Trim() + " " + percentage + " %   of " + total + " " +
-                              tailMessage.Trim());
-            }
-
-        }
-
-        public static void ProgressUpdate(double counter, double total, string message, string tailMessage = "")
-        {
-            double percentage = 0.0;
-
-            percentage = counter / total * 100;
-
-            //  Console.SetCursorPosition(0, Console.CursorTop - 1);
-
-            // ClearCurrentConsoleLine();
-            if (counter < 1)
-            {
-                Console.WriteLine("");
-                Console.WriteLine("UPDATING " + message.Trim() + " " + percentage + " %   of " + total + " " + tailMessage.Trim());
-            }
-            else
-            {
-                Console.Write("\rUPDATING " + message.Trim() + " " + percentage + " %   of " + total + " " + tailMessage.Trim());
-
-            }
-
-
-        }
-
-        public static void StatusReport(string message,bool forceNewLine,  bool pause =false)
-        {
-         //   Console.WriteLine("");
-            if(forceNewLine)
-                Console.WriteLine("");
-
-            Console.WriteLine(message);
-
-            if (pause)
-            {
-                Console.WriteLine("press any key to continue");
-                Console.ReadKey();
-            }
-        }
-
-        public static void HandleSave(DNAGEDContext dnagedContext, string message)
-        {
-            Console.WriteLine();
-
-            Console.WriteLine("SAVING " + message);
-
-            dnagedContext.SaveChanges();
-
-            Console.Write(" SAVED ");
-        }
-
-        public static void HandleBulkSave<T>(DNAGEDContext dnagedContext, IEnumerable<T> entities, string message) where T : class
-        {
-            Console.WriteLine();
-
-            Console.WriteLine("SAVING " + message);
-
-            dnagedContext.BulkUpdate(entities);
-
-            Console.Write(" SAVED ");
-        }
-
-    }
-
-
+{   
     public class LocationFixer
     {
         private readonly ILocationDataContext _locationDataContext;
@@ -184,8 +69,6 @@ namespace PlaceLib
 
             ConsoleWrapper.StatusReport("Set country as England based on parents",true);
         }
-
-        
 
         public void UpdateAmericanParents()
         {
@@ -371,9 +254,11 @@ namespace PlaceLib
 
             locationFixer.UpdateBritishParents();
 
-            locationFixer.SetBirthCounty(PlaceOperations.GetCounties());
-
             locationFixer.UpdateAmericanParents();
+
+
+
+            locationFixer.SetBirthCounty(PlaceOperations.GetCounties());
 
             ConsoleWrapper.StatusReport("Finished press any key to exit",false, true);
         }

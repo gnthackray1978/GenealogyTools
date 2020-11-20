@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ConsoleTools\ConsoleTools.csproj" />
     <ProjectReference Include="..\GenDBContext\GenDBContext.csproj" />
   </ItemGroup>
 

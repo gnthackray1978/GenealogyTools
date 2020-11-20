@@ -10,11 +10,14 @@ using GenDBContext.Models;
 using DNAGedLib.Models;
 using GedcomParser.Entities;
 using Microsoft.Data.Sqlite;
+using ConsoleTools;
 
 namespace GedcomImporter
 {
     public class GedcomImporter
-    {        
+    {     
+        private static int recursionCounter =0;
+
         public static DateObj GetDateObj(DatePlace birthPlace, DatePlace baptismPlace)
         {
             var returnObj = new DateObj() { 
@@ -68,7 +71,17 @@ namespace GedcomImporter
             //fills new treepersons tables which is clone of persons table
             //reason for this is that deleting the existing tree persons from the old persons table
             //couldn't be made to work in a reasonable time frame!
+            var parts = filePath.Split('/');
+            Console.WriteLine("");
 
+            if (parts.Length > 0) {
+                Console.WriteLine("Importing GED file :" + parts.Last());
+            }
+            else
+            {
+                Console.WriteLine("GED file path looks wrong:" + filePath);
+                return;
+            }
             var fileParser = new FileParser();
 
             fileParser.Parse(filePath);
@@ -83,12 +96,16 @@ namespace GedcomImporter
 
 
             var context = new DNAGEDContext();
-
+            
             Console.WriteLine("Deleting existing tree");
             context.DeleteTreePersons();
 
             int countPeople =0;
-            Console.WriteLine("Importing " + fileParser.PersonContainer.Persons.Count + " persons");
+            int total = fileParser.PersonContainer.Persons.Count;
+            Console.WriteLine("Importing " + total + " persons");
+            
+
+
             foreach (var p in fileParser.PersonContainer.Persons)
             {
                 // fileParser.PersonContainer.ChildRelations[0].From.Id
@@ -116,10 +133,14 @@ namespace GedcomImporter
                 persons.Add(new Persons()
                 {
                     Id = countPeople,
+                    IDString = p.Id,
+
                     ChristianName = p.FirstName,
                     Surname = p.LastName,
                     FatherId = 0,
+                    FatherString = fatherId,
                     MotherId = 0,
+                    MotherString = motherId,
                     BirthDate = birth.DateStr,
                     BirthYear = birth.YearInt,
                     BirthPlace = birth.Place,                    
@@ -141,13 +162,55 @@ namespace GedcomImporter
                     CountyUpdated =false                                                           
                 });
 
+                if(countPeople%50 ==0)
+                    ConsoleWrapper.ProgressUpdate(countPeople, total, "");
+
                 countPeople++;
             }
+
+            Console.WriteLine("setting home persons");
+            var subset = persons.Where(w => !string.IsNullOrEmpty(w.ChristianName) && w.ChristianName.Contains("_"));
+
+            recursionCounter = 0;
+
+            foreach (var homePerson in subset)
+            {
+                //input.Any(c => char.IsDigit(c))
+                if(homePerson.ChristianName.Any(c=>char.IsDigit(c)))
+                    update(homePerson.ChristianName, homePerson, persons);
+            }
+
             Console.WriteLine("attempting to save");
             context.BulkInsertTreePersons(persons);
         }
            
+        private static void update(string homePerson, Persons child, 
+            List<Persons> personList)
+        {
+            var father = personList.FirstOrDefault(f => f.IDString == child.FatherString);
+            
+            var mother = personList.FirstOrDefault(f => f.IDString == child.MotherString);
 
+            recursionCounter++;
+
+            if (recursionCounter % 100 == 0)
+                ConsoleWrapper.ProgressUpdate(recursionCounter, personList.Count, "");
+
+            if (father != null)
+            {
+                child.FatherId = father.Id;
+                father.Memory = homePerson;
+                update(homePerson, father, personList);                  
+            }
+
+            if (mother != null)
+            {
+                child.MotherId = mother.Id;
+                mother.Memory = homePerson;
+                update(homePerson, mother, personList);
+            }
+
+        }
 
     }
 }
