@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Text.RegularExpressions;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -15,6 +17,9 @@ namespace PlaceLib.Model
             : base(options)
         {
         }
+
+        
+        public virtual DbSet<FTMPlaceCache> FTMPlaceCache { get; set; }
 
         public virtual DbSet<Places> Places { get; set; }
 
@@ -115,6 +120,32 @@ namespace PlaceLib.Model
 
                 entity.Property(e => e.Wd15cd).IsUnicode(false);
             });
+        }
+
+        public string SearchPlacesDBForCounty(string searchString)
+        {
+            string county = "";
+
+            var placedbResult = this.Places.FirstOrDefault(w => w.Place15nm == searchString);
+
+            if (placedbResult != null)
+            {
+                county = placedbResult.Ctyhistnm;
+            }
+            else
+            {
+                var stripped = searchString.ToLower();
+                stripped = Regex.Replace(stripped, " ", "");
+
+                placedbResult = this.Places.FirstOrDefault(w => w.Placesort == stripped);
+
+                if (placedbResult != null)
+                {
+                    county = placedbResult.Ctyhistnm;
+                }
+            }
+
+            return county;
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using DNAGedLib.Models;
 using GenDBContext.Models;
 using Microsoft.EntityFrameworkCore;
@@ -128,7 +129,8 @@ namespace PlaceLib
                     switch (placeCriteria)
                     {
                         case PlaceCriteria.ForAllUnknownCounties:
-                            var parts = places[m.Id].Split("||");
+                            
+                            var parts = Regex.Split(places[m.Id], "||");
                             m.BirthCounty = parts[0];
                             m.BirthCountry = parts[1];
                             break;

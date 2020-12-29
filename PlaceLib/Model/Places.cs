@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PlaceLib.Model
 {
+
     public partial class Places
     {
         [Column("id")]

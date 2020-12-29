@@ -22,6 +22,16 @@ namespace PlaceLib
 
     public class PlaceOperations
     {
+        public static void TestConnection()
+        {
+            using (var placecontext = new PlacesContext())
+            {
+                var t = placecontext.FTMPlaceCache.Count();
+
+                Debug.WriteLine(t);
+            }
+        }
+
 
         public static void FindMissingCounties()
         {
