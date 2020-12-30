@@ -149,6 +149,7 @@ Thumbs.db
 *[Rr]esharper*
 packages
 NuGet.exe
+ftmframework/ConString.cs
 _[Ss]cripts
 *.exe
 
