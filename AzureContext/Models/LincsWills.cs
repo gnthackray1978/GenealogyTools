@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 namespace AzureContext.Models
 {
+
+
     public partial class LincsWills
     {
         public int Id { get; set; }
