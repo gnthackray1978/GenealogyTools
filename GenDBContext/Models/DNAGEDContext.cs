@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Diagnostics;
 using System.Linq;
+using System.Text.RegularExpressions;
 using DNAGedLib.Models;
 using Microsoft.Data.SqlClient;
 using Microsoft.Data.Sqlite;
@@ -943,7 +944,9 @@ namespace GenDBContext.Models
                         {
                             command.Parameters["$Id"].Value = row.Key;
 
-                            var parts = row.Value.Split("||");
+                            
+
+                            var parts = Regex.Split(row.Value, "||");
 
                             command.Parameters["$county"].Value = parts[0];
                             command.Parameters["$country"].Value = parts[1];
