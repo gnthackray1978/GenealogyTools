@@ -1,0 +1,29 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Markers</title>
+    <script src="./Scripts/data.js"></script>
+    <script src="./Scripts/app.js"></script>
+    <script src="./Scripts/jquery-3.3.1.min.js"></script>
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC4xE7VpfxqbdKcH19lze4LDxHX4e5nqLU&callback=initMap&libraries=&v=weekly" defer></script>
+
+    <script>
+        var p = new PlaceObj();
+
+
+    </script>
+</head>
+<body>
+    <button onclick="p.callService();">callService</button>
+    <button onclick="p.postService();">postService</button>
+    <button onclick="p.countOfUnknownLocations();">Get Count of Unknown Locations</button>
+
+    <div id="map"></div>
+    <div id="count"></div>
+    <div id="progress"></div>
+    <div id="output"></div>
+</body>
+</html>
