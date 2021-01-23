@@ -93,7 +93,7 @@ namespace DNAGedLib
                             MatchGuid = s.MatchGuid,
                         }).ToList();
 
-                context.BulkInsert(matchDetails);
+              //  context.BulkInsert(matchDetails);
 
                 Console.WriteLine("added: " + missingRecordCount + " MatchDetails to the context");
 

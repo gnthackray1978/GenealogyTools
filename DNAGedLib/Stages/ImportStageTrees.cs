@@ -99,7 +99,7 @@ namespace DNAGedLib
 
                 //  dnagedContext.SaveChanges();
 
-                dnagedContext.BulkInsert(matchTrees);
+               // dnagedContext.BulkInsert(matchTrees);
 
                 Console.WriteLine("saved " + addedRecords + " new records");
             };
