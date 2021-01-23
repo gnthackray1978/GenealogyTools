@@ -72,6 +72,8 @@ namespace GedcomImporter
             //reason for this is that deleting the existing tree persons from the old persons table
             //couldn't be made to work in a reasonable time frame!
             var parts = filePath.Split('/');
+            var consoleWrapper = new ConsoleWrapper();
+
             Console.WriteLine("");
 
             if (parts.Length > 0) {
@@ -163,7 +165,7 @@ namespace GedcomImporter
                 });
 
                 if(countPeople%50 ==0)
-                    ConsoleWrapper.ProgressUpdate(countPeople, total, "");
+                    consoleWrapper.ProgressUpdate(countPeople, total, "");
 
                 countPeople++;
             }
@@ -187,6 +189,7 @@ namespace GedcomImporter
         private static void update(string homePerson, Persons child, 
             List<Persons> personList)
         {
+            var consoleWrapper = new ConsoleWrapper();
             var father = personList.FirstOrDefault(f => f.IDString == child.FatherString);
             
             var mother = personList.FirstOrDefault(f => f.IDString == child.MotherString);
@@ -194,7 +197,7 @@ namespace GedcomImporter
             recursionCounter++;
 
             if (recursionCounter % 100 == 0)
-                ConsoleWrapper.ProgressUpdate(recursionCounter, personList.Count, "");
+                consoleWrapper.ProgressUpdate(recursionCounter, personList.Count, "");
 
             if (father != null)
             {
