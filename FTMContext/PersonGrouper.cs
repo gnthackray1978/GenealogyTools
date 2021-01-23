@@ -1,4 +1,5 @@
-﻿using FTMContext;
+﻿using ConsoleTools;
+using FTMContext;
 using FTMContext.lib;
 using FTMContext.Models;
 using nullpointer.Metaphone;
@@ -11,36 +12,42 @@ namespace FTMContext
 {
    
 
-    public class PersonGrouper {
+    public class PersonGrouper {      
+        private FTMakerContext _sourceContext;
+        private FTMakerCacheContext _cacheContext;
+        private IConsoleWrapper _consoleWrapper;
 
-        public static DupeEntry DumpString(FTMakerContext f, List<Fact> facts, int personId, string ident) {
+        public List<MatchGroup> MatchGroups { get; set; } = new List<MatchGroup>();
 
-            var dupeEntry = new DupeEntry();
+        //public static DupeEntry DumpString(FTMakerContext f, List<Fact> facts, 
+        //    int personId, string ident) {
 
-            var cpFact = FTMTools.GetFact(facts, personId);
+        //    var dupeEntry = new DupeEntry();
 
-            var person = f.Person.FirstOrDefault(f1 => f1.Id == personId);
+        //    var cpFact = FTMTools.GetFact(facts, personId);
 
-            var birthString = "";
+        //    var person = f.Person.FirstOrDefault(f1 => f1.Id == personId);
 
-            if (cpFact.BirthYearFrom == cpFact.BirthYearTo)
-                birthString = cpFact.BirthYearFrom.ToString();
-            else
-                birthString = cpFact.BirthYearFrom.ToString() + " - " + cpFact.BirthYearTo.ToString();
+        //    var birthString = "";
 
-            string result = cpFact.Origin + " , " + birthString + " , " + GoogleGeoCodingHelpers.FormatPlace(person.BirthPlace) + " , " + person.GivenName + " , " + person.FamilyName;
+        //    if (cpFact.BirthYearFrom == cpFact.BirthYearTo)
+        //        birthString = cpFact.BirthYearFrom.ToString();
+        //    else
+        //        birthString = cpFact.BirthYearFrom.ToString() + " - " + cpFact.BirthYearTo.ToString();
 
-            dupeEntry.Ident = ident;
-            dupeEntry.PersonId = personId;
-            dupeEntry.BirthYearFrom = cpFact.BirthYearFrom;
-            dupeEntry.BirthYearTo = cpFact.BirthYearTo;
-            dupeEntry.Origin = cpFact.Origin;
-            dupeEntry.Location = GoogleGeoCodingHelpers.FormatPlace(person.BirthPlace);
-            dupeEntry.ChristianName = person.GivenName;
-            dupeEntry.Surname = person.FamilyName;
+        //    string result = cpFact.Origin + " , " + birthString + " , " + GoogleGeoCodingHelpers.FormatPlace(person.BirthPlace) + " , " + person.GivenName + " , " + person.FamilyName;
 
-            return dupeEntry;
-        }
+        //    dupeEntry.Ident = ident;
+        //    dupeEntry.PersonId = personId;
+        //    dupeEntry.BirthYearFrom = cpFact.BirthYearFrom;
+        //    dupeEntry.BirthYearTo = cpFact.BirthYearTo;
+        //    dupeEntry.Origin = cpFact.Origin;
+        //    dupeEntry.Location = GoogleGeoCodingHelpers.FormatPlace(person.BirthPlace);
+        //    dupeEntry.ChristianName = person.GivenName;
+        //    dupeEntry.Surname = person.FamilyName;
+
+        //    return dupeEntry;
+        //}
 
         public static string MakeKey(string name1) {
             DoubleMetaphone mphone = new DoubleMetaphone();
@@ -53,7 +60,7 @@ namespace FTMContext
             return pkey1 + akey1;
         } 
 
-        public bool CompareNames(string name1, string name2) {
+        public static bool CompareNames(string name1, string name2) {
 
 
             DoubleMetaphone mphone = new DoubleMetaphone();
@@ -78,10 +85,17 @@ namespace FTMContext
             return false;
         }
 
-        public List<MatchGroup> MatchGroups { get; set; } = new List<MatchGroup>();
+        public PersonGrouper(FTMakerContext sourceContext,
+                             FTMakerCacheContext cacheContext,
+                             IConsoleWrapper consoleWrapper) {
+         
+            _sourceContext = sourceContext;
+            _cacheContext = cacheContext;
+            _consoleWrapper = consoleWrapper;
+        }
 
 
-        public MatchGroup MatchGroupExists(List<MatchGroup> matchGroups, int personId) {
+        private MatchGroup MatchGroupExists(List<MatchGroup> matchGroups, int personId) {
           
 
             foreach (var matchGroup in matchGroups) {
@@ -94,26 +108,19 @@ namespace FTMContext
         }
 
 
+        /// <summary>
+        /// Fills out dupes table in destination context.
+        /// Searchs source context for dupes. Needs source context because
+        /// this will have all facts(origin person,location,birth range etc) filled out. 
+        /// </summary>      
+        public void PopulateDupeEntries() {
+           
+            
 
-        public void Group() {
-            var a = new FTMakerContext(new ConfigObj
-            {
-                Path = @"C:\Users\george\Documents\Repos\FTMCRUD\ftmframework\",
-                FileName = @"decrrypted.db",
-                IsEncrypted = false
-            });
-
-            var f = new FTMakerContext(new ConfigObj
-            {
-                Path = @"C:\Users\george\Documents\Software MacKiev\Family Tree Maker\",
-                FileName = @"DNA Match File.ftm",
-                IsEncrypted = true
-            });
-
-            var facts =  f.Fact.Where(w => w.FactTypeId == 14 || w.FactTypeId == 90).ToList();
+            var facts =  _sourceContext.Fact.Where(w => w.FactTypeId == 14 || w.FactTypeId == 90).ToList();
 
           
-            var comparisonPersons = f.Person.Where(w=> !string.IsNullOrEmpty(w.GivenName)
+            var comparisonPersons = _sourceContext.Person.Where(w=> !string.IsNullOrEmpty(w.GivenName)
                     && !string.IsNullOrEmpty(w.FamilyName))
                         .Select(s => new PersonDupeSearchSubset() {
                         Id = s.Id,
@@ -122,14 +129,14 @@ namespace FTMContext
                         Fact = FTMTools.GetFact(facts, s.Id)
                 }).ToList();
 
-        
-            Console.WriteLine("Records to search: " + comparisonPersons.Count());
+
+            _consoleWrapper.WriteLine("Records to search: " + comparisonPersons.Count());
             int idx = 0;
 
             foreach (var cp in comparisonPersons) {
 
                 if (idx % 1000 == 0)
-                    Console.WriteLine(idx);
+                    _consoleWrapper.WriteLine(idx.ToString());
 
                // var cpFact = FTMTools.GetFact(f, cp.Id);
 
@@ -199,7 +206,7 @@ namespace FTMContext
                 idx++;
             }
 
-            Console.WriteLine("Found: " + MatchGroups.Count());
+            _consoleWrapper.WriteLine("Found: " + MatchGroups.Count());
 
             foreach (var mg in MatchGroups)
             {
@@ -234,27 +241,24 @@ namespace FTMContext
                 mg.IncludedTrees = identString;
             }
 
-            var dupeId = a.DupeEntries.Count() +1;
+            var dupeId = _cacheContext.DupeEntries.Count() +1;
 
             foreach (var group in MatchGroups.GroupBy(g => g.IncludedTrees)) {
-                Debug.WriteLine(group.Key);
+                _consoleWrapper.WriteLine(group.Key);
 
                 var p = group.OrderByDescending(o => o.LatestTree).First();
-
-
-
+                
                 foreach (var person in p.Persons) {
-                    var dupeEntry = DumpString(f, facts, person, group.Key);
-                    dupeEntry.Id = dupeId;
+                    var dupeEntry = _cacheContext.CreateNewDupeEntry(dupeId, _sourceContext.Person, facts, person, group.Key);
 
-                    a.DupeEntries.Add(dupeEntry);
+                    _cacheContext.DupeEntries.Add(dupeEntry);
                     dupeId++;
                 }
                 //    Debug.WriteLine(DumpString(f, facts, person));
             }
 
-            a.SaveChanges();
-            Console.ReadKey();
+            _cacheContext.SaveChanges();
+           
 
 
           

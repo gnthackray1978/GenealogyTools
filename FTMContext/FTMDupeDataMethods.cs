@@ -1,4 +1,5 @@
-﻿using FTMContext;
+﻿using ConsoleTools;
+using FTMContext;
 using FTMContext.Models;
 using MyFamily.Shared;
 using Newtonsoft.Json;
@@ -31,9 +32,12 @@ namespace FTMContext
 
     public class FTMDupeDataMethods
     {
-        protected FTMakerContext _context;
+        protected IConsoleWrapper _consoleWrapper;
 
-        protected FTMakerContext _de_context;
+        protected FTMakerContext _sourceContext;
+
+        protected FTMakerCacheContext _destinationContext;
+         
 
         protected Dictionary<int, string> originDictionary;
 
@@ -67,25 +71,16 @@ namespace FTMContext
             return null;
         }
 
-        public FTMDupeDataMethods() {
+        public FTMDupeDataMethods(FTMakerContext _sourceContext, 
+            FTMakerCacheContext _destinationContext, IConsoleWrapper consoleWrapper) {
 
-            _context = new FTMakerContext(new ConfigObj
-            {
-                Path = @"C:\Users\george\Documents\Software MacKiev\Family Tree Maker\",
-                FileName = @"DNA Match File.ftm",
-                IsEncrypted = true
-            });
+            _consoleWrapper = consoleWrapper;
 
-            _de_context = new FTMakerContext(new ConfigObj
-            {
-                Path = @"C:\Users\george\Documents\Repos\FTMCRUD\ftmframework\",
-                FileName = @"decrrypted.db",
-                IsEncrypted = false
-            });
+            _consoleWrapper.WriteLine("Creating cache");
 
             fTMPlaceCaches = new Dictionary<int, FTMPlaceCacheSubset>();
 
-            foreach (var f in _de_context.FTMPlaceCache.Select(s => new FTMPlaceCacheSubset()
+            foreach (var f in _destinationContext.FTMPlaceCache.Select(s => new FTMPlaceCacheSubset()
             {
                 FTMPlaceId = s.FTMPlaceId,
                 Id = s.Id,
@@ -102,7 +97,7 @@ namespace FTMContext
 
             baptismFactCache = new Dictionary<int, FactSubset>();
 
-            foreach (var f in _context.Fact.Where(w => w.FactTypeId == 7
+            foreach (var f in _sourceContext.Fact.Where(w => w.FactTypeId == 7
                                                  && w.LinkTableId == 5).Select(s => new FactSubset()
                                                  {
                                                      Id = s.Id,
@@ -119,7 +114,7 @@ namespace FTMContext
 
             originDictionary = new Dictionary<int, string>();
 
-            foreach (var f in _context.Fact.Where(w => w.FactTypeId == 14
+            foreach (var f in _sourceContext.Fact.Where(w => w.FactTypeId == 14
                                                  && w.LinkTableId == 5).Select(s => new FactSubset()
                                                  {
                                                      Id = s.Id,                                            
@@ -134,7 +129,7 @@ namespace FTMContext
 
 
 
-            var relationships = _context.Relationship.Select(s => new RelationSubSet()
+            var relationships = _sourceContext.Relationship.Select(s => new RelationSubSet()
             {
                 Id = s.Id,
                 Person1Id = s.Person1Id,
@@ -177,7 +172,7 @@ namespace FTMContext
                 }
             };
 
-            foreach (var f in _context.Fact.Where(w => w.FactTypeId == 4
+            foreach (var f in _sourceContext.Fact.Where(w => w.FactTypeId == 4
                                                  && w.LinkTableId == 7
                                                  && w.Date!=null && w.PlaceId != null).Select(s => new FactSubset()
             {
@@ -252,7 +247,7 @@ namespace FTMContext
 
             personCache = new Dictionary<int, PersonSubset>();
 
-            foreach (var p in _context.Person.Select(s => new PersonSubset()
+            foreach (var p in _sourceContext.Person.Select(s => new PersonSubset()
             {
                 Id = s.Id,
                 Sex = s.Sex,
@@ -269,7 +264,7 @@ namespace FTMContext
             childRelationshipPersonIndex = new Dictionary<int, int>();
             childRelationshipIndex = new Dictionary<int, int>();
 
-            childRelationshipCache = new List<ChildRelationshipSubset>(_context.ChildRelationship.Select(s => new ChildRelationshipSubset()
+            childRelationshipCache = new List<ChildRelationshipSubset>(_sourceContext.ChildRelationship.Select(s => new ChildRelationshipSubset()
             {
                 Id = s.Id,
                 PersonId = s.PersonId,
@@ -309,8 +304,9 @@ namespace FTMContext
                 idx++;
             }
 
-
+            _consoleWrapper.WriteLine("Cache Created");
         }
+
         public void CheckForChangedLocs()
         {
             int idx = 0;
@@ -320,13 +316,13 @@ namespace FTMContext
                 GetAllLocationsForPerson(p.Id);
 
                 if (idx % 250 == 0) {
-                    Console.WriteLine(idx);
+                    _consoleWrapper.WriteLine(idx.ToString());
                 }
 
                 idx++;
             }
 
-            Console.WriteLine("finished");
+            _consoleWrapper.WriteLine("finished");
         }
 
 
@@ -337,7 +333,7 @@ namespace FTMContext
             //changed persons
 
 
-            var existingData = _context.Fact.Where(w => w.FactTypeId == 90 && w.LinkTableId == 5)
+            var existingData = _sourceContext.Fact.Where(w => w.FactTypeId == 90 && w.LinkTableId == 5)
                 .Select(s => new KeyValuePair<int, string>(s.LinkId, s.Text)).ToList();
 
             List<int> missingPersonIds = new List<int>();
@@ -347,7 +343,7 @@ namespace FTMContext
             int counter = 0;
             int saveCounter = 0;
 
-            Console.WriteLine(peopleCount + " Records ");
+            _consoleWrapper.WriteLine(peopleCount + " Records ");
  
             foreach (var p in personCache.Values)
             {
@@ -393,16 +389,16 @@ namespace FTMContext
             int counter = 0;
             int saveCounter = 0;
 
-            Console.WriteLine(peopleCount + " Records ");
+            _consoleWrapper.WriteLine(peopleCount + " record to process");
 
             int idCounter = 1;
 
             foreach (var p in personCache.Values)
             {
-                if (p.Id == 1924)
-                {
-                    Debug.WriteLine("");
-                }
+                //if (p.Id == 1924)
+                //{
+                //    _consoleWrapper.WriteLine("");
+                //}
 
 
                 var processDateReturnType = ProcessDates(p.Id);
@@ -436,24 +432,24 @@ namespace FTMContext
                     Origin = origin
                 };
 
-                _de_context.FTMPersonView.Add(fTMPersonView);
+                _destinationContext.FTMPersonView.Add(fTMPersonView);
                
 
                 counter++;
                 idCounter++;
 
                 if (saveCounter == 1000) {
-                    Console.WriteLine(counter + " of " + peopleCount);
-                    Console.WriteLine("Saving: ");
+                    _consoleWrapper.WriteLine(counter + " of " + peopleCount);
+                    _consoleWrapper.WriteLine("Saving: ");
                     // _context.SaveChanges();
-                    _de_context.SaveChanges();
+                    _destinationContext.SaveChanges();
                     saveCounter = 0;
 
                 }
                 saveCounter++;
             }
 
-            _context.SaveChanges();
+            _sourceContext.SaveChanges();
         }
 
         #region age related methods

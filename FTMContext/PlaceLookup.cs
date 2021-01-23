@@ -7,5 +7,7 @@
         public string PlaceFormatted { get; set; }
         public string results { get; set; }
     }
+
+    
 }
  

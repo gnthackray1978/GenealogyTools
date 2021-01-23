@@ -1,10 +1,14 @@
-﻿using FTMContext;
+﻿using ConsoleTools;
+using FTMContext;
 using FTMContext.Models;
+using Microsoft.EntityFrameworkCore;
 using MyFamily.Shared;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace FTMContext
@@ -107,6 +111,61 @@ namespace FTMContext
             return null;
         }
 
+        public static void SaveState(FTMakerContext f)
+        {
+            var ef = f.SyncState.FirstOrDefault();
+            // write regex to get year
+
+            if (ef!=null)
+            {
+                ef.TreeModified = DateTime.Now;                                
+            }
+
+            var p = f.Person.FirstOrDefault(pa=>pa.Id ==1);
+            // write regex to get year
+
+            if (p != null)
+            {
+                p.UpdateDate = DateTime.Now;
+            }
+        }
+
+        public static void SaveFactWithSync(FTMakerContext f, int factTypeId,
+           string originString, int personId)
+        {
+            //NOTE
+            //to make sync work with facts
+            //I've found that you need to add a completely new fact
+            //so delete all old facts of the types you're interested in
+            //then just re-add. this is of course slow.
+
+            var existingFacts = f.Fact.Where(w => w.FactTypeId == factTypeId && w.LinkId == personId);
+            // write regex to get year
+
+            foreach (var exf in existingFacts)
+            {
+                f.Fact.Remove(exf);
+            }
+
+            var fact = new Fact()
+            {
+                LinkId = personId,
+                LinkTableId = 5,
+                FactTypeId = factTypeId,//origin
+                Private = false,
+                Preferred = true,
+                Date = null,
+                PlaceId = null,
+                Text = originString,
+                MediaLinkedCounts = 0,
+                SourceLinkedCounts = 0,
+                CreateDate = DateTime.Today,
+                UpdateDate = DateTime.Today
+            };
+
+            f.Fact.Add(fact);
+        }
+
 
         public static void SaveFact(FTMakerContext f, int factTypeId,
             string originString, int personId)
@@ -114,9 +173,10 @@ namespace FTMContext
             var existingFacts = f.Fact.Where(w => w.FactTypeId == factTypeId && w.LinkId == personId);
             // write regex to get year
 
+
             if (existingFacts.Count() > 0)
             {
-                
+
                 var ef = existingFacts.First();
                 //if it's actually changed then update it
                 if (ef.Text != originString)
@@ -125,8 +185,8 @@ namespace FTMContext
                     ef.LinkTableId = 5;
                     ef.Text = originString;
                     ef.FactTypeId = factTypeId;//origin
-                    ef.CreateDate = DateTime.Today;
-                    ef.UpdateDate = DateTime.Today;
+                    ef.CreateDate = DateTime.Now.Subtract(new TimeSpan(2, 2, 2, 2));
+                    ef.UpdateDate = DateTime.Now.Subtract(new TimeSpan(1, 1, 1, 1));
                 }
             }
             else
@@ -151,88 +211,76 @@ namespace FTMContext
             }
 
 
-           
+
         }
 
         public static void TestConnections() {
-            var f = new FTMakerContext(new ConfigObj
-            {
-                // Path = @"C:\Users\george\Documents\Software MacKiev\Family Tree Maker\",
-                Path = @"C:\Users\george\Documents\Family Tree Maker\",
-                FileName = @"Allen Herbert - possible ancestors.ftm",
-                IsEncrypted = true
-            });
+            var sourceContext = FTMakerContext.CreateSourceDB();
 
-            var a = new FTMakerContext(new ConfigObj
-            {
-                Path = @"C:\Users\george\Documents\Repos\FTMCRUD\ftmframework\",
-                FileName = @"decrrypted.db",
-                IsEncrypted = false
-            });
+            var destinationContext = FTMakerContext.CreateDestinationDB();
 
-            var p = f.Person.FirstOrDefault(n => n.FamilyName.Contains("Allen"));
+            var p = sourceContext.Person.FirstOrDefault(n => n.FamilyName.Contains("Allen"));
 
             Console.WriteLine("First entry FTDNA Person table: " + p.FullName);
 
-            var p2 = a.Person.FirstOrDefault(n => n.FamilyName.Contains("Allen"));
+            var p2 = destinationContext.Person.FirstOrDefault(n => n.FamilyName.Contains("Allen"));
 
             Console.WriteLine("First entry Decrypt Person table: " + p2.FullName);
 
-            Console.WriteLine(a.FTMPlaceCache.Count());
+            //Console.WriteLine(destinationContext.FTMPlaceCache.Count());
         }
 
-        public static void ExtractFTMDB()
+       
+
+        public static void ExtractFTMDB(FTMakerContext source, IConsoleWrapper consoleWrapper)
         {
+            string path = Path.GetDirectoryName((new System.Uri(Assembly.GetExecutingAssembly().CodeBase)).LocalPath);
+                        
+            File.Copy(Path.Combine(path, "blank.db"), FTMakerContext.DecryptedDBPath + FTMakerContext.DecryptedDBName,true);
+            
+            FTMakerContext destination = FTMakerContext.CreateDestinationDB();
 
-            Console.WriteLine("copying db");
-
-            var f = new FTMakerContext(new ConfigObj
-            {
-                Path = @"C:\Users\george\Documents\Software MacKiev\Family Tree Maker\",
-                FileName = @"DNA Match File.ftm",
-                IsEncrypted = true
-            });
+            consoleWrapper.WriteLine("Decrypting FTM data from " + source.FileName + " to " + destination.FileName);
 
 
-            var a = new FTMakerContext(new ConfigObj
-            {
-                Path = @"C:\Users\george\Documents\Repos\FTMCRUD\ftmframework\",
-                FileName = @"decrrypted.db",
-                IsEncrypted = false
-            });
+            consoleWrapper.WriteLine("Adding tables");
 
-            Console.WriteLine("Deleting Existing Data");
+            destination.SyncFact.AddRange(source.SyncFact);
+            destination.SyncArtifact.AddRange(source.SyncArtifact);
+            destination.SyncArtifactReference.AddRange(source.SyncArtifactReference);
+            destination.SyncState.AddRange(source.SyncState);
+            destination.SyncPerson.AddRange(source.SyncPerson);
 
-            a.DeleteAll();
+          
+            destination.ChildRelationship.AddRange(source.ChildRelationship);
+            destination.Deleted.AddRange(source.Deleted);
+            destination.FactType.AddRange(source.FactType);
+            destination.HistoryList.AddRange(source.HistoryList);
+            destination.MasterSource.AddRange(source.MasterSource);
+            destination.MediaLink.AddRange(source.MediaLink);
+            destination.Note.AddRange(source.Note);
+            destination.PersonExternal.AddRange(source.PersonExternal);
+            destination.PersonGroup.AddRange(source.PersonGroup);
+            destination.Publication.AddRange(source.Publication);
+            destination.Repository.AddRange(source.Repository);
+            destination.Setting.AddRange(source.Setting);
+            destination.Source.AddRange(source.Source);
+            destination.SourceLink.AddRange(source.SourceLink);
+            destination.Tag.AddRange(source.Tag);
+            destination.TagLink.AddRange(source.TagLink);
+            destination.Task.AddRange(source.Task);
+            destination.Person.AddRange(source.Person);
+            destination.Fact.AddRange(source.Fact);
+            destination.Place.AddRange(source.Place);
+            destination.Relationship.AddRange(source.Relationship);
+            destination.MediaFile.AddRange(source.MediaFile);
+            destination.WebLink.AddRange(source.WebLink);
 
-            Console.WriteLine("Importing New Data");
+            consoleWrapper.WriteLine("Saving Data");
+            destination.SaveChanges();
 
-            a.ChildRelationship.AddRange(f.ChildRelationship);
-            a.Deleted.AddRange(f.Deleted);
-            a.FactType.AddRange(f.FactType);
-            a.HistoryList.AddRange(f.HistoryList);
-            a.MasterSource.AddRange(f.MasterSource);
-            a.MediaLink.AddRange(f.MediaLink);
-            a.Note.AddRange(f.Note);
-            a.PersonExternal.AddRange(f.PersonExternal);
-            a.PersonGroup.AddRange(f.PersonGroup);
-            a.Publication.AddRange(f.Publication);
-            a.Repository.AddRange(f.Repository);
-            a.Setting.AddRange(f.Setting);
-            a.Source.AddRange(f.Source);
-            a.SourceLink.AddRange(f.SourceLink);
-            a.Tag.AddRange(f.Tag);
-            a.TagLink.AddRange(f.TagLink);
-            a.Task.AddRange(f.Task);
-            a.Person.AddRange(f.Person);
-            a.Fact.AddRange(f.Fact);
-            a.Place.AddRange(f.Place);
-            a.Relationship.AddRange(f.Relationship);
-            a.MediaFile.AddRange(f.MediaFile);
-            a.WebLink.AddRange(f.WebLink);
+            consoleWrapper.WriteLine("Completed");
 
-            Console.WriteLine("Saving New Data");
-            a.SaveChanges();
         }
     }
 }

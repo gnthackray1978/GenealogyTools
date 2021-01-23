@@ -1,4 +1,5 @@
-﻿using FTMContext.lib;
+﻿using ConsoleTools;
+using FTMContext.lib;
 using FTMContext.Models;
 using Newtonsoft.Json;
 using PlaceLib.Model;
@@ -17,15 +18,6 @@ namespace FTMContext
         public static Location GetLocation(string jsonResult)
         {
         
-            //var a = new FTMakerContext(new ConfigObj
-            //{
-            //    Path = @"C:\Users\george\Documents\Repos\FTMCRUD\ftmframework\",
-            //    FileName = @"decrrypted.db",
-            //    IsEncrypted = false
-            //});
-
-            //var first = a.FTMPlaceCache.First();
-
             if(jsonResult==null)
                 return new Location();
 
@@ -41,20 +33,14 @@ namespace FTMContext
         /// <summary>
         /// sets county and country values in ftmcache. 
         /// </summary>
-        public static void UpdateFTMCacheMetaData()
+        public static void UpdateFTMCacheMetaData(FTMakerCacheContext a, IConsoleWrapper consoleWrapper)
         {
             var p = new PlacesContext();
 
-            var a = new FTMakerContext(new ConfigObj
-            {
-                Path = @"C:\Users\george\Documents\Repos\FTMCRUD\ftmframework\",
-                FileName = @"decrrypted.db",
-                IsEncrypted = false
-            });
             var unsetCountiesCount = a.FTMPlaceCache.Where(w => w.County == "" || w.Country == "").Count();
 
-            Console.WriteLine("FTMPlaceCache has ~" + unsetCountiesCount + " unset records");
-            Console.WriteLine("Updating FTMPlaceCache");
+            consoleWrapper.WriteLine("FTMPlaceCache has ~" + unsetCountiesCount + " unset records");
+            consoleWrapper.WriteLine("Updating FTMPlaceCache");
             int foreignCounties = 0;
             foreach (var place in a.FTMPlaceCache.Where(w=>w.County == "" || w.Country == "")) {
                 if (place.JSONResult != null)
@@ -109,9 +95,9 @@ namespace FTMContext
 
             unsetCountiesCount = a.FTMPlaceCache.Where(w => w.County == "" || w.Country == "").Count();
 
-            Console.WriteLine("FTMPlaceCache has ~" + foreignCounties + " foreign records");
+            consoleWrapper.WriteLine("FTMPlaceCache has ~" + foreignCounties + " foreign records");
 
-            Console.WriteLine("FTMPlaceCache has ~" + unsetCountiesCount + " unset records");
+            consoleWrapper.WriteLine("FTMPlaceCache has ~" + unsetCountiesCount + " unset records");
         }
 
         
@@ -120,24 +106,14 @@ namespace FTMContext
         /// return list of entries in decrypt place cache that don't haven't been geolocated
         /// </summary>
         /// <returns></returns>
-        public static List<PlaceLookup> GetUnknownPlaces()
+        public static List<PlaceLookup> GetUnknownPlaces(FTMakerCacheContext context, IConsoleWrapper consoleWrapper)
         {
 
             var places = new List<PlaceLookup>();
 
-            using (var context = new FTMakerContext(new ConfigObj
-            {
-                Path = @"C:\Users\george\Documents\Repos\FTMCRUD\ftmframework\",
-                FileName = @"decrrypted.db",
-                IsEncrypted = false
-            }))
-            {
-
                 places = context.FTMPlaceCache.Where(w => (w.JSONResult == null || w.JSONResult == "null"))
                     .Select(s => new PlaceLookup() { PlaceId = s.FTMPlaceId, PlaceFormatted = s.FTMOrginalNameFormatted })
                     .ToList();
-
-            };
 
             return places;
         }
@@ -145,19 +121,14 @@ namespace FTMContext
         /// <summary>
         /// add missing places into the place cache. ready to be looked up by the geocoder
         /// </summary>
-        public static void AddMissingPlaces()
+        public static void AddMissingPlaces(List<Place> sourcePlaces, FTMakerCacheContext a, IConsoleWrapper consoleWrapper)
         {
-            var a = new FTMakerContext(new ConfigObj
-            {
-                Path = @"C:\Users\george\Documents\Repos\FTMCRUD\ftmframework\",
-                FileName = @"decrrypted.db",
-                IsEncrypted = false
-            });
+           
 
-            (List<Place> missingPlaces, List<Place> updatedPlaces) data = CheckForUpdates(a);
+            (List<Place> missingPlaces, List<Place> updatedPlaces) data = CheckForUpdates(a, sourcePlaces, consoleWrapper);
 
 
-            Console.WriteLine("Adding " + data.missingPlaces.Count + " missing places");
+            consoleWrapper.WriteLine("Adding " + data.missingPlaces.Count + " missing places");
 
             if (data.missingPlaces.Count > 0)
             {
@@ -188,25 +159,20 @@ namespace FTMContext
         /// finds place ids in the ftmcache and sets them to null when
         /// the place ids have been changed.
         /// </summary>
-        public static void ResetUpdatedPlaces()
+        public static void ResetUpdatedPlaces(List<Place> sourcePlaces, FTMakerCacheContext destinationContext, 
+            IConsoleWrapper consoleWrapper)
         {
-            var a = new FTMakerContext(new ConfigObj
-            {
-                Path = @"C:\Users\george\Documents\Repos\FTMCRUD\ftmframework\",
-                FileName = @"decrrypted.db",
-                IsEncrypted = false
-            });
+           
+            (List<Place> missingPlaces, List<Place> updatedPlaces) data = CheckForUpdates(destinationContext, sourcePlaces, consoleWrapper);
 
-            (List<Place> missingPlaces, List<Place> updatedPlaces) data = CheckForUpdates(a);
-
-            Console.WriteLine("Resetting " + data.updatedPlaces.Count + " places press any key to continue");
-            Console.ReadKey();
+            consoleWrapper.WriteLine("Resetting " + data.updatedPlaces.Count + " places press any key to continue");
+          
 
             if (data.updatedPlaces.Count > 0)
             {
                 foreach (var p in data.updatedPlaces)
                 {
-                    var cachedValue = a.FTMPlaceCache.FirstOrDefault(f => f.FTMPlaceId == p.Id);
+                    var cachedValue = destinationContext.FTMPlaceCache.FirstOrDefault(f => f.FTMPlaceId == p.Id);
 
                     if (cachedValue != null)
                     {
@@ -217,16 +183,17 @@ namespace FTMContext
                         cachedValue.FTMOrginalNameFormatted = GoogleGeoCodingHelpers.FormatPlace(p.Name);
                     }
 
-                    a.SaveChanges();
+                    destinationContext.SaveChanges();
                 }
             }
 
         }
         
-        public static (List<Place> missingPlaces, List<Place> updatedPlaces) CheckForUpdates(FTMakerContext a, bool showInfo = false)
+        public static (List<Place> missingPlaces, List<Place> updatedPlaces) 
+                                CheckForUpdates(FTMakerCacheContext a, List<Place> sourcePlaces, IConsoleWrapper consoleWrapper, bool showInfo = false)
         {
 
-            Console.WriteLine("Checking for updated places");
+            consoleWrapper.WriteLine("Checking for updated places");
             //    ExtractFTMDB();
 
 
@@ -243,7 +210,7 @@ namespace FTMContext
             List<Place> missingPlaces = new List<Place>();
             List<Place> updatedPlaces = new List<Place>();
 
-            foreach (var p in a.Place)
+            foreach (var p in sourcePlaces)
             {
                 if (!cacheDictionary.ContainsKey(p.Id))
                 {
@@ -263,18 +230,18 @@ namespace FTMContext
 
             if (showInfo)
             {
-                Console.WriteLine(updatedPlaces.Count + " updated places ");
+                consoleWrapper.WriteLine(updatedPlaces.Count + " updated places ");
 
                 foreach (var m in updatedPlaces)
                 {
-                    Console.WriteLine("Missing Place : " + m.Name);
+                    consoleWrapper.WriteLine("Missing Place : " + m.Name);
                 }
 
-                Console.WriteLine(missingPlaces.Count + " missing places ");
+                consoleWrapper.WriteLine(missingPlaces.Count + " missing places ");
 
                 foreach (var m in missingPlaces)
                 {
-                    Console.WriteLine("Missing Place : " + m.Name);
+                    consoleWrapper.WriteLine("Missing Place : " + m.Name);
                 }
             }
             return (missingPlaces, updatedPlaces);

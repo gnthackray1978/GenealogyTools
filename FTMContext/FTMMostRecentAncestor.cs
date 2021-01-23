@@ -1,60 +1,62 @@
-﻿using FTMContext;
-using FTMContext;
+﻿using ConsoleTools;
 using FTMContext.Models;
-using MyFamily.Shared;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace FTMContext
 {
     public class FTMMostRecentAncestor
     {
-        public static List<int> AddedPersons = new List<int>();
+        private FTMakerContext _context;
+        private IConsoleWrapper _consoleWrapper;
 
-        public static void MarkMostRecentAncestor()
-        {
-            var f = new FTMakerContext(new ConfigObj
-            {
-                Path = @"C:\Users\george\Documents\Software MacKiev\Family Tree Maker\",
-                FileName = @"DNA Match File.ftm",
-                IsEncrypted = true
-            });
+        public List<int> AddedPersons = new List<int>();
 
-            var firstPerson = f.Person.First(w => w.Id == 1);
+        public FTMMostRecentAncestor(FTMakerContext context, IConsoleWrapper consoleWrapper) {
+            _consoleWrapper = consoleWrapper;
+            _context = context;
+        }
 
-            Debug.WriteLine(firstPerson.BirthDate);
+        
+
+        public void MarkMostRecentAncestor()
+        {           
+            var firstPerson = _context.Person.First(w => w.Id == 1);
+
+            _consoleWrapper.WriteLine(firstPerson.BirthDate);
 
 
-            var rootPeople = f.Person.Where(w => w.FamilyName.StartsWith("_"));
+            var rootPeople = _context.Person.Where(w => w.FamilyName.StartsWith("_"));
 
             foreach (var rootPerson in rootPeople)
             {
                 //var rootPerson = rootPeople.First();
-                Console.WriteLine("Assigning ancestors for : " + rootPerson.FamilyName);
+                _consoleWrapper.WriteLine("Assigning ancestors for : " + rootPerson.FamilyName);
 
                 AddedPersons = new List<int>();
 
-                LookupAncestors(f, rootPerson.Id);
+                LookupAncestors(rootPerson.Id);
+
+                _consoleWrapper.WriteLine("Saving Facts for " + AddedPersons.Count() + " ancestors");
 
                 foreach (var id in AddedPersons)
                 {
-                    var person = f.Person.First(w => w.Id == id);
-                    FTMTools.SaveFact(f, 14, rootPerson.FamilyName, person.Id);
+                    var person = _context.Person.First(w => w.Id == id);
+                    FTMTools.SaveFact(_context, 14, rootPerson.FamilyName, person.Id);
                 }
 
             }
 
-            f.SaveChanges();
-            Console.WriteLine("finished: " + AddedPersons.Count);
+            _context.SaveChanges();
+            _consoleWrapper.WriteLine("Finished ");
         }
 
-        private static void LookupDescendants(FTMakerContext f, int testPersonId)
+        private void LookupDescendants(int testPersonId)
         {
 
-            var parentalRelationship = f.Relationship.Where(w => w.Person1Id == testPersonId
+            var parentalRelationship = _context.Relationship.Where(w => w.Person1Id == testPersonId
                                            || w.Person2Id == testPersonId).ToList();
 
             //is this guy part of any parental relationships
@@ -72,26 +74,26 @@ namespace FTMContext
                     //ADD SPOUSE
                     if (!AddedPersons.Contains(spouseId.Value))
                     {
-                        var p = f.Person.FirstOrDefault(w => w.Id == spouseId);
+                        var p = _context.Person.FirstOrDefault(w => w.Id == spouseId);
                         AddedPersons.Add(p.Id);
-                        Debug.WriteLine(p.Id + " " + p.FullName);
+                       // _consoleWrapper.WriteLine(p.Id + " " + p.FullName);
                     }
                 }
 
 
 
                 var relationshipId = pr.Id;
-                var otherChildren = f.ChildRelationship.Where(w => w.RelationshipId == relationshipId).ToList();
+                var otherChildren = _context.ChildRelationship.Where(w => w.RelationshipId == relationshipId).ToList();
 
                 foreach (var child in otherChildren)
                 {
                     if (!AddedPersons.Contains(child.PersonId))
                     {
                         AddedPersons.Add(child.PersonId);
-                        var cPerson = f.Person.FirstOrDefault(w => w.Id == child.PersonId);
+                        var cPerson = _context.Person.FirstOrDefault(w => w.Id == child.PersonId);
 
-                        Debug.WriteLine(child.PersonId + " " + cPerson.FullName);
-                        LookupDescendants(f, child.PersonId);
+                       // _consoleWrapper.WriteLine(child.PersonId + " " + cPerson.FullName);
+                        LookupDescendants(child.PersonId);
                     }
 
 
@@ -100,41 +102,36 @@ namespace FTMContext
             }
         }
 
-        private static void LookupAncestors(FTMakerContext f, int testPersonId)
+        private void LookupAncestors(int testPersonId)
         {
-            var p = f.Person.FirstOrDefault(w => w.Id == testPersonId);
+            var p = _context.Person.FirstOrDefault(w => w.Id == testPersonId);
 
             if (!AddedPersons.Contains(p.Id))
             {
                 AddedPersons.Add(p.Id);
 
-                Debug.WriteLine(p.Id + " " + p.FullName);
+             //   _consoleWrapper.WriteLine(p.Id + " " + p.FullName);
             }
-            //8439 William Wall Junior
-
-            if (p.Id == 8439)
-            {
-                Debug.WriteLine("");
-            }
+          
             //child relationship joins a person to a relationship i.e. their parents relationship
-            var crs = f.ChildRelationship.Where(w => w.PersonId == testPersonId).ToList();
+            var crs = _context.ChildRelationship.Where(w => w.PersonId == testPersonId).ToList();
 
-            LookupDescendants(f, testPersonId);
+            LookupDescendants(testPersonId);
 
             foreach (var c in crs)
             {
 
-                var rels = f.Relationship.Where(w => w.Id == c.RelationshipId).ToList();
+                var rels = _context.Relationship.Where(w => w.Id == c.RelationshipId).ToList();
 
                 foreach (var r in rels)
                 {
                     var p1 = r.Person1Id;
                     if (p1 != null)
-                        LookupAncestors(f, p1.Value);
+                        LookupAncestors(p1.Value);
 
                     var p2 = r.Person2Id;
                     if (p2 != null)
-                        LookupAncestors(f, p2.Value);
+                        LookupAncestors(p2.Value);
                 }
             }
         }
