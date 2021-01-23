@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Web.Http;
 
 namespace FTMServices
@@ -19,6 +20,16 @@ namespace FTMServices
                 routeTemplate: "api/{controller}/{id}",
                 defaults: new { id = RouteParameter.Optional }
             );
+
+            Global.LogMessage = Requestlog.PostToClient;
+            config.Formatters.JsonFormatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("text/html"));
+
         }
+    }
+
+    public class Global
+    {
+        public delegate void DelLogMessage(string data);
+        public static DelLogMessage LogMessage;
     }
 }

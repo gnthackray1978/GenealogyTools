@@ -2,13 +2,34 @@
 <html>
 <head>
     <title>Simple Markers</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
     <script src="./Scripts/data.js"></script>
     <script src="./Scripts/app.js"></script>
     <script src="./Scripts/jquery-3.3.1.min.js"></script>
+    <script src="./Scripts/jquery.signalR-2.4.1.js"></script>
 
     <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
 
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC4xE7VpfxqbdKcH19lze4LDxHX4e5nqLU&callback=initMap&libraries=&v=weekly" defer></script>
+
+    <script src="/signalr/hubs"></script>
+
+    <script type="text/javascript">
+        $(function () {
+
+            var chat = $.connection.requestlog;
+            $.connection.hub.start().done(function () {
+
+            });
+            chat.client.postToClient = function (data) {
+                $('#discussion').append(data + '<br />');
+            };
+        });
+    </script>
 
     <script>
         var p = new PlaceObj();
@@ -17,13 +38,71 @@
     </script>
 </head>
 <body>
-    <button onclick="p.callService();">callService</button>
-    <button onclick="p.postService();">postService</button>
-    <button onclick="p.countOfUnknownLocations();">Get Count of Unknown Locations</button>
+
 
     <div id="map"></div>
-    <div id="count"></div>
-    <div id="progress"></div>
-    <div id="output"></div>
+    
+    
+    
+  
+    <div class="container-fluid">
+        <h2>FTM Data Manager</h2>
+        <br>
+        <div class="row">
+            <div class="col"><a href="#Foo" onclick="p.backupAndDecryptFTMDB();">Backup and decrypt FTM DB</a></div>
+        </div>
+        <br>
+        <div class="row">
+            <div class="col">Place Cache Operations</div>
+        </div>
+        <br>
+
+        <div class="row">
+            <div class="col"><a href="#Foo" onclick="p.addResetMissingPlaces();">Add and Reset Missing Places in FTMPlaceCache</a></div>
+            <div class="col"><a href="#Foo" onclick="p.getUnEncodedLocationsFromServer();">GeoCode Location entries </a><div id="geocodecount" style="display:inline">0</div></div>
+        </div>
+        <br>
+        <div class="row">
+            <div class="col"><a href="#Foo" onclick="p.countOfUnknownLocations();">Update count of locations that have not been GEOCoded - </a><div id="count" style="display:inline">0</div></div>
+            <div class="col"><a href="#Foo" onclick="p.updatePlaceMetadata();">Update FTM Cache MetaData</a></div>
+        </div>
+
+        <br>
+        <div class="row">
+            <div class="col">Add Facts to FTM DB</div>
+        </div>
+        <br>
+        <div class="row">
+            <div class="col"><a href="#Foo" onclick="p.setOriginPerson();">Set Origin Person</a></div>
+            <div class="col"><a href="#Foo" onclick="p.setDateLocPop();">Set Date and Location facts. Populate FTM person View</a></div>
+        </div>
+        <br>
+        <div class="row">
+            <div class="col">Create data views</div>
+        </div>
+        <br>
+        <div class="row">
+            <div class="col"><a href="#Foo" onclick="p.createDupeView();">Populate Dupe Entry View</a></div>
+             
+        </div>
+
+        <br>
+        <div class="row">
+            <div class="col">Console</div>
+        </div>
+
+        <div class="row">
+            <div class="col"><ul id="discussion"  style="color: green; background-color: black; font-weight:600"></ul></div>
+        </div>
+
+        <div class="row">
+            <div id="output"></div>
+        </div>
+        <div class="row">
+            <div id="progress"></div>
+        </div>
+
+    </div>
+
 </body>
 </html>
