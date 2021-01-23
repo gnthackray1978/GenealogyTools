@@ -2,10 +2,21 @@
 
 namespace ConsoleTools
 {
+    public interface IConsoleWrapper {
+        void WriteLine(string line);
+        void ClearCurrentConsoleLine();
+        void ProgressSearch(double counter, double total, string message, string tailMessage = "");
+        void ProgressUpdate(double counter, double total, string message, string tailMessage = "");
+        void StatusReport(string message, bool forceNewLine, bool pause = false);
+    }
 
-    public class ConsoleWrapper
+    public class ConsoleWrapper : IConsoleWrapper
     {
-        public static void ClearCurrentConsoleLine()
+        public void WriteLine(string line) {
+            Console.WriteLine(line);
+        }
+
+        public void ClearCurrentConsoleLine()
         {
             int currentLineCursor = Console.CursorTop;
             Console.SetCursorPosition(0, Console.CursorTop);
@@ -13,7 +24,7 @@ namespace ConsoleTools
             Console.SetCursorPosition(0, currentLineCursor);
         }
 
-        public static void ProgressSearch(double counter, double total, string message, string tailMessage = "")
+        public void ProgressSearch(double counter, double total, string message, string tailMessage = "")
         {
             double percentage = 0.0;
 
@@ -33,7 +44,7 @@ namespace ConsoleTools
 
         }
 
-        public static void ProgressUpdate(double counter, double total, string message, string tailMessage = "")
+        public void ProgressUpdate(double counter, double total, string message, string tailMessage = "")
         {
             double percentage = 0.0;
 
@@ -56,7 +67,7 @@ namespace ConsoleTools
 
         }
 
-        public static void StatusReport(string message, bool forceNewLine, bool pause = false)
+        public void StatusReport(string message, bool forceNewLine, bool pause = false)
         {
             //   Console.WriteLine("");
             if (forceNewLine)
@@ -73,5 +84,7 @@ namespace ConsoleTools
  
 
     }
+
+
 
 }
