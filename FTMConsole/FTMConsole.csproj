@@ -159,6 +159,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ConsoleTools\ConsoleTools.csproj">
+      <Project>{3cd9e96e-f4e2-4484-afa1-7a51ec71a93f}</Project>
+      <Name>ConsoleTools</Name>
+    </ProjectReference>
     <ProjectReference Include="..\FTMContext\FTMContext.csproj">
       <Project>{747cfd57-7dce-416c-912f-dc6b65c25887}</Project>
       <Name>FTMContext</Name>
