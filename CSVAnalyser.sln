@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28010.2041
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30907.101
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LincsWillScraper", "LincsWillScraper\LincsWillScraper.csproj", "{47729E84-B15F-4A93-89A6-24C2B2FDDF74}"
 EndProject
@@ -27,20 +27,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DatasetCreator", "DatasetCr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleTools", "ConsoleTools\ConsoleTools.csproj", "{3CD9E96E-F4E2-4484-AFA1-7A51EC71A93F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeocodingAPIHandler", "GeocodingAPIHandler\GeocodingAPIHandler.csproj", "{3B12C513-954B-4AA0-A085-15B529D63F28}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FTMServices", "FTMServices\FTMServices.csproj", "{95554D0F-0584-4A36-8454-068FE1540893}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FTMContext", "FTMContext\FTMContext.csproj", "{747CFD57-7DCE-416C-912F-DC6B65C25887}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FTMConsole", "FTMConsole\FTMConsole.csproj", "{D22C310B-D36D-4D61-A19D-ADA416D367FA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureConsole", "AzureConsole\AzureConsole.csproj", "{D6BEDA9A-BA0E-4A4E-A79E-04FB7B6ACA2E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AzureConsole", "AzureConsole\AzureConsole.csproj", "{D6BEDA9A-BA0E-4A4E-A79E-04FB7B6ACA2E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FTMServices4", "FTMServices4\FTMServices4.csproj", "{95778526-ECA7-4C38-A6AD-2BBC69DD7823}"
 EndProject
 Global
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -94,14 +89,6 @@ Global
 		{3CD9E96E-F4E2-4484-AFA1-7A51EC71A93F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3CD9E96E-F4E2-4484-AFA1-7A51EC71A93F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3CD9E96E-F4E2-4484-AFA1-7A51EC71A93F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3B12C513-954B-4AA0-A085-15B529D63F28}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3B12C513-954B-4AA0-A085-15B529D63F28}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3B12C513-954B-4AA0-A085-15B529D63F28}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3B12C513-954B-4AA0-A085-15B529D63F28}.Release|Any CPU.Build.0 = Release|Any CPU
-		{95554D0F-0584-4A36-8454-068FE1540893}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{95554D0F-0584-4A36-8454-068FE1540893}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{95554D0F-0584-4A36-8454-068FE1540893}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{95554D0F-0584-4A36-8454-068FE1540893}.Release|Any CPU.Build.0 = Release|Any CPU
 		{747CFD57-7DCE-416C-912F-DC6B65C25887}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{747CFD57-7DCE-416C-912F-DC6B65C25887}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{747CFD57-7DCE-416C-912F-DC6B65C25887}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -114,11 +101,18 @@ Global
 		{D6BEDA9A-BA0E-4A4E-A79E-04FB7B6ACA2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D6BEDA9A-BA0E-4A4E-A79E-04FB7B6ACA2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D6BEDA9A-BA0E-4A4E-A79E-04FB7B6ACA2E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{95778526-ECA7-4C38-A6AD-2BBC69DD7823}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95778526-ECA7-4C38-A6AD-2BBC69DD7823}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95778526-ECA7-4C38-A6AD-2BBC69DD7823}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95778526-ECA7-4C38-A6AD-2BBC69DD7823}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DC910791-ECE4-47E6-BC3F-72F91596FEEF}
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
 	EndGlobalSection
 EndGlobal

@@ -5,6 +5,28 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="MyFamily.Shared.dll" />
+    <None Remove="SQLite.Interop.dll" />
+    <None Remove="System.Data.SQLite.dll" />
+    <None Remove="System.Data.SQLite.Linq.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="MyFamily.Shared.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SQLite.Interop.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="System.Data.SQLite.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="System.Data.SQLite.Linq.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" version="1.1.1" />
     <PackageReference Include="Microsoft.Bcl.HashCode" version="1.1.0" />
     <PackageReference Include="Microsoft.CSharp" version="4.7.0" />
@@ -16,10 +38,13 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Analyzers" version="3.1.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" version="3.1.10" developmentDependency="true" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" version="3.1.10" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" version="3.1.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" version="3.1.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" version="3.1.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" version="3.1.10" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" version="3.1.10" developmentDependency="true" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" version="3.1.0" developmentDependency="true">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" version="3.1.10" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" version="3.1.10" />
     <PackageReference Include="Microsoft.Extensions.Configuration" version="3.1.10" />
@@ -71,13 +96,13 @@
       <HintPath>Microsoft.Practices.EnterpriseLibrary.Caching.dll</HintPath>
     </Reference>
     <Reference Include="MyFamily.Shared">
-      <HintPath>lib\MyFamily.Shared.dll</HintPath>
+      <HintPath>MyFamily.Shared.dll</HintPath>
     </Reference>
     <Reference Include="System.Data.SQLite">
-      <HintPath>..\..\..\Visual Studio 2017\Projects\FTM_Decompiled\ftmframework\System.Data.SQLite.dll</HintPath>
+      <HintPath>System.Data.SQLite.dll</HintPath>
     </Reference>
     <Reference Include="System.Data.SQLite.Linq">
-      <HintPath>..\..\..\Visual Studio 2017\Projects\FTM_Decompiled\FTM_Decompiled\System.Data.SQLite.Linq.dll</HintPath>
+      <HintPath>System.Data.SQLite.Linq.dll</HintPath>
     </Reference>
   </ItemGroup>
 
