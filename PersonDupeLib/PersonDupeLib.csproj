@@ -1,15 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="3.1.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="5.0.2" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GenDBContext\GenDBContext.csproj" />
+    <ProjectReference Include="..\ConsoleTools2\ConsoleTools2.csproj" />
+    <ProjectReference Include="..\GenDBContextNET\GenDBContextNET.csproj" />
+    <ProjectReference Include="..\PlaceLibNet\PlaceLibNet.csproj" />
   </ItemGroup>
 
 </Project>
