@@ -9,6 +9,11 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace FTMServices4.Controllers
 {
+    public class Result
+    { 
+        public IEnumerable<PlaceLookup> Results { get; set; }
+    }
+
     [ApiController]
     [Route("[controller]")]
     public class GeoCodeController : ControllerBase
@@ -23,19 +28,26 @@ namespace FTMServices4.Controllers
 
 
         // GET api/values
-        public IEnumerable<PlaceLookup> Get()
+        [HttpGet]
+        public Result Get(string infoType)
         {
             var context = FTMakerCacheContext.CreateCacheDB();
 
-            return FTMGeoCoding.GetUnknownPlaces(context, new OutputHandler(_hubContext)).Take(75);
+            var result = new Result()
+            {
+                Results = FTMGeoCoding.GetUnknownPlaces(context, new OutputHandler(_hubContext)).Take(75)
+            };
+
+            return result;
         }
         // POST api/values
-        public void Post([FromBody]PlaceLookup value)
+        [HttpPost]
+        public void Post(PlaceLookup value)
         {
             //Debug.WriteLine("recieved: " + value.PlaceId + " " + value.results);
             var outputHandler = new OutputHandler(_hubContext);
             var cacheDB = FTMakerCacheContext.CreateCacheDB();
-            cacheDB.SetPlaceGeoData(value.PlaceId, value.results);
+            cacheDB.SetPlaceGeoData(value.placeid, value.results);
         }
 
     }

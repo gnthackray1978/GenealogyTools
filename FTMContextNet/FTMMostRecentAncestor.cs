@@ -10,13 +10,17 @@ namespace FTMContext
     public class FTMMostRecentAncestor
     {
         private FTMakerContext _context;
+        private FTMakerCacheContext _cacheContext;
         private IConsoleWrapper _consoleWrapper;
 
         public List<int> AddedPersons = new List<int>();
 
-        public FTMMostRecentAncestor(FTMakerContext context, IConsoleWrapper consoleWrapper) {
+        public FTMMostRecentAncestor(FTMakerContext context,
+            FTMakerCacheContext cacheContext,
+            IConsoleWrapper consoleWrapper) {
             _consoleWrapper = consoleWrapper;
             _context = context;
+            _cacheContext = cacheContext;
         }
 
         
@@ -29,26 +33,43 @@ namespace FTMContext
 
 
             var rootPeople = _context.Person.Where(w => w.FamilyName.StartsWith("_"));
+            
+            int idx = _cacheContext.FTMPersonOrigins.Count()+1;
 
             foreach (var rootPerson in rootPeople)
             {
                 //var rootPerson = rootPeople.First();
-                _consoleWrapper.WriteLine("Assigning ancestors for : " + rootPerson.FamilyName);
+              //  _consoleWrapper.WriteLine("Assigning ancestors for : " + rootPerson.FamilyName);
 
                 AddedPersons = new List<int>();
 
                 LookupAncestors(rootPerson.Id);
 
-                _consoleWrapper.WriteLine("Saving Facts for " + AddedPersons.Count() + " ancestors");
+                _consoleWrapper.WriteCounter("Saving Facts for "+ rootPerson.FamilyName + " " + AddedPersons.Count() + " ancestors");
+                
+                //FTMPERSONORIGIN shoule be empty!
+              
 
                 foreach (var id in AddedPersons)
                 {
                     var person = _context.Person.First(w => w.Id == id);
-                    FTMTools.SaveFact(_context, 14, rootPerson.FamilyName, person.Id);
+                   //  FTMTools.SaveFact(_context, 14, rootPerson.FamilyName, person.Id);
+                    
+                    _cacheContext.FTMPersonOrigins.Add(new FTMPersonOrigin()
+                    {
+                        Id = idx,
+                        PersonId = person.Id,
+                        Origin =  rootPerson.FamilyName
+                    });
+
+                    idx++;
                 }
 
-            }
 
+                _cacheContext.SaveChanges();
+
+            }
+           
             _context.SaveChanges();
             _consoleWrapper.WriteLine("Finished ");
         }

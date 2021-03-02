@@ -111,6 +111,24 @@ namespace FTMContext
             return null;
         }
 
+        public static PersonDataObj GetFactFromViewEntry(int BirthFrom, int BirthTo, string Origin, string LinkedLocations)
+        {
+            var returnObj = new PersonDataObj
+            {
+                BirthYearFrom = BirthFrom, BirthYearTo = BirthTo, Origin = Origin
+            };
+
+
+            var countyListPart = LinkedLocations.Trim();
+
+            if (countyListPart.Contains(","))
+                returnObj.Counties.AddRange(countyListPart.Split(','));
+            else
+                returnObj.Counties.Add(countyListPart);
+
+            return returnObj;
+        }
+
         public static void SaveState(FTMakerContext f)
         {
             var ef = f.SyncState.FirstOrDefault();
@@ -173,7 +191,6 @@ namespace FTMContext
             var existingFacts = f.Fact.Where(w => w.FactTypeId == factTypeId && w.LinkId == personId);
             // write regex to get year
 
-
             if (existingFacts.Count() > 0)
             {
 
@@ -209,9 +226,6 @@ namespace FTMContext
 
                 f.Fact.Add(fact);
             }
-
-
-
         }
 
         public static void TestConnections() {

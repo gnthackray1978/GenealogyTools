@@ -114,20 +114,20 @@ namespace FTMContext
         /// this will have all facts(origin person,location,birth range etc) filled out. 
         /// </summary>      
         public void PopulateDupeEntries() {
-           
-            
 
-            var facts =  _sourceContext.Fact.Where(w => w.FactTypeId == 14 || w.FactTypeId == 90).ToList();
 
-          
-            var comparisonPersons = _sourceContext.Person.Where(w=> !string.IsNullOrEmpty(w.GivenName)
-                    && !string.IsNullOrEmpty(w.FamilyName))
+
+            //  var facts =  _sourceContext.Fact.Where(w => w.FactTypeId == 14 || w.FactTypeId == 90).ToList();
+            //GetFactFromViewEntry
+
+              var comparisonPersons = _cacheContext.FTMPersonView.Where(w=> !string.IsNullOrEmpty(w.FirstName)
+                                                                   && !string.IsNullOrEmpty(w.Surname))
                         .Select(s => new PersonDupeSearchSubset() {
-                        Id = s.Id,
-                        FamilyName = MakeKey(s.FamilyName),
-                        GivenName = MakeKey(s.GivenName),
-                        Fact = FTMTools.GetFact(facts, s.Id)
-                }).ToList();
+                        Id = s.PersonId,
+                        FamilyName = MakeKey(s.FirstName),
+                        GivenName = MakeKey(s.Surname),
+                        Fact = FTMTools.GetFactFromViewEntry(s.BirthFrom,s.BirthTo,s.Origin,s.LinkedLocations)
+                        }).ToList();
 
 
             _consoleWrapper.WriteLine("Records to search: " + comparisonPersons.Count());
@@ -136,7 +136,7 @@ namespace FTMContext
             foreach (var cp in comparisonPersons) {
 
                 if (idx % 1000 == 0)
-                    _consoleWrapper.WriteLine(idx.ToString());
+                    _consoleWrapper.WriteCounter(idx + " of " + comparisonPersons.Count());
 
                // var cpFact = FTMTools.GetFact(f, cp.Id);
 
@@ -217,7 +217,9 @@ namespace FTMContext
 
                 foreach (var p in mg.Persons)
                 {
-                    var cpFact = FTMTools.GetFact(facts, p);
+                    var person = comparisonPersons.First(x => x.Id == p);
+
+                    var cpFact = person.Fact;
 
                     if (cpFact.BirthYearFrom > latestTree)
                         latestTree = cpFact.BirthYearFrom;
@@ -244,12 +246,14 @@ namespace FTMContext
             var dupeId = _cacheContext.DupeEntries.Count() +1;
 
             foreach (var group in MatchGroups.GroupBy(g => g.IncludedTrees)) {
-                _consoleWrapper.WriteLine(group.Key);
+                _consoleWrapper.WriteCounter(group.Key);
 
                 var p = group.OrderByDescending(o => o.LatestTree).First();
                 
                 foreach (var person in p.Persons) {
-                    var dupeEntry = _cacheContext.CreateNewDupeEntry(dupeId, _sourceContext.Person, facts, person, group.Key);
+
+                    var dupeEntry = _cacheContext.CreateNewDupeEntry(dupeId,
+                        _cacheContext.FTMPersonView.First(f => f.PersonId == person), person, group.Key);
 
                     _cacheContext.DupeEntries.Add(dupeEntry);
                     dupeId++;

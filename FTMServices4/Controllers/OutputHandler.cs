@@ -43,6 +43,9 @@ namespace FTMServices4.Controllers
            
         }
 
-
+        public void WriteCounter(string message)
+        {
+            _hubContext.Clients.All.SendAsync("Update", message);
+        }
     }
 }

@@ -2,7 +2,10 @@
 
 namespace ConsoleTools
 {
-    public interface IConsoleWrapper {
+    public interface IConsoleWrapper
+    {
+
+        void WriteCounter(string message);
         void WriteLine(string line);
         void ClearCurrentConsoleLine();
         void ProgressSearch(double counter, double total, string message, string tailMessage = "");
@@ -81,8 +84,11 @@ namespace ConsoleTools
                 Console.ReadKey();
             }
         }
- 
 
+        public void WriteCounter(string message)
+        {
+            Console.WriteLine(message);
+        }
     }
 
 

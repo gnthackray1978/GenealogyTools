@@ -97,20 +97,34 @@ namespace FTMServices4.Controllers
 
                     break;
 
+                case "cleardata":
+
+                    outputHandler.WriteLine("Clearing existing data");
+
+                    cacheDB.DeleteTempData();
+
+                    outputHandler.WriteLine("Finished Deleting data");
+
+                    break;
+
                 case "setOriginPerson":
 
-                    var ftmMostRecentAncestor = new FTMMostRecentAncestor(sourceDB, outputHandler);
+                    var ftmMostRecentAncestor = new FTMMostRecentAncestor(sourceDB, cacheDB, outputHandler);
 
                     ftmMostRecentAncestor.MarkMostRecentAncestor();
 
-                    outputHandler.WriteLine("Finished set");
+                    outputHandler.WriteLine("Finished Setting Origin Person");
 
                     break;
+
+
                 case "setDateLocPop":
 
-                    var ftmDupe = new FTMDupeDataMethods(sourceDB, cacheDB, outputHandler);
+                    var ftmDupe = new FTMViewCreator(sourceDB, cacheDB, outputHandler);
 
                     ftmDupe.Run();
+
+                    outputHandler.WriteLine("Finished Setting Date Loc Pop");
 
                     break;
                 case "createDupeView":
@@ -118,9 +132,17 @@ namespace FTMServices4.Controllers
                     var pg = new PersonGrouper(sourceDB, cacheDB, outputHandler);
 
                     pg.PopulateDupeEntries();
-                    break;
 
-                    //
+                    outputHandler.WriteLine("Finished Creating Dupe View");
+                    break;
+                case "createTreeRecord":
+                    FTMTreeRecordCreator ftmTreeRecordCreator = new FTMTreeRecordCreator(sourceDB, cacheDB, outputHandler);
+
+                    ftmTreeRecordCreator.Create();
+
+                    outputHandler.WriteLine("Finished Creating Tree Record View");
+
+                    break;
 
             }
 

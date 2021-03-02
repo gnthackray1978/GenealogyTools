@@ -43,6 +43,18 @@
                 $('#discussion').append(user + '<br />');
             });
 
+            connection.on("Update", function (user, message) {
+
+                var listItem = $("ul").first();
+
+                if (listItem) {
+                   listItem.html(user + '<br />');
+                } else {
+                    $('#header').append(user + '<br />');
+                }
+                
+            });
+
             connection.onclose(start);
 
             // Start the connection.
@@ -71,10 +83,6 @@
         <h2>FTM Data Manager</h2>
         <br>
         <div class="row">
-            <div class="col"><a href="#Foo" onclick="p.backupAndDecryptFTMDB();">Backup and decrypt FTM DB</a></div>
-        </div>
-        <br>
-        <div class="row">
             <div class="col">Place Cache Operations</div>
         </div>
         <br>
@@ -95,17 +103,24 @@
         </div>
         <br>
         <div class="row">
-            <div class="col"><a href="#Foo" onclick="p.setOriginPerson();">Set Origin Person</a></div>
-            <div class="col"><a href="#Foo" onclick="p.setDateLocPop();">Set Date and Location facts. Populate FTM person View</a></div>
+            <div class="col"><a href="#Foo" onclick="p.clearData();">1.Clear Data</a></div>
+            <div class="col"><a href="#Foo" onclick="p.setOriginPerson();">2.Cache Person Tree Info</a></div>
         </div>
         <br>
+
         <div class="row">
             <div class="col">Create data views</div>
         </div>
         <br>
         <div class="row">
-            <div class="col"><a href="#Foo" onclick="p.createDupeView();">Populate Dupe Entry View</a></div>
-             
+            <div class="col"><a href="#Foo" onclick="p.setDateLocPop();">1. Create FTM person View</a></div>
+            <div class="col"><a href="#Foo" onclick="p.createDupeView();">2. Create Dupe Entry View</a></div>
+
+        </div>
+        <br>
+        <div class="row">
+            <div class="col"><a href="#Foo" onclick="p.createTreeRecord();">3. Create Tree Record View</a></div>
+            <div class="col"></div>
         </div>
 
         <br>
@@ -113,8 +128,12 @@
             <div class="col">Console</div>
         </div>
 
-        <div class="row">
-            <div class="col"><ul id="discussion"  style="color: green; background-color: black; font-weight:600"></ul></div>
+        <div class="row" style="background-color: black; margin-left: 1px; margin-right: 1px;">
+            <div class="col"><ul id="header" style="color: green; background-color: black; font-weight: 600; padding-left: 1px"></ul></div>
+        </div>
+
+        <div class="row" style="background-color: black; margin-left: 1px; margin-right: 1px;">
+            <div class="col"><ul id="discussion" style="color: green; background-color: black;  font-weight: 600; padding-left: 1px"></ul></div>
         </div>
 
         <div class="row">

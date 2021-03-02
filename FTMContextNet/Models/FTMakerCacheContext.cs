@@ -4,6 +4,7 @@ using System.Data.SQLite;
 using System.Diagnostics;
 using System.Linq;
 using FTMContext.lib;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
 namespace FTMContext.Models
@@ -31,6 +32,8 @@ namespace FTMContext.Models
 
         public string Origin { get; set; }
         public int PersonId { get; set; }
+
+        public string LinkedLocations { get; set; }
     }
 
     public partial class DupeEntry
@@ -61,6 +64,24 @@ namespace FTMContext.Models
 
     }
 
+
+    public partial class TreeRecord
+    {
+        public int Id { get; set; }
+        public int PersonCount { get; set; }
+        public string Origin { get; set; }
+        public string Name { get; set; }
+        public int CM { get; set; }
+    
+    }
+
+    public partial class FTMPersonOrigin
+    {
+        public int Id { get; set; }
+        public int PersonId { get; set; }
+        public string Origin { get; set; }
+        
+    }
 
     public partial class FTMakerCacheContext : DbContext
     {
@@ -142,43 +163,72 @@ namespace FTMContext.Models
 
         }
 
-        public DupeEntry CreateNewDupeEntry(int dupeId, DbSet<Person> Person, List<Fact> facts, int personId, string ident)
+        public DupeEntry CreateNewDupeEntry(int dupeId, FTMPersonView person, int personId, string ident)
         {
 
-            var dupeEntry = new DupeEntry();
-
-            dupeEntry.Id = dupeId;
-
-            var cpFact = FTMTools.GetFact(facts, personId);
-
-            var person = Person.FirstOrDefault(f1 => f1.Id == personId);
-
-            var birthString = "";
-
-            if (cpFact.BirthYearFrom == cpFact.BirthYearTo)
-                birthString = cpFact.BirthYearFrom.ToString();
-            else
-                birthString = cpFact.BirthYearFrom.ToString() + " - " + cpFact.BirthYearTo.ToString();
-
-            string result = cpFact.Origin + " , " + birthString + " , " + GoogleGeoCodingHelpers.FormatPlace(person.BirthPlace) + " , " + person.GivenName + " , " + person.FamilyName;
-
-            dupeEntry.Ident = ident;
-            dupeEntry.PersonId = personId;
-            dupeEntry.BirthYearFrom = cpFact.BirthYearFrom;
-            dupeEntry.BirthYearTo = cpFact.BirthYearTo;
-            dupeEntry.Origin = cpFact.Origin;
-            dupeEntry.Location = GoogleGeoCodingHelpers.FormatPlace(person.BirthPlace);
-            dupeEntry.ChristianName = person.GivenName;
-            dupeEntry.Surname = person.FamilyName;
+            var dupeEntry = new DupeEntry
+            {
+                Id = dupeId,
+                Ident = ident,
+                PersonId = personId,
+                BirthYearFrom = person.BirthFrom,
+                BirthYearTo = person.BirthTo,
+                Origin = person.Origin,
+                Location = GoogleGeoCodingHelpers.FormatPlace(person.BirthLocation),
+                ChristianName = person.FirstName,
+                Surname = person.Surname
+            };
 
             return dupeEntry;
         }
 
 
+        public virtual DbSet<FTMPersonOrigin> FTMPersonOrigins { get; set; }
+        public virtual DbSet<TreeRecord> TreeRecords { get; set; }
         public virtual DbSet<DupeEntry> DupeEntries { get; set; }
         public virtual DbSet<FTMPersonView> FTMPersonView { get; set; }
         public virtual DbSet<FTMPlaceCache> FTMPlaceCache { get; set; }
-     
+
+
+        public void DeleteTempData()
+        {
+          
+
+            using (var connection = this.GetCon())
+            {
+                var command = connection.CreateCommand();
+                command.CommandText = "DELETE FROM FTMPersonOrigins";
+
+
+                connection.Open();
+                command.ExecuteNonQuery();
+                connection.Close();
+
+                command.CommandText = "DELETE FROM DupeEntries";
+
+
+                connection.Open();
+                command.ExecuteNonQuery();
+                connection.Close();
+
+                command.CommandText = "DELETE FROM FTMPersonView";
+
+
+                connection.Open();
+                command.ExecuteNonQuery();
+                connection.Close();
+
+                command.CommandText = "DELETE FROM TreeRecord";
+
+
+                connection.Open();
+                command.ExecuteNonQuery();
+                connection.Close();
+            }
+
+        }
+
+
         private SQLiteConnection GetCon()
         {
 

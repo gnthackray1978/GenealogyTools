@@ -29,18 +29,7 @@ PlaceObj.prototype = {
         return true;
     },
     
-    backupAndDecryptFTMDB: function () { 
-
-        var Upload = {
-            Value: 'backupAndDecryptFTMDB'
-        };
-
-        $.post("./data", Upload,
-            function (data, status) {
-
-            });
-        return true;
-    },
+    
 
     addResetMissingPlaces: function () {
 
@@ -48,10 +37,14 @@ PlaceObj.prototype = {
             Value: 'addResetMissingPlaces'
         };
 
-        $.post("./data", Upload,
-            function (data, status) {
+        $.ajax({
+            type: "post",
+            url: "/data", // "/api/controllerName/methodName"
+            contentType: "application/json",
+            dataType: "json",
+            data: JSON.stringify(Upload)  //the parameter in method
 
-            });
+        });
         return true;
     },
 
@@ -79,10 +72,31 @@ PlaceObj.prototype = {
             Value: 'setOriginPerson'
         };
 
-        $.post("./data", Upload,
-            function (data, status) {
+        $.ajax({
+            type: "post",
+            url: "/data", // "/api/controllerName/methodName"
+            contentType: "application/json",
+            dataType: "json",
+            data: JSON.stringify(Upload)  //the parameter in method
 
-            });
+        });
+        return true;
+    },
+
+    clearData: function () {
+
+        var Upload = {
+            Value: 'cleardata'
+        };
+
+        $.ajax({
+            type: "post",
+            url: "/data",  
+            contentType: "application/json",
+            dataType: "json",
+            data: JSON.stringify(Upload)  
+
+        });
         return true;
     },
 
@@ -92,31 +106,64 @@ PlaceObj.prototype = {
             Value: 'setDateLocPop'
         };
 
-        $.post("./data", Upload,
-            function (data, status) {
+        $.ajax({
+            type: "post",
+            url: "/data", // "/api/controllerName/methodName"
+            contentType: "application/json",
+            dataType: "json",
+            data: JSON.stringify(Upload)  //the parameter in method
 
-            });
+        });
         return true;
     },
 
     createDupeView: function () {
 
         var Upload = {
-            Value: 'setDateLocPop'
+            Value: 'createDupeView'
         };
 
-        $.post("./data", Upload,
-            function (data, status) {
+        $.ajax({
+            type: "post",
+            url: "/data", // "/api/controllerName/methodName"
+            contentType: "application/json",
+            dataType: "json",
+            data: JSON.stringify(Upload)  //the parameter in method
 
-            });
+        });
         return true;
     },
 
-    saveGeoCodedLocationToServer: function (placeLookup) {
-        $.post("./geocode", placeLookup,
-            function (data, status) {
+    createTreeRecord: function () {
 
-            });
+        var Upload = {
+            Value: 'createTreeRecord'
+        };
+
+        $.ajax({
+            type: "post",
+            url: "/data", // "/api/controllerName/methodName"
+            contentType: "application/json",
+            dataType: "json",
+            data: JSON.stringify(Upload)  //the parameter in method
+
+        });
+        return true;
+    },
+
+
+    saveGeoCodedLocationToServer: function (placeLookup) {
+
+        $.ajax({
+            type: "post",
+            url: "./geocode", // "/api/controllerName/methodName"
+            contentType: "application/json",
+            dataType: "json",
+            data: JSON.stringify(placeLookup)  //the parameter in method
+
+        });
+
+         
 
     },
 
@@ -125,14 +172,35 @@ PlaceObj.prototype = {
         $('#discussion').append('GET geocode endpoint for unencoded places<br />');
         var sh = this;
 
-        $.ajax({
-            url: "./geocode", success: function (result) {
+        //$.ajax({
+        //    type: "get", //send it through get method
+        //    url: "./geocode/",
+        //    success: function (result) {
                
+        //        $('#discussion').append('GET geocode returned data<br />');
+        //        sh.data = result;
+        //        sh.start();
+        //    }
+        //});
+        
+
+        $.ajax({
+            type: "get", //send it through get method
+            url: "./geocode/",
+            data: {
+                infoType: ''
+            },
+            success: function (result) {
                 $('#discussion').append('GET geocode returned data<br />');
-                sh.data = result;
+                sh.data = result.results;
                 sh.start();
+            },
+            error: function (xhr) {
+                //Do Something to handle error
             }
         });
+
+
 
         return true;
     },
@@ -149,13 +217,13 @@ PlaceObj.prototype = {
             if (!d)
                 return;
 
-            if (d.PlaceFormatted)
-                console.log(d.PlaceFormatted);
+            if (d.placeformatted)
+                console.log(d.placeformatted);
 
             document.getElementById("progress").innerHTML = idx;
 
             geocoder.geocode({
-                address: d.PlaceFormatted
+                address: d.placeformatted
             }, (results, status) => {
 
                 sh.count++;
@@ -172,18 +240,18 @@ PlaceObj.prototype = {
                 else {
 
                     //var placeLookup = {
-                    //    PlaceId: 0,
+                    //    placeid: 0,
                     //    Place: '',
-                    //    PlaceFormatted: '',
+                    //    placeformatted: '',
                     //    Output: ''
                     //};
 
                     var element = document.createElement("p");
 
                     var result = {
-                        PlaceId: d.PlaceId,
-                        Place : '',
-                        PlaceFormatted: d.PlaceFormatted,
+                        placeid: d.placeid,
+                        place : '',
+                        placeformatted: d.placeformatted,
                         results: JSON.stringify(results)
                     };
 

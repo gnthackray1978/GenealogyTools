@@ -112,7 +112,7 @@ namespace FTMContext
             var places = new List<PlaceLookup>();
 
                 places = context.FTMPlaceCache.Where(w => (w.JSONResult == null || w.JSONResult == "null"))
-                    .Select(s => new PlaceLookup() { PlaceId = s.FTMPlaceId, PlaceFormatted = s.FTMOrginalNameFormatted })
+                    .Select(s => new PlaceLookup() { placeid = s.FTMPlaceId, placeformatted = s.FTMOrginalNameFormatted })
                     .ToList();
 
             return places;
