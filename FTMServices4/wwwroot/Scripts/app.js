@@ -151,6 +151,23 @@ PlaceObj.prototype = {
         return true;
     },
 
+    azureimport: function () {
+
+        var Upload = {
+            Value: 'azureimport'
+        };
+
+        $.ajax({
+            type: "post",
+            url: "/data", // "/api/controllerName/methodName"
+            contentType: "application/json",
+            dataType: "json",
+            data: JSON.stringify(Upload)  //the parameter in method
+
+        });
+        return true;
+    },
+
 
     saveGeoCodedLocationToServer: function (placeLookup) {
 
