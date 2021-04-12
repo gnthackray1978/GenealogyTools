@@ -8,5 +8,7 @@
 
         public int? PersonCount { get; set; }
         public int? CM { get; set; }
+
+        public bool Located { get; set; }
     }
 }
