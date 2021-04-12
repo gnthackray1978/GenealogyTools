@@ -23,13 +23,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FTMServices4", "FTMServices
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FTMConsole2", "FTMConsole2\FTMConsole2.csproj", "{A8DE8C9F-5145-4515-80A5-D24C3543322D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlaceLibNet", "PlaceLibNet\PlaceLibNet.csproj", "{A1F38B3F-05C3-4797-8783-2A24DDE22726}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlaceLibNet", "PlaceLibNet\PlaceLibNet.csproj", "{A1F38B3F-05C3-4797-8783-2A24DDE22726}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenDBContextNET", "GenDBContextNET\GenDBContextNET.csproj", "{57790CA3-ECEB-4613-A108-6F932EFC0FF0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GenDBContextNET", "GenDBContextNET\GenDBContextNET.csproj", "{57790CA3-ECEB-4613-A108-6F932EFC0FF0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FTMContextNet", "FTMContextNet\FTMContextNet.csproj", "{B6824CDD-CD5F-446F-9D06-475358649D7D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FTMContextNet", "FTMContextNet\FTMContextNet.csproj", "{B6824CDD-CD5F-446F-9D06-475358649D7D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleTools2", "ConsoleTools2\ConsoleTools2.csproj", "{6198811D-572F-4DFC-88DE-2D0AA955CD6F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleTools2", "ConsoleTools2\ConsoleTools2.csproj", "{6198811D-572F-4DFC-88DE-2D0AA955CD6F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConfigHelper", "ConfigHelper\ConfigHelper.csproj", "{AD4614C4-0F64-4491-9502-ABF898AA4A41}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -93,6 +95,10 @@ Global
 		{6198811D-572F-4DFC-88DE-2D0AA955CD6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6198811D-572F-4DFC-88DE-2D0AA955CD6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6198811D-572F-4DFC-88DE-2D0AA955CD6F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AD4614C4-0F64-4491-9502-ABF898AA4A41}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD4614C4-0F64-4491-9502-ABF898AA4A41}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD4614C4-0F64-4491-9502-ABF898AA4A41}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD4614C4-0F64-4491-9502-ABF898AA4A41}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

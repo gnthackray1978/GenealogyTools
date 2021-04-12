@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AzureContext\AzureContext.csproj" />
     <ProjectReference Include="..\FTMContextNet\FTMContextNet.csproj" />
   </ItemGroup>
 
