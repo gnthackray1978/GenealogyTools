@@ -9,4 +9,11 @@ namespace AzureContext.Models
         public Guid? ParishId { get; set; }
         public string ParishDataString { get; set; }
     }
+
+    public partial class ParishTranscriptionDetails2
+    {
+        public int ParishTranscriptionId { get; set; }
+        public Guid? ParishId { get; set; }
+        public string ParishDataString { get; set; }
+    }
 }
