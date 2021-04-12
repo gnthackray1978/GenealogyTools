@@ -127,8 +127,14 @@ namespace FTMContext
                 var processDateReturnType = this._srcCache.ProcessDates(p.Id);
 
                 var processLocationReturnType = this._srcCache.GetAllLocationsForPerson(p.Id);
-                 
+
+                var parents = this._srcCache.GetParentIds(p.Id);
+
+
+
                 this._srcCache.originDictionary.TryGetValue(p.Id, out string origin);
+
+                
 
                 var fTMPersonView = new FTMPersonView() {
                     Id = idCounter,
@@ -146,7 +152,9 @@ namespace FTMContext
                     FirstName = p.GivenName,
                     Surname = p.FamilyName,
                     Origin = origin,
-                    LinkedLocations = processLocationReturnType.LocationString
+                    LinkedLocations = processLocationReturnType.LocationString,
+                    FatherId = parents[1],
+                    MotherId = parents[0]
                 };
 
                 _destinationContext.FTMPersonView.Add(fTMPersonView);

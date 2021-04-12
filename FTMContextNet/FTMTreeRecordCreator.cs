@@ -38,8 +38,8 @@ namespace FTMContext
             foreach (var family in _cacheContext.FTMPersonView.ToList().GroupBy(g => g.Origin))
             {
 
-                string familyName = family.First().Surname;
-
+                string familyName = family.First().Origin;
+                  
                 _consoleWrapper.WriteCounter("Adding Tree " + familyName + " " + family.Count() + " ancestors");
 
                 List<string> locationList = new List<string>();
@@ -76,13 +76,18 @@ namespace FTMContext
                     Int32.TryParse(m.Value, out cmVal);
                 }
 
+                re = new Regex(@"[fF]\d+");
+
+                m = re.Match(familyName);
+                 
                 _cacheContext.TreeRecords.Add(new TreeRecord()
                 {
                     Id = idx,
                     PersonCount = family.Count(),
                     Name = familyName,
                     Origin = originString,
-                    CM = cmVal
+                    CM = cmVal,
+                    Located = m.Success
                 });
 
                 idx++;
