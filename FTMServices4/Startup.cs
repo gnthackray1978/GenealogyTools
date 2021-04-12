@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ConfigHelper;
 using static FTMServices4.Program;
 
 namespace FTMServices4
@@ -26,6 +27,9 @@ namespace FTMServices4
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var msgConfigHelper = new MSGConfigHelper();
+
+            services.AddSingleton<IMSGConfigHelper>(msgConfigHelper);
 
             services.AddControllers();
             services.AddSignalR();
