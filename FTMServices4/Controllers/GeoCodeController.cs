@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using ConfigHelper;
 using Microsoft.AspNetCore.SignalR;
 
 namespace FTMServices4.Controllers
@@ -18,12 +19,13 @@ namespace FTMServices4.Controllers
     [Route("[controller]")]
     public class GeoCodeController : ControllerBase
     {
-
+        private readonly IMSGConfigHelper _iMSGConfigHelper;
         private readonly IHubContext<NotificationHub> _hubContext;
 
-        public GeoCodeController(IHubContext<NotificationHub> hubContext)
+        public GeoCodeController(IHubContext<NotificationHub> hubContext, IMSGConfigHelper iMSGConfigHelper)
         {
             _hubContext = hubContext;
+            _iMSGConfigHelper = iMSGConfigHelper;
         }
 
 
@@ -31,7 +33,7 @@ namespace FTMServices4.Controllers
         [HttpGet]
         public Result Get(string infoType)
         {
-            var context = FTMakerCacheContext.CreateCacheDB();
+            var context = FTMakerCacheContext.CreateCacheDB(_iMSGConfigHelper);
 
             var result = new Result()
             {
@@ -46,7 +48,7 @@ namespace FTMServices4.Controllers
         {
             //Debug.WriteLine("recieved: " + value.PlaceId + " " + value.results);
             var outputHandler = new OutputHandler(_hubContext);
-            var cacheDB = FTMakerCacheContext.CreateCacheDB();
+            var cacheDB = FTMakerCacheContext.CreateCacheDB(_iMSGConfigHelper);
             cacheDB.SetPlaceGeoData(value.placeid, value.results);
         }
 

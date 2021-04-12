@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using ConfigHelper;
 using Microsoft.AspNetCore.SignalR;
 
 namespace FTMServices4.Controllers
@@ -15,10 +16,12 @@ namespace FTMServices4.Controllers
     public class InfoController : ControllerBase
     {
         private readonly IHubContext<NotificationHub> _hubContext;
+        private readonly IMSGConfigHelper _iMSGConfigHelper;
 
-        public InfoController(IHubContext<NotificationHub> hubContext)
+        public InfoController(IHubContext<NotificationHub> hubContext, IMSGConfigHelper iMSGConfigHelper)
         {
             _hubContext = hubContext;
+            _iMSGConfigHelper = iMSGConfigHelper;
         }
 
         public Info Get(string infoType)
@@ -32,7 +35,7 @@ namespace FTMServices4.Controllers
             switch (infoType)
             {
                 case "unknown_places_count":
-                    using (var context = FTMakerCacheContext.CreateCacheDB())
+                    using (var context = FTMakerCacheContext.CreateCacheDB(_iMSGConfigHelper))
                     {
                         count = FTMGeoCoding.GetUnknownPlaces(context, new OutputHandler()).Count();
                     }

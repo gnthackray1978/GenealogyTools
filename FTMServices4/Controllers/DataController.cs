@@ -6,6 +6,8 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using AzureContext;
+using ConfigHelper;
 using Microsoft.AspNetCore.SignalR;
 
 namespace FTMServices4.Controllers
@@ -26,11 +28,15 @@ namespace FTMServices4.Controllers
     public class DataController : ControllerBase
     {
         private readonly IHubContext<NotificationHub> _hubContext;
+        private readonly IMSGConfigHelper _iMSGConfigHelper;
 
-        public DataController(IHubContext<NotificationHub> hubContext)
+        public DataController(IHubContext<NotificationHub> hubContext, IMSGConfigHelper iMSGConfigHelper)
         {
             _hubContext = hubContext;
+            _iMSGConfigHelper = iMSGConfigHelper;
         }
+
+        public object AzureDbImporter { get; private set; }
 
 
         // GET api/values
@@ -38,7 +44,7 @@ namespace FTMServices4.Controllers
         {
             var outputHandler = new OutputHandler(_hubContext);
 
-            var context = FTMakerCacheContext.CreateCacheDB();
+            var context = FTMakerCacheContext.CreateCacheDB(_iMSGConfigHelper);
 
             return FTMGeoCoding.GetUnknownPlaces(context, outputHandler).Take(75);
         }
@@ -55,8 +61,8 @@ namespace FTMServices4.Controllers
         {
             //Debug.WriteLine(upload.Value);
             var outputHandler = new OutputHandler(_hubContext);
-            var cacheDB = FTMakerCacheContext.CreateCacheDB();
-            var sourceDB = FTMakerContext.CreateSourceDB();
+            var cacheDB = FTMakerCacheContext.CreateCacheDB(_iMSGConfigHelper);
+            var sourceDB = FTMakerContext.CreateSourceDB(_iMSGConfigHelper);
 
             switch (upload.Value) {
                 case "backupAndDecryptFTMDB":
@@ -142,6 +148,13 @@ namespace FTMServices4.Controllers
 
                     outputHandler.WriteLine("Finished Creating Tree Record View");
 
+                    break;
+
+                case "azureimport":
+                    var az = new AzureDbImporter(outputHandler, _iMSGConfigHelper);
+                    outputHandler.WriteLine("Importing into azure DB");
+                    az.Import();
+                    outputHandler.WriteLine("Finished importing into azure DB");
                     break;
 
             }
