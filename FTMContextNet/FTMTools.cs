@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using ConfigHelper;
 
 namespace FTMContext
 {
@@ -229,9 +230,12 @@ namespace FTMContext
         }
 
         public static void TestConnections() {
-            var sourceContext = FTMakerContext.CreateSourceDB();
 
-            var destinationContext = FTMakerContext.CreateDestinationDB();
+            IMSGConfigHelper imsgConfigHelper = new MSGConfigHelper();
+
+            var sourceContext = FTMakerContext.CreateSourceDB(imsgConfigHelper);
+
+            var destinationContext = FTMakerContext.CreateDestinationDB(imsgConfigHelper);
 
             var p = sourceContext.Person.FirstOrDefault(n => n.FamilyName.Contains("Allen"));
 
@@ -246,9 +250,9 @@ namespace FTMContext
 
         public static void TestDestinationConnections()
         {
-         
+            IMSGConfigHelper imsgConfigHelper = new MSGConfigHelper();
 
-            var destinationContext = FTMakerContext.CreateDestinationDB();
+            var destinationContext = FTMakerContext.CreateDestinationDB(imsgConfigHelper);
                   
             var p2 = destinationContext.Person.FirstOrDefault(n => n.FamilyName.Contains("Allen"));
 
@@ -259,11 +263,14 @@ namespace FTMContext
 
         public static void ExtractFTMDB(FTMakerContext source, IConsoleWrapper consoleWrapper)
         {
+            IMSGConfigHelper imsgConfigHelper = new MSGConfigHelper();
+
+
             string path = Path.GetDirectoryName((new System.Uri(Assembly.GetExecutingAssembly().CodeBase)).LocalPath);
                         
-            File.Copy(Path.Combine(path, "blank.db"), FTMakerContext.DecryptedDBPath + FTMakerContext.DecryptedDBName,true);
+            File.Copy(Path.Combine(path, "blank.db"), imsgConfigHelper.DNA_Match_File_Path + imsgConfigHelper.DNA_Match_File_FileName, true);
             
-            FTMakerContext destination = FTMakerContext.CreateDestinationDB();
+            FTMakerContext destination = FTMakerContext.CreateDestinationDB(imsgConfigHelper);
 
             consoleWrapper.WriteLine("Decrypting FTM data from " + source.FileName + " to " + destination.FileName);
 

@@ -3,10 +3,10 @@ using PersonDupeLib;
 using PlaceLib;
 using System;
 using System.Collections.Generic;
-
+//
 namespace GenealogyTools
 {
-    class Program
+    class Program2
     {
         static void Main(string[] args)
         {

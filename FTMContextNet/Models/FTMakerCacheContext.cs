@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Diagnostics;
 using System.Linq;
+using ConfigHelper;
 using FTMContext.lib;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -31,7 +32,12 @@ namespace FTMContext.Models
         public double AltLong { get; set; }
 
         public string Origin { get; set; }
+
         public int PersonId { get; set; }
+
+        public int FatherId { get; set; }
+
+        public int MotherId { get; set; }
 
         public string LinkedLocations { get; set; }
     }
@@ -72,6 +78,8 @@ namespace FTMContext.Models
         public string Origin { get; set; }
         public string Name { get; set; }
         public int CM { get; set; }
+
+        public bool Located { get; set; }
     
     }
 
@@ -88,10 +96,10 @@ namespace FTMContext.Models
 
 
 
-        private ConfigObj _configObj { get; set; }
+        private IMSGConfigHelper _configObj { get; set; }
         private SQLiteConnection _sqlConnection { get; set; }
 
-        public FTMakerCacheContext(ConfigObj config)
+        public FTMakerCacheContext(IMSGConfigHelper config)
         {
             _configObj = config;
         }
@@ -126,16 +134,17 @@ namespace FTMContext.Models
                 results.Add(result);
         }
 
-        public static FTMakerCacheContext CreateCacheDB()
+        public static FTMakerCacheContext CreateCacheDB(IMSGConfigHelper imsgConfigHelper)
         {
-            var a = new FTMakerCacheContext(new ConfigObj
-            {
-                Path = @"C:\Users\george\Documents\Software MacKiev\Family Tree Maker\",
-                FileName = @"cacheData.db",
-                IsEncrypted = false
-            });
+            //var a = new FTMakerCacheContext(new ConfigObj
+            //{
+            //    Path = imsgConfigHelper.CacheData_Path,
+            //    FileName = imsgConfigHelper.CacheData_FileName,
+            //    IsEncrypted = imsgConfigHelper.CacheData_IsEncrypted
+            //});
 
-            return a;
+          
+            return new FTMakerCacheContext(imsgConfigHelper);
         }
 
     
@@ -218,7 +227,7 @@ namespace FTMContext.Models
                 command.ExecuteNonQuery();
                 connection.Close();
 
-                command.CommandText = "DELETE FROM TreeRecord";
+                command.CommandText = "DELETE FROM TreeRecords";
 
 
                 connection.Open();
@@ -235,25 +244,26 @@ namespace FTMContext.Models
             string cs = "";
 
 
-            string key = ConString.FTMConString;
+            //string key = ConString.FTMConString;
 
-            if (_configObj.IsEncrypted)
+            if (_configObj.CacheData_IsEncrypted)
             {
-                //cs = "data source=\"" + _configObj.Path + _configObj.FileName + "\";synchronous=Off;pooling=False;journal mode=Memory;foreign keys=True;"+ key + ";datetimekind=Utc;datetimeformat=UnixEpoch;failifmissing=False;read only=False;collate settings=\"en@colCaseFirst=upper\"";
-
-                cs = "data source=\"" + _configObj.Path + _configObj.FileName + "\";synchronous=Off;pooling=False;journal mode=Memory;foreign keys=True;" + key + ";datetimekind=Utc;datetimeformat=UnixEpoch;failifmissing=False;read only=False;collate settings=\"en@colCaseFirst=upper\"";
-                _sqlConnection = new System.Data.SQLite.SQLiteConnection(cs);
-
-                _sqlConnection.Flags |= SQLiteConnectionFlags.AllowNestedTransactions;
+                cs = "data source=\"" + _configObj.CacheData_Path 
+                                      + _configObj.CacheData_FileName 
+                                      + "\";synchronous=Off;pooling=False;journal mode=Memory;foreign keys=True;" 
+                                      + _configObj.FTMConString + ";datetimekind=Utc;datetimeformat=UnixEpoch;failifmissing=False;read only=False;collate settings=\"en@colCaseFirst=upper\"";
             }
             else
             {
-                //cs = "data source=\"" + _configObj.Path + _configObj.FileName + "\";synchronous=Off;pooling=False;journal mode=Memory;foreign keys=True;datetimekind=Utc;datetimeformat=UnixEpoch;failifmissing=False;read only=False;collate settings=\"en@colCaseFirst=upper\"";
-                cs = "data source=\"" + _configObj.Path + _configObj.FileName + "\";pooling=False;journal mode=Memory;foreign keys=True;datetimekind=Utc;datetimeformat=UnixEpoch;failifmissing=False;read only=False;collate settings=\"en@colCaseFirst=upper\"";
-                _sqlConnection = new System.Data.SQLite.SQLiteConnection(cs);
-
-                _sqlConnection.Flags |= SQLiteConnectionFlags.AllowNestedTransactions;
+                
+                cs = "data source=\"" + _configObj.CacheData_Path 
+                                      + _configObj.CacheData_FileName 
+                                      + "\";pooling=False;journal mode=Memory;foreign keys=True;datetimekind=Utc;datetimeformat=UnixEpoch;failifmissing=False;read only=False;collate settings=\"en@colCaseFirst=upper\"";
             }
+
+            _sqlConnection = new SQLiteConnection(cs);
+
+            _sqlConnection.Flags |= SQLiteConnectionFlags.AllowNestedTransactions;
 
             return _sqlConnection;
         }

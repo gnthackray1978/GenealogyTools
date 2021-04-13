@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace FTMServices4
 {
-    public class Program
+    public class Program2
     {
         public static void Main(string[] args)
         {
@@ -30,3 +30,4 @@ namespace FTMServices4
         }
     }
 }
+//
