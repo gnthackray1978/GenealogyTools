@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Azure.Identity" Version="1.4.0-beta.5" />
+    <PackageReference Include="Azure.Security.KeyVault.Keys" Version="4.2.0-beta.5" />
+    <PackageReference Include="Azure.Security.KeyVault.Secrets" Version="4.2.0-beta.4" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0-preview.3.21201.4" />
+  </ItemGroup>
+
+</Project>
