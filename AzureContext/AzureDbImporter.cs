@@ -67,6 +67,8 @@ namespace AzureContext
                     Surname = d.Surname,
                     FirstName = d.FirstName,
                     PersonId = d.PersonId,
+                    FatherId = d.FatherId,
+                    MotherId = d.MotherId,
                     AltLat = d.AltLat,
                     AltLocation = d.AltLocation,
                     AltLocationDesc = d.AltLocationDesc,
