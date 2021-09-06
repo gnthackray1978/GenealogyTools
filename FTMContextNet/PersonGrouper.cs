@@ -4,20 +4,17 @@ using FTMContext.lib;
 using FTMContext.Models;
 using nullpointer.Metaphone;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
 namespace FTMContext
 {
-   
-
     public class PersonGrouper {      
         private FTMakerContext _sourceContext;
         private FTMakerCacheContext _cacheContext;
         private IConsoleWrapper _consoleWrapper;
 
-        public List<MatchGroup> MatchGroups { get; set; } = new List<MatchGroup>();
+        public MatchGroups MatchGroups { get; set; } = new MatchGroups();
 
         //public static DupeEntry DumpString(FTMakerContext f, List<Fact> facts, 
         //    int personId, string ident) {
@@ -95,17 +92,7 @@ namespace FTMContext
         }
 
 
-        private MatchGroup MatchGroupExists(List<MatchGroup> matchGroups, int personId) {
-          
 
-            foreach (var matchGroup in matchGroups) {
-                if (matchGroup.Contains(personId)) {
-                    return matchGroup;
-                }
-            }
-
-            return null;
-        }
 
 
         /// <summary>
@@ -120,13 +107,17 @@ namespace FTMContext
             //  var facts =  _sourceContext.Fact.Where(w => w.FactTypeId == 14 || w.FactTypeId == 90).ToList();
             //GetFactFromViewEntry
 
-              var comparisonPersons = _cacheContext.FTMPersonView.Where(w=> !string.IsNullOrEmpty(w.FirstName)
-                                                                   && !string.IsNullOrEmpty(w.Surname))
+              var comparisonPersons = _cacheContext.FTMPersonView.Where(w=> 
+                                                                      !string.IsNullOrEmpty(w.FirstName)
+                                                                      && !w.FirstName.ToLower().Contains("group")
+                                                                      && !string.IsNullOrEmpty(w.Surname)
+                                                                   && !string.IsNullOrEmpty(w.Origin)
+                                                                   && w.Origin != "Thackray")
                         .Select(s => new PersonDupeSearchSubset() {
                         Id = s.PersonId,
                         FamilyName = MakeKey(s.FirstName),
                         GivenName = MakeKey(s.Surname),
-                        Fact = FTMTools.GetFactFromViewEntry(s.BirthFrom,s.BirthTo,s.Origin,s.LinkedLocations)
+                        Fact = PersonDataObj.Create(s.BirthFrom,s.BirthTo,s.Origin,s.LinkedLocations,s.Surname)
                         }).ToList();
 
 
@@ -134,131 +125,74 @@ namespace FTMContext
             int idx = 0;
 
             foreach (var cp in comparisonPersons) {
+                //12707
+                //13124
+
+                if (cp.Id == 8260 || cp.Id == 27621)
+                {
+                    Debug.WriteLine("stop");
+                }
 
                 if (idx % 1000 == 0)
                     _consoleWrapper.WriteCounter(idx + " of " + comparisonPersons.Count());
 
-               // var cpFact = FTMTools.GetFact(f, cp.Id);
-
-              //  if (cpFact == null) continue;
-
-                var newGroup = false;
                 // if this person is in a existing group
                 // get that group
-                var mg = MatchGroupExists(this.MatchGroups, cp.Id);
+                var mg = MatchGroups.FindByPersonId(cp.Id) ?? MatchGroups.CreateGroup(cp.Id, cp.Fact.Origin, cp.Fact.BirthYearFrom);
 
-                if (mg == null)
-                {
-                    mg = new MatchGroup();
-                    mg.ID = this.MatchGroups.Count() + 1;
-                    mg.Persons.Add(cp.Id);
-                    if(cp.Fact!=null)
-                    mg.Origins.Add(cp.Fact.Origin);
-                    newGroup = true;
-                }
-             
                 foreach (var p in comparisonPersons
-                    .Where(w=>w.FamilyName == cp.FamilyName && w.GivenName == cp.GivenName && cp.Fact!=null))
+                    .Where(w=>w.FamilyName == cp.FamilyName 
+                              && w.GivenName == cp.GivenName 
+                              && cp.Fact!=null
+                              && w.Fact!=null 
+                              && !mg.Contains(w.Id)))
                 {
-                    if (p.Fact == null) continue;
-
-                    if (mg.Persons.Contains(p.Id))
-                        continue;
-                                        
+                    
                     var yearMatch = cp.Fact.MatchBirthYear(p.Fact);
 
                     var locationMatch = cp.Fact.MatchLocations(p.Fact);
 
                     var originMatch = cp.Fact.Origin == p.Fact.Origin;
 
-                    
-                    if (yearMatch && locationMatch && !originMatch) {
+                    var surnameCheck = cp.Fact.DoubleCheckSurname(p.Fact);
 
-                        if (p.Fact.Origin == "_24_mountain" || p.Fact.Origin == "_20.9_SCross")
-                        {
-                            Debug.WriteLine("");
-                        }
+                    if (surnameCheck && yearMatch && locationMatch && !originMatch) {
 
-                        if (!mg.Origins.Contains(p.Fact.Origin))
-                        {
-                            mg.Persons.Add(p.Id);
-                            mg.Origins.Add(p.Fact.Origin);
-                        }
+                        mg.AddPerson(p.Id, p.Fact.Origin, p.Fact.BirthYearFrom);
+                        
                     }
-
-
-                    //comparisonPerson.GivenName
-                    //comparisonPerson.FamilyName
-
-
-                    //match name
-                    //match birth range
-                    //match counties
-                    //ensure the dupe doesn't have the same source
-
+                    
                 }
 
-                //if it's a new group and we found dupes
-                if (mg.Persons.Count() > 1 && newGroup) {
-                    MatchGroups.Add(mg);
-                }
+                MatchGroups.SaveGroup(mg);
 
+                 
                 idx++;
             }
 
-            _consoleWrapper.WriteLine("Found: " + MatchGroups.Count());
+            _consoleWrapper.WriteLine("Found: " + MatchGroups.Groups.Count());
 
-            foreach (var mg in MatchGroups)
-            {
-                string identString = "";
-               // var birthString = "";
-                int latestTree = 0;
-                List<string> origins = new List<string>();
+            MatchGroups.SetAggregates();
 
-                foreach (var p in mg.Persons)
-                {
-                    var person = comparisonPersons.First(x => x.Id == p);
 
-                    var cpFact = person.Fact;
+             var dupeId = _cacheContext.DupeEntries.Count() +1;
 
-                    if (cpFact.BirthYearFrom > latestTree)
-                        latestTree = cpFact.BirthYearFrom;
-
-                    //if (cpFact.BirthYearFrom == cpFact.BirthYearTo)
-                    //    birthString = cpFact.BirthYearFrom.ToString();
-                    //else
-                    //    birthString = cpFact.BirthYearFrom.ToString() + " - " + cpFact.BirthYearTo.ToString();
-
-                    //  Debug.WriteLine(DumpString(f,facts, p));
-                    origins.Add(cpFact.Origin);
-                    
-                }
-
-                foreach (var o in origins.OrderBy(o => o)) {
-                    identString += o;
-                }
-
-                //identString += birthString;
-                mg.LatestTree = latestTree;
-                mg.IncludedTrees = identString;
-            }
-
-            var dupeId = _cacheContext.DupeEntries.Count() +1;
-
-            foreach (var group in MatchGroups.GroupBy(g => g.IncludedTrees)) {
+            foreach (var group in MatchGroups.Groups.GroupBy(g => g.IncludedTrees)) {
                 _consoleWrapper.WriteCounter(group.Key);
 
                 var p = group.OrderByDescending(o => o.LatestTree).First();
                 
-                foreach (var person in p.Persons) {
+                foreach (var person in p.Persons)
+                {
 
-                    var dupeEntry = _cacheContext.CreateNewDupeEntry(dupeId,
-                        _cacheContext.FTMPersonView.First(f => f.PersonId == person), person, group.Key);
+                    var fpvPerson = _cacheContext.FTMPersonView.First(f => f.PersonId == person.PersonId);
+
+                    var dupeEntry = _cacheContext.CreateNewDupeEntry(dupeId, fpvPerson, group.Key);
 
                     _cacheContext.DupeEntries.Add(dupeEntry);
                     dupeId++;
                 }
-                //    Debug.WriteLine(DumpString(f, facts, person));
+                //Debug.WriteLine(DumpString(f, facts, person));
             }
 
             _cacheContext.SaveChanges();
