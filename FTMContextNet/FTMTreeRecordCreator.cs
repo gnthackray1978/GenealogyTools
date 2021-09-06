@@ -37,8 +37,8 @@ namespace FTMContext
 
             foreach (var family in _cacheContext.FTMPersonView.ToList().GroupBy(g => g.Origin))
             {
-
-                string familyName = family.First().Origin;
+             
+                string familyName = family.First().Origin ?? "Unknown";
                   
                 _consoleWrapper.WriteCounter("Adding Tree " + familyName + " " + family.Count() + " ancestors");
 
