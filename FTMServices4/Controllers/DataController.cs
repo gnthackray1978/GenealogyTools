@@ -90,7 +90,7 @@ namespace FTMServices4.Controllers
 
                     FTMGeoCoding.ResetUpdatedPlaces(sourcePlaces, cacheDB, outputHandler);
                      
-                    outputHandler.WriteLine("Updating Place Names");
+                    outputHandler.WriteLine("Finished Updating Place Names");
                     
 
                     break;
