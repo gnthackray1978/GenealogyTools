@@ -172,14 +172,14 @@ namespace FTMContext.Models
 
         }
 
-        public DupeEntry CreateNewDupeEntry(int dupeId, FTMPersonView person, int personId, string ident)
+        public DupeEntry CreateNewDupeEntry(int dupeId, FTMPersonView person, string ident)
         {
 
             var dupeEntry = new DupeEntry
             {
                 Id = dupeId,
                 Ident = ident,
-                PersonId = personId,
+                PersonId = person.PersonId,
                 BirthYearFrom = person.BirthFrom,
                 BirthYearTo = person.BirthTo,
                 Origin = person.Origin,
