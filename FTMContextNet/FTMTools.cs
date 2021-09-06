@@ -100,9 +100,9 @@ namespace FTMContext
                     var countyListPart = parts[1].Trim();
 
                     if (countyListPart.Contains(","))
-                        returnObj.Counties.AddRange(countyListPart.Split(','));
+                        returnObj.AssociatedLocations.AddRange(countyListPart.Split(','));
                     else
-                        returnObj.Counties.Add(countyListPart);
+                        returnObj.AssociatedLocations.Add(countyListPart);
 
                     return returnObj;
                 }
@@ -112,23 +112,7 @@ namespace FTMContext
             return null;
         }
 
-        public static PersonDataObj GetFactFromViewEntry(int BirthFrom, int BirthTo, string Origin, string LinkedLocations)
-        {
-            var returnObj = new PersonDataObj
-            {
-                BirthYearFrom = BirthFrom, BirthYearTo = BirthTo, Origin = Origin
-            };
-
-
-            var countyListPart = LinkedLocations.Trim();
-
-            if (countyListPart.Contains(","))
-                returnObj.Counties.AddRange(countyListPart.Split(','));
-            else
-                returnObj.Counties.Add(countyListPart);
-
-            return returnObj;
-        }
+  
 
         public static void SaveState(FTMakerContext f)
         {
