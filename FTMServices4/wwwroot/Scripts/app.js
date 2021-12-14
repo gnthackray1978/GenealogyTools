@@ -1,6 +1,7 @@
 ﻿"use strict";
 
-function PlaceObj() {
+function PlaceObj(webConsole) {
+    this.console = webConsole;
     this.count = 0;
     this.failures = [];
     this.data;
@@ -9,7 +10,8 @@ function PlaceObj() {
 PlaceObj.prototype = {
 
     countOfUnknownLocations: function () {
-       
+        var printLocationCount = this.console.printLocationCount;
+
         $.ajax({
             url: "./info/",
             type: "get", //send it through get method
@@ -17,9 +19,8 @@ PlaceObj.prototype = {
                 infoType: 'unknown_places_count'
             },
             success: function (result) {
-                document.getElementById("count").innerHTML = result.recordCount;
-                
-                //
+                //document.getElementById("count").innerHTML = result.recordCount;
+                printLocationCount(result.recordCount);
             },
             error: function (xhr) {
                 //Do Something to handle error
@@ -186,21 +187,12 @@ PlaceObj.prototype = {
 
 
     getUnEncodedLocationsFromServer: function () {
-        $('#discussion').append('GET geocode endpoint for unencoded places<br />');
+       
         var sh = this;
+        var printBasic = this.console.printBasic;
 
-        //$.ajax({
-        //    type: "get", //send it through get method
-        //    url: "./geocode/",
-        //    success: function (result) {
-               
-        //        $('#discussion').append('GET geocode returned data<br />');
-        //        sh.data = result;
-        //        sh.start();
-        //    }
-        //});
-        
-
+        printBasic('GET geocode endpoint for unencoded places');
+         
         $.ajax({
             type: "get", //send it through get method
             url: "./geocode/",
@@ -208,7 +200,7 @@ PlaceObj.prototype = {
                 infoType: ''
             },
             success: function (result) {
-                $('#discussion').append('GET geocode returned data<br />');
+                printBasic('GET geocode returned data');
                 sh.data = result.results;
                 sh.start();
             },
@@ -224,7 +216,11 @@ PlaceObj.prototype = {
 
     start: function() {
         var sh = this;
-        sh.count = 0;
+        sh.count = 0; 
+        var printBasic = this.console.printBasic;
+        var printGeoCodeProgressCount = this.console.printGeoCodeProgressCount;
+        var printProgressCount = this.console.printProgressCount;
+
         var geocoder = new google.maps.Geocoder();
 
         var idx = 0
@@ -234,48 +230,40 @@ PlaceObj.prototype = {
             if (!d)
                 return;
 
-            if (d.placeformatted)
-                console.log(d.placeformatted);
+          //  if (d.placeformatted)
+           //     console.log(d.placeformatted);
 
-            document.getElementById("progress").innerHTML = idx;
+           // document.getElementById("progress").innerHTML = idx;
+
+           printProgressCount(idx);
 
             geocoder.geocode({
                 address: d.placeformatted
             }, (results, status) => {
 
                 sh.count++;
-                document.getElementById("geocodecount").innerHTML = sh.count;
                 
+                printGeoCodeProgressCount(sh.count);
 
                 if (status == "OVER_QUERY_LIMIT") {
                  
-                    $('#discussion').append('GEOCODE FAILED ' + status + '<br />');
+               
+                    printBasic('GEOCODE FAILED ' + status);
+
                     setTimeout(function () {                   
                         searchAddress(sh.data[idx]);
                     }, 3000);
                 }
                 else {
-
-                    //var placeLookup = {
-                    //    placeid: 0,
-                    //    Place: '',
-                    //    placeformatted: '',
-                    //    Output: ''
-                    //};
-
-                    var element = document.createElement("p");
-
+                    
                     var result = {
                         placeid: d.placeid,
                         place : '',
                         placeformatted: d.placeformatted,
                         results: JSON.stringify(results)
                     };
-
-                    element.appendChild(document.createTextNode(JSON.stringify(result)));
-                    document.getElementById('output').appendChild(element);
-                   // $('#discussion').append('GEOCODE SUCCESS Posting to server<br />');
-                   
+                     
+                    sh.console.printToOutput(d.placeformatted, results);
                     sh.saveGeoCodedLocationToServer(result);
 
                     setTimeout(function () {

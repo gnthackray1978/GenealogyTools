@@ -17,57 +17,23 @@
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC4xE7VpfxqbdKcH19lze4LDxHX4e5nqLU&callback=initMap&libraries=&v=weekly" defer></script>
 
     <script src="./Scripts/signalr.js"></script>
-   
-    <script type="text/javascript">
-        $(function () {
 
-          
+    <script src="./Scripts/signalWrapper.js"></script>
 
+    <script src="./Scripts/signalWrapper.js"></script>
 
-            const connection = new signalR.HubConnectionBuilder()
-                .withUrl("/notificationhub")
-                .configureLogging(signalR.LogLevel.Information)
-                .build();
-
-            async function start() {
-                try {
-                    await connection.start();
-                    console.log("SignalR Connected.");
-                } catch (err) {
-                    console.log(err);
-                    setTimeout(start, 5000);
-                }
-            };
-
-            connection.on("Notify", function (user, message) {
-                $('#discussion').append(user + '<br />');
-            });
-
-            connection.on("Update", function (user, message) {
-
-                var listItem = $("ul").first();
-
-                if (listItem) {
-                   listItem.html(user + '<br />');
-                } else {
-                    $('#header').append(user + '<br />');
-                }
-                
-            });
-
-            connection.onclose(start);
-
-            // Start the connection.
-            start();
-
-
-        });
-    </script>
-
+    <script src="./Scripts/webConsole.js"></script>
 
     <script>
-        var p = new PlaceObj();
+        var wc = new WebConsole();
 
+        var p = new PlaceObj(wc);
+
+        var sw = new SignalWrapper();
+
+        sw.run(signalR, (user) => {
+            wc.printBasic(user);
+        });
 
     </script>
 </head>
@@ -94,7 +60,7 @@
         <br>
         <div class="row">
             <div class="col"><a href="#Foo" onclick="p.countOfUnknownLocations();">Update count of locations that have not been GEOCoded - </a><div id="count" style="display:inline">0</div></div>
-            <div class="col"><a href="#Foo" onclick="p.updatePlaceMetadata();">Update FTM Cache MetaData</a></div>
+            <div class="col"><a href="#Foo" onclick="p.updatePlaceMetadata();">Update FTM Cache MetaData(set county and country fields in FTMPlaceCache table)</a></div>
         </div>
 
         <br>
@@ -133,17 +99,28 @@
         </div>
 
         <div class="row" style="background-color: black; margin-left: 1px; margin-right: 1px;">
-            <div class="col"><ul id="discussion" style="color: green; background-color: black;  font-weight: 600; padding-left: 1px"></ul></div>
+            <div class="col">
+
+                <ul id="discussion" style="color: green; background-color: black; font-weight: 600; padding-left: 1px">
+
+                </ul>
+            </div>
         </div>
 
-        <div class="row">
-            <div id="output"></div>
-        </div>
-        <div class="row">
-            <div id="progress"></div>
+        <div class="row" style="background-color: black; margin-left: 1px; margin-right: 1px;">
+            <div class="col">
+                <div id="output" style="color: green; background-color: black; font-weight: 600; padding-left: 1px"></div>
+            </div>
+            
         </div>
 
-    </div>
+        <div class="row" style="background-color: black; margin-left: 1px; margin-right: 1px;">
+            <div class="col">
+                <div id="progress" style="color: green; background-color: black; font-weight: 600; padding-left: 1px"></div>
+            </div>
+        </div>
+
+        </div>
 
 </body>
 </html>
