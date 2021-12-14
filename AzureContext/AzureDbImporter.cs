@@ -63,7 +63,7 @@ namespace AzureContext
                 destination.FTMPersonView.Add(new Models.FTMPersonView()
                 {
                     Id = d.Id,
-                    Origin = d.Origin,
+                    Origin = d.Origin??"".Replace(" ",""),
                     Surname = d.Surname,
                     FirstName = d.FirstName,
                     PersonId = d.PersonId,
@@ -91,7 +91,7 @@ namespace AzureContext
                 destination.TreeRecord.Add(new Models.TreeRecord()
                 {
                     Id = d.Id,
-                    Origin = d.Origin,
+                    Origin = d.Origin??"".Replace(" ", ""),
                     CM = d.CM,
                     Name = d.Name,
                     PersonCount = d.PersonCount,
