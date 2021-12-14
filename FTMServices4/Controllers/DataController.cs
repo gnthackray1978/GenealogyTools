@@ -99,7 +99,7 @@ namespace FTMServices4.Controllers
 
                     FTMGeoCoding.UpdateFTMCacheMetaData(cacheDB, outputHandler);
 
-                    outputHandler.WriteLine("Finished FTM Meta Data");
+                    outputHandler.WriteLine("Finished setting counties and countries in FTMPlaceCache table");
 
                     break;
 
