@@ -4,6 +4,7 @@ using FTMContext;
 using FTMContext.Models;
 using System;
 using System.Linq;
+using Clusterer;
 using ConfigHelper;
 
 namespace FTMConsole2
@@ -28,7 +29,9 @@ namespace FTMConsole2
 
             Console.WriteLine("6. Debug Option");
 
-            Console.WriteLine("7. Quit");
+            Console.WriteLine("7. Clustering");
+
+            Console.WriteLine("8. Quit");
 
 
 
@@ -37,7 +40,7 @@ namespace FTMConsole2
 
             var input = Console.ReadKey();
 
-            while (!int.TryParse(input.KeyChar.ToString(), out sin) || sin > 7 || sin == 0)
+            while (!int.TryParse(input.KeyChar.ToString(), out sin) || sin > 8 || sin == 0)
             {
                 Console.WriteLine("Not a valid Selection");
                 input = Console.ReadKey();
@@ -134,6 +137,11 @@ namespace FTMConsole2
                 Console.WriteLine(c);
 
                 Console.ReadKey();
+            }
+
+            if (sin == 7)
+            {
+                var c = new Cluster();
             }
 
         }
