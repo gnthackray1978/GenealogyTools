@@ -115,9 +115,33 @@ namespace FTMContext
                     .Select(s => new PlaceLookup() { placeid = s.FTMPlaceId, placeformatted = s.FTMOrginalNameFormatted })
                     .ToList();
 
+                foreach (var f in places)
+                {
+                    f.placeformatted = f.placeformatted.Replace("//", "").Replace("|", "");
+                }
+
             return places;
         }
-      
+
+        public static List<PlaceLookup> GetUnknownPlacesIgnoreSearchedAlready(FTMakerCacheContext context, 
+                                                                              IConsoleWrapper consoleWrapper)
+        {
+
+            var places = new List<PlaceLookup>();
+                
+            places = context.FTMPlaceCache.Where(w => (w.JSONResult == null || w.JSONResult == "null")
+                                                      && !w.Searched)
+                .Select(s => new PlaceLookup() { placeid = s.FTMPlaceId, placeformatted = s.FTMOrginalNameFormatted })
+                .ToList();
+
+            foreach (var f in places)
+            {
+                f.placeformatted = f.placeformatted.Replace("//", "").Replace("|", "");
+            }
+
+            return places;
+        }
+
         /// <summary>
         /// add missing places into the place cache. ready to be looked up by the geocoder
         /// </summary>
@@ -143,7 +167,8 @@ namespace FTMContext
                         FTMOrginalName = p.Name,
                         JSONResult = null,
                         FTMOrginalNameFormatted = GoogleGeoCodingHelpers.FormatPlace(p.Name),
-                        FTMPlaceId = p.Id
+                        FTMPlaceId = p.Id,
+                        Searched = false
                     });
 
                     newId++;
@@ -181,6 +206,7 @@ namespace FTMContext
                         cachedValue.Country = "";
                         cachedValue.County = "";
                         cachedValue.FTMOrginalNameFormatted = GoogleGeoCodingHelpers.FormatPlace(p.Name);
+                        cachedValue.Searched = false;
                     }
 
                     destinationContext.SaveChanges();
