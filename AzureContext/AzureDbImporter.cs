@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using AzureContext.Models;
 using ConfigHelper;
 using ConsoleTools;
+using EFCore.BulkExtensions;
 using FTMContext.Models;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using FTMPersonView = AzureContext.Models.FTMPersonView;
 
 namespace AzureContext
 {
@@ -56,8 +60,9 @@ namespace AzureContext
             destination.SaveChanges();
 
 
-            _console.WriteCounter("Adding new FTM Person view");
+            _console.WriteCounter("Adding new FTM Person view : " + a.FTMPersonView.Count());
 
+          
             foreach (var d in a.FTMPersonView)
             {
                 destination.FTMPersonView.Add(new Models.FTMPersonView()
@@ -79,10 +84,10 @@ namespace AzureContext
                     BirthLong = d.BirthLong,
                     BirthTo = d.BirthTo
                 });
-
+                
             }
-
-            destination.SaveChanges();
+          
+            destination.BulkInsert(destination.FTMPersonView.ToList());
 
             _console.WriteCounter("Adding new tree records");
 
@@ -99,8 +104,8 @@ namespace AzureContext
                 });
 
             }
-
-            destination.SaveChanges();
+            destination.BulkInsert(destination.TreeRecord.ToList());
+      
 
         }
 
