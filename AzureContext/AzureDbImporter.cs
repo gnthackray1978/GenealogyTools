@@ -3,11 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using AzureContext.Models;
 using ConfigHelper;
-using ConsoleTools;
-using EFCore.BulkExtensions;
-using FTMContext.Models;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
+using ConsoleTools; 
+using FTMContext.Models; 
 using FTMPersonView = AzureContext.Models.FTMPersonView;
 
 namespace AzureContext
@@ -25,6 +22,10 @@ namespace AzureContext
 
         public void Import()
         {
+
+            
+
+
             var a = FTMakerCacheContext.CreateCacheDB(_imsgConfigHelper);
 
             _console.WriteCounter("Emptying TreeRecord FTMPersonView and DupeEntries");
@@ -60,12 +61,14 @@ namespace AzureContext
             destination.SaveChanges();
 
 
-            _console.WriteCounter("Adding new FTM Person view : " + a.FTMPersonView.Count());
+            _console.WriteCounter("Adding " + a.FTMPersonView.Count() + " FTM Person view records ");
 
-          
+
+            List<FTMPersonView> ftmPersonViews = new List<FTMPersonView>();
+
             foreach (var d in a.FTMPersonView)
             {
-                destination.FTMPersonView.Add(new Models.FTMPersonView()
+                ftmPersonViews.Add(new FTMPersonView()
                 {
                     Id = d.Id,
                     Origin = d.Origin??"".Replace(" ",""),
@@ -86,8 +89,8 @@ namespace AzureContext
                 });
                 
             }
-          
-            destination.BulkInsert(destination.FTMPersonView.ToList());
+
+            AzureDBContext.BulkInsert(_imsgConfigHelper.MSGGenDB01, ftmPersonViews);
 
             _console.WriteCounter("Adding new tree records");
 
@@ -104,8 +107,10 @@ namespace AzureContext
                 });
 
             }
-            destination.BulkInsert(destination.TreeRecord.ToList());
-      
+
+            destination.SaveChanges();
+            //  destination.BulkInsert(destination.TreeRecord.ToList());
+
 
         }
 

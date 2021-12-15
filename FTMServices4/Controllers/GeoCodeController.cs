@@ -37,7 +37,8 @@ namespace FTMServices4.Controllers
 
             var result = new Result()
             {
-                Results = FTMGeoCoding.GetUnknownPlaces(context, new OutputHandler(_hubContext)).Take(75)
+               // Results = FTMGeoCoding.GetUnknownPlaces(context, new OutputHandler(_hubContext)).Take(75)
+                Results = FTMGeoCoding.GetUnknownPlacesIgnoreSearchedAlready(context, new OutputHandler(_hubContext)).Take(75)
             };
 
             return result;

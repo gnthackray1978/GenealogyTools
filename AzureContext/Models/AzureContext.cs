@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Data;
 using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
@@ -1251,5 +1254,132 @@ namespace AzureContext.Models
         }
 
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+
+        
+
+        public static void BulkInsert(string connectionString, List<FTMPersonView> rows)
+        {
+            using (var executor = new AzureDBContext(connectionString))
+            {
+                 
+                executor.FTMPersonView.Add(new FTMPersonView()
+                {
+                    FirstName = "x",
+                    AltLat = 0,
+                    AltLocation = "x",
+                    AltLocationDesc = "x",
+                    AltLong = 0,
+                    BirthFrom = 0,
+                    BirthLat = 0,
+                    BirthLocation = "x",
+                    BirthLong = 0,
+                    BirthTo = 0,
+                    FatherId = 0,
+                    Id = 0,
+                    MotherId = 0,
+                    Origin = "x",
+                    PersonId = 0,
+                    Surname = "x"
+                });
+
+                executor.SaveChanges();
+            }
+
+            var dt = CreateDataTable(connectionString);
+
+            using (var executor = new AzureDBContext(connectionString))
+            {
+                executor.ExecuteCommand("TRUNCATE TABLE DNA.FTMPersonView"); 
+            }
+
+
+            int idx = 0;
+            foreach (var row in rows)
+            {
+                dt.Rows.Add(idx,
+                    row.FirstName,
+                    row.Surname,
+                    row.BirthFrom,
+                    row.BirthTo, 
+                    row.BirthLocation, 
+                    row.BirthLat, 
+                    row.BirthLong, 
+                    row.AltLocationDesc, 
+                    row.AltLocation, row.AltLat, row.AltLong, row.Origin, row.PersonId, row.FatherId, row.MotherId);
+ 
+                idx++;
+            }
+
+
+            using (var copy = new SqlBulkCopy(connectionString))
+            {
+
+
+                copy.DestinationTableName = "dna.FTMPersonView";
+                copy.BulkCopyTimeout = 600;
+                copy.ColumnMappings.Add("ID", "ID");
+                copy.ColumnMappings.Add("FirstName", "FirstName");
+                copy.ColumnMappings.Add("Surname", "Surname");
+                copy.ColumnMappings.Add("BirthFrom", "BirthFrom");
+                copy.ColumnMappings.Add("BirthTo", "BirthTo");
+                copy.ColumnMappings.Add("BirthLocation", "BirthLocation");
+                copy.ColumnMappings.Add("BirthLat", "BirthLat");
+                copy.ColumnMappings.Add("BirthLong", "BirthLong");
+                copy.ColumnMappings.Add("AltLocationDesc", "AltLocationDesc");
+                copy.ColumnMappings.Add("AltLocation", "AltLocation");
+                copy.ColumnMappings.Add("AltLat", "AltLat");
+                copy.ColumnMappings.Add("AltLong", "AltLong");
+                copy.ColumnMappings.Add("Origin", "Origin");
+                copy.ColumnMappings.Add("PersonID", "PersonID");
+                copy.ColumnMappings.Add("FatherId", "FatherId");
+                copy.ColumnMappings.Add("MotherId", "MotherId");
+
+                copy.WriteToServer(dt);
+            }
+        }
+
+
+        private static DataTable CreateDataTable(string connectionString)
+        {
+           
+
+            
+             
+            DataColumnCollection Columns;
+
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                con.Open();
+                using (SqlCommand command = new SqlCommand("select top 1 * from dna.FTMPersonView", con))
+                {
+                    using (var r = command.ExecuteReader())
+                    {
+                        using (var dt = new DataTable())
+                        {
+                            dt.Load(r);
+                            Columns = dt.Columns;
+                        }
+                    }
+
+                }
+                con.Close();
+            }
+
+
+
+            DataTable dataTable = new DataTable();
+
+            while (Columns.Count > 0)
+            {
+                DataColumn c = Columns[0];
+                c.Table.Columns.Remove(c);
+
+                dataTable.Columns.Add(c);
+            }
+            Columns = dataTable.Columns;
+            
+            return dataTable;
+
+        }
     }
 }
