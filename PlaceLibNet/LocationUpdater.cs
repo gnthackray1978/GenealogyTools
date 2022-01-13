@@ -1,20 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ConsoleTools;
 using GenDBContext.Models;
+using LoggingLib;
 
 namespace PlaceLib
 {   
     public class LocationFixer
     {
-        private readonly IConsoleWrapper _consoleWrapper;
+        private readonly Ilog _ilog;
         private readonly ILocationDataContext _locationDataContext;
 
-        public LocationFixer(ILocationDataContext locationDataContext, IConsoleWrapper consoleWrapper)
+        public LocationFixer(ILocationDataContext locationDataContext, Ilog ilog)
         {
             _locationDataContext = locationDataContext;
-            _consoleWrapper = consoleWrapper;
+            _ilog = ilog;
         }
 
         public void UpdateBritishParents()
@@ -43,7 +43,7 @@ namespace PlaceLib
                         englishParents.Add(p.MotherId.Value);
                 }
 
-                _consoleWrapper.ProgressSearch(counter, total, "English Parents", "possible records");
+                _ilog.ProgressSearch(counter, total, "English Parents", "possible records");
 
                 counter++;
             }
@@ -52,7 +52,7 @@ namespace PlaceLib
 
             if (!personsOfUnknownOrigins.Any())
             {
-                _consoleWrapper.StatusReport("No English Parents",true);
+                _ilog.StatusReport("No English Parents",true);
                 return;
             }
 
@@ -62,10 +62,10 @@ namespace PlaceLib
 
             progress.ProgressChanged += (sender, e) =>
             {
-                _consoleWrapper.StatusReport(e,true);
+                _ilog.StatusReport(e,true);
             };
 
-            _consoleWrapper.StatusReport("Set country as England based on parents",true);
+            _ilog.StatusReport("Set country as England based on parents",true);
         }
 
         public void UpdateAmericanParents()
@@ -94,7 +94,7 @@ namespace PlaceLib
                         englishParents.Add(p.MotherId.Value);
                 }
 
-                _consoleWrapper.ProgressSearch(counter, total, "American Parents", "possible records");
+                _ilog.ProgressSearch(counter, total, "American Parents", "possible records");
 
                 counter++;
             }
@@ -103,7 +103,7 @@ namespace PlaceLib
 
             if (!personsOfUnknownOrigins.Any())
             {
-                _consoleWrapper.StatusReport("No American Parents",true);
+                _ilog.StatusReport("No American Parents",true);
                 return;
             }
             var progress = new Progress<string>();
@@ -112,10 +112,10 @@ namespace PlaceLib
 
             progress.ProgressChanged += (sender, e) =>
             {
-                _consoleWrapper.StatusReport(e,true);
+                _ilog.StatusReport(e,true);
             };
 
-            _consoleWrapper.StatusReport("Set country as America based on parents",true);
+            _ilog.StatusReport("Set country as America based on parents",true);
 
         }
 
@@ -140,7 +140,7 @@ namespace PlaceLib
 
             _locationDataContext.SavePlaces(countryDictionary, PlaceCriteria.ForMappings);
 
-            _consoleWrapper.StatusReport("Set known countries",false);
+            _ilog.StatusReport("Set known countries",false);
         }
 
         public void MapPlaceListToCounties(List<PlaceDto> knowns)
@@ -188,7 +188,7 @@ namespace PlaceLib
                     
                 }
 
-                _consoleWrapper.ProgressUpdate(counter, total, "Birth County", "Unset counties");
+                _ilog.ProgressUpdate(counter, total, "Birth County", "Unset counties");
 
                 counter++;
 
@@ -224,7 +224,7 @@ namespace PlaceLib
                         countryDictionary.Add(p.personId, county.County + "||" + county.Country);
                 }
 
-                _consoleWrapper.ProgressUpdate(counter, total, "Birth County", "Unset counties");
+                _ilog.ProgressUpdate(counter, total, "Birth County", "Unset counties");
 
                 counter++;
                  
@@ -239,12 +239,12 @@ namespace PlaceLib
         {
             _locationDataContext.MarkUnknowns();
 
-            _consoleWrapper.StatusReport("Marked unknown birth places as Unknown",false,false);
+            _ilog.StatusReport("Marked unknown birth places as Unknown",false,false);
         }
 
         public static void UpdateLocations()
         {
-            var consoleWrapper = new ConsoleWrapper();
+            var consoleWrapper = new Log();
 
             var locationFixer = new LocationFixer(new LocationSqlLiteDataContext(), consoleWrapper);
 
@@ -263,7 +263,7 @@ namespace PlaceLib
 
         public static void MapPlaceListToCounties()
         {
-            var consoleWrapper = new ConsoleWrapper();
+            var consoleWrapper = new Log();
 
             var locationFixer = new LocationFixer(new LocationSqlLiteDataContext(), consoleWrapper);
 

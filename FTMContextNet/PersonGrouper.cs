@@ -1,18 +1,18 @@
-﻿using ConsoleTools;
-using FTMContext;
+﻿using FTMContext;
 using FTMContext.lib;
 using FTMContext.Models;
 using nullpointer.Metaphone;
 using System;
 using System.Diagnostics;
 using System.Linq;
+using LoggingLib;
 
 namespace FTMContext
 {
     public class PersonGrouper {      
         private FTMakerContext _sourceContext;
         private FTMakerCacheContext _cacheContext;
-        private IConsoleWrapper _consoleWrapper;
+        private Ilog _ilog;
 
         public MatchGroups MatchGroups { get; set; } = new MatchGroups();
 
@@ -84,11 +84,11 @@ namespace FTMContext
 
         public PersonGrouper(FTMakerContext sourceContext,
                              FTMakerCacheContext cacheContext,
-                             IConsoleWrapper consoleWrapper) {
+                             Ilog ilog) {
          
             _sourceContext = sourceContext;
             _cacheContext = cacheContext;
-            _consoleWrapper = consoleWrapper;
+            _ilog = ilog;
         }
 
 
@@ -121,7 +121,7 @@ namespace FTMContext
                         }).ToList();
 
 
-            _consoleWrapper.WriteLine("Records to search: " + comparisonPersons.Count());
+            _ilog.WriteLine("Records to search: " + comparisonPersons.Count());
             int idx = 0;
 
             foreach (var cp in comparisonPersons) {
@@ -134,7 +134,7 @@ namespace FTMContext
                 }
 
                 if (idx % 1000 == 0)
-                    _consoleWrapper.WriteCounter(idx + " of " + comparisonPersons.Count());
+                    _ilog.WriteCounter(idx + " of " + comparisonPersons.Count());
 
                 // if this person is in a existing group
                 // get that group
@@ -170,7 +170,7 @@ namespace FTMContext
                 idx++;
             }
 
-            _consoleWrapper.WriteLine("Found: " + MatchGroups.Groups.Count());
+            _ilog.WriteLine("Found: " + MatchGroups.Groups.Count());
 
             MatchGroups.SetAggregates();
 
@@ -178,7 +178,7 @@ namespace FTMContext
              var dupeId = _cacheContext.DupeEntries.Count() +1;
 
             foreach (var group in MatchGroups.Groups.GroupBy(g => g.IncludedTrees)) {
-                _consoleWrapper.WriteCounter(group.Key);
+                _ilog.WriteCounter(group.Key);
 
                 var p = group.OrderByDescending(o => o.LatestTree).First();
                 

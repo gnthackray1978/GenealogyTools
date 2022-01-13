@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace ConsoleTools
+namespace LoggingLib
 {
-    public interface IConsoleWrapper
+    public interface Ilog
     {
 
         void WriteCounter(string message);
@@ -13,7 +13,7 @@ namespace ConsoleTools
         void StatusReport(string message, bool forceNewLine, bool pause = false);
     }
 
-    public class ConsoleWrapper : IConsoleWrapper
+    public class Log : Ilog
     {
         public void WriteLine(string line) {
             Console.WriteLine(line);

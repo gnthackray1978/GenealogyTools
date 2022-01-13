@@ -1,5 +1,4 @@
-﻿using ConsoleTools;
-using FTMContext.lib;
+﻿using FTMContext.lib;
 using FTMContext.Models;
 using Newtonsoft.Json;
 using PlaceLib.Model;
@@ -10,6 +9,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using LoggingLib;
 
 namespace FTMContext
 {
@@ -33,14 +33,14 @@ namespace FTMContext
         /// <summary>
         /// sets county and country values in ftmcache. 
         /// </summary>
-        public static void UpdateFTMCacheMetaData(FTMakerCacheContext a, IConsoleWrapper consoleWrapper)
+        public static void UpdateFTMCacheMetaData(FTMakerCacheContext a, Ilog ilog)
         {
             var p = new PlacesContext();
 
             var unsetCountiesCount = a.FTMPlaceCache.Where(w => w.County == "" || w.Country == "").Count();
 
-            consoleWrapper.WriteLine("FTMPlaceCache has ~" + unsetCountiesCount + " unset records");
-            consoleWrapper.WriteLine("Updating FTMPlaceCache");
+            ilog.WriteLine("FTMPlaceCache has ~" + unsetCountiesCount + " unset records");
+            ilog.WriteLine("Updating FTMPlaceCache");
             int foreignCounties = 0;
             foreach (var place in a.FTMPlaceCache.Where(w=>w.County == "" || w.Country == "")) {
                 if (place.JSONResult != null)
@@ -95,9 +95,9 @@ namespace FTMContext
 
             unsetCountiesCount = a.FTMPlaceCache.Where(w => w.County == "" || w.Country == "").Count();
 
-            consoleWrapper.WriteLine("FTMPlaceCache has ~" + foreignCounties + " foreign records");
+            ilog.WriteLine("FTMPlaceCache has ~" + foreignCounties + " foreign records");
 
-            consoleWrapper.WriteLine("FTMPlaceCache has ~" + unsetCountiesCount + " unset records");
+            ilog.WriteLine("FTMPlaceCache has ~" + unsetCountiesCount + " unset records");
         }
 
         
@@ -106,7 +106,7 @@ namespace FTMContext
         /// return list of entries in decrypt place cache that don't haven't been geolocated
         /// </summary>
         /// <returns></returns>
-        public static List<PlaceLookup> GetUnknownPlaces(FTMakerCacheContext context, IConsoleWrapper consoleWrapper)
+        public static List<PlaceLookup> GetUnknownPlaces(FTMakerCacheContext context, Ilog ilog)
         {
 
             var places = new List<PlaceLookup>();
@@ -124,7 +124,7 @@ namespace FTMContext
         }
 
         public static List<PlaceLookup> GetUnknownPlacesIgnoreSearchedAlready(FTMakerCacheContext context, 
-                                                                              IConsoleWrapper consoleWrapper)
+                                                                              Ilog ilog)
         {
 
             var places = new List<PlaceLookup>();
@@ -145,14 +145,14 @@ namespace FTMContext
         /// <summary>
         /// add missing places into the place cache. ready to be looked up by the geocoder
         /// </summary>
-        public static void AddMissingPlaces(List<Place> sourcePlaces, FTMakerCacheContext a, IConsoleWrapper consoleWrapper)
+        public static void AddMissingPlaces(List<Place> sourcePlaces, FTMakerCacheContext a, Ilog ilog)
         {
            
 
-            (List<Place> missingPlaces, List<Place> updatedPlaces) data = CheckForUpdates(a, sourcePlaces, consoleWrapper);
+            (List<Place> missingPlaces, List<Place> updatedPlaces) data = CheckForUpdates(a, sourcePlaces, ilog);
 
 
-            consoleWrapper.WriteLine("Adding " + data.missingPlaces.Count + " missing places");
+            ilog.WriteLine("Adding " + data.missingPlaces.Count + " missing places");
 
             if (data.missingPlaces.Count > 0)
             {
@@ -185,12 +185,12 @@ namespace FTMContext
         /// the place ids have been changed.
         /// </summary>
         public static void ResetUpdatedPlaces(List<Place> sourcePlaces, FTMakerCacheContext destinationContext, 
-            IConsoleWrapper consoleWrapper)
+            Ilog ilog)
         {
            
-            (List<Place> missingPlaces, List<Place> updatedPlaces) data = CheckForUpdates(destinationContext, sourcePlaces, consoleWrapper);
+            (List<Place> missingPlaces, List<Place> updatedPlaces) data = CheckForUpdates(destinationContext, sourcePlaces, ilog);
 
-            consoleWrapper.WriteLine("Resetting " + data.updatedPlaces.Count + " places press any key to continue");
+            ilog.WriteLine("Resetting " + data.updatedPlaces.Count + " places press any key to continue");
           
 
             if (data.updatedPlaces.Count > 0)
@@ -216,10 +216,10 @@ namespace FTMContext
         }
         
         public static (List<Place> missingPlaces, List<Place> updatedPlaces) 
-                                CheckForUpdates(FTMakerCacheContext a, List<Place> sourcePlaces, IConsoleWrapper consoleWrapper, bool showInfo = false)
+                                CheckForUpdates(FTMakerCacheContext a, List<Place> sourcePlaces, Ilog ilog, bool showInfo = false)
         {
 
-            consoleWrapper.WriteLine("Checking for updated places");
+            ilog.WriteLine("Checking for updated places");
             //    ExtractFTMDB();
 
 
@@ -256,18 +256,18 @@ namespace FTMContext
 
             if (showInfo)
             {
-                consoleWrapper.WriteLine(updatedPlaces.Count + " updated places ");
+                ilog.WriteLine(updatedPlaces.Count + " updated places ");
 
                 foreach (var m in updatedPlaces)
                 {
-                    consoleWrapper.WriteLine("Missing Place : " + m.Name);
+                    ilog.WriteLine("Missing Place : " + m.Name);
                 }
 
-                consoleWrapper.WriteLine(missingPlaces.Count + " missing places ");
+                ilog.WriteLine(missingPlaces.Count + " missing places ");
 
                 foreach (var m in missingPlaces)
                 {
-                    consoleWrapper.WriteLine("Missing Place : " + m.Name);
+                    ilog.WriteLine("Missing Place : " + m.Name);
                 }
             }
             return (missingPlaces, updatedPlaces);

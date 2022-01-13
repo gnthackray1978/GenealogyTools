@@ -1,9 +1,9 @@
-﻿using ConsoleTools;
+﻿using LoggingLib;
 using Microsoft.AspNetCore.SignalR;
 
 namespace FTMServices4.Controllers
 {
-    public class OutputHandler : IConsoleWrapper
+    public class OutputHandler : Ilog
     {
 
         private readonly IHubContext<NotificationHub> _hubContext;

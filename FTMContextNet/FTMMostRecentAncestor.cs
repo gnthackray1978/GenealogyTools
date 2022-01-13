@@ -1,9 +1,9 @@
-﻿using ConsoleTools;
-using FTMContext.Models;
+﻿using FTMContext.Models;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using LoggingLib;
 
 namespace FTMContext
 {
@@ -11,7 +11,7 @@ namespace FTMContext
     {
         private FTMakerContext _context;
         private FTMakerCacheContext _cacheContext;
-        private IConsoleWrapper _consoleWrapper;
+        private Ilog _ilog;
 
         public List<int> AddedPersons = new List<int>();
         public List<int> SpouseList = new List<int>();
@@ -22,8 +22,8 @@ namespace FTMContext
 
         public FTMMostRecentAncestor(FTMakerContext context,
             FTMakerCacheContext cacheContext,
-            IConsoleWrapper consoleWrapper) {
-            _consoleWrapper = consoleWrapper;
+            Ilog ilog) {
+            _ilog = ilog;
             _context = context;
             _cacheContext = cacheContext;
         }
@@ -34,7 +34,7 @@ namespace FTMContext
         {           
             var firstPerson = _context.Person.First(w => w.Id == 1);
 
-            _consoleWrapper.WriteLine(firstPerson.BirthDate);
+            _ilog.WriteLine(firstPerson.BirthDate);
 
             var me = _context.Person.FirstOrDefault(w => w.FamilyName.Trim() == "Thackray" && w.GivenName.Trim() == "George Nicholas");
 
@@ -66,7 +66,7 @@ namespace FTMContext
               
                 LookupAncestors(rootPerson.Id);
 
-                _consoleWrapper.WriteCounter("Saving Facts for "+ rootPerson.FamilyName + " " + AddedPersons.Count() + " ancestors");
+                _ilog.WriteCounter("Saving Facts for "+ rootPerson.FamilyName + " " + AddedPersons.Count() + " ancestors");
 
                 //FTMPERSONORIGIN shoule be empty!
 
@@ -110,7 +110,7 @@ namespace FTMContext
             }
            
             _context.SaveChanges();
-            _consoleWrapper.WriteLine("Finished ");
+            _ilog.WriteLine("Finished ");
         }
 
         private void LookupDescendants(int testPersonId)

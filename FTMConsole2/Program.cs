@@ -1,11 +1,11 @@
 ﻿using AzureContext.Models;
-using ConsoleTools;
 using FTMContext;
 using FTMContext.Models;
 using System;
 using System.Linq;
 using Clusterer;
 using ConfigHelper;
+using LoggingLib;
 
 namespace FTMConsole2
 {
@@ -56,12 +56,12 @@ namespace FTMConsole2
                 Console.WriteLine("Press a key to Add Missing Places");
                 Console.ReadKey();
 
-                FTMGeoCoding.AddMissingPlaces(sourcePlaces, FTMakerCacheContext.CreateCacheDB(imsgConfigHelper), new ConsoleWrapper());
+                FTMGeoCoding.AddMissingPlaces(sourcePlaces, FTMakerCacheContext.CreateCacheDB(imsgConfigHelper), new Log());
 
                 Console.WriteLine("Press a key to Reset Updated Places");
                 Console.ReadKey();
 
-                FTMGeoCoding.ResetUpdatedPlaces(sourcePlaces, FTMakerCacheContext.CreateCacheDB(imsgConfigHelper), new ConsoleWrapper());
+                FTMGeoCoding.ResetUpdatedPlaces(sourcePlaces, FTMakerCacheContext.CreateCacheDB(imsgConfigHelper), new Log());
 
                 // now loadftmservices and geolocate the cache entries 
                 // which dont have a json result set.
@@ -75,7 +75,7 @@ namespace FTMConsole2
 
             if (sin == 2)
             {
-                FTMGeoCoding.UpdateFTMCacheMetaData(FTMakerCacheContext.CreateCacheDB(imsgConfigHelper), new ConsoleWrapper());
+                FTMGeoCoding.UpdateFTMCacheMetaData(FTMakerCacheContext.CreateCacheDB(imsgConfigHelper), new Log());
 
                 Console.WriteLine("Finished");
                 Console.ReadKey();
@@ -84,7 +84,7 @@ namespace FTMConsole2
 
             if (sin == 3)
             {
-                var ftmDupe = new FTMViewCreator(FTMakerContext.CreateSourceDB(imsgConfigHelper), FTMakerCacheContext.CreateCacheDB(imsgConfigHelper), new ConsoleWrapper());
+                var ftmDupe = new FTMViewCreator(FTMakerContext.CreateSourceDB(imsgConfigHelper), FTMakerCacheContext.CreateCacheDB(imsgConfigHelper), new Log());
 
                 ftmDupe.Run();
 
@@ -105,7 +105,7 @@ namespace FTMConsole2
             if (sin == 5)
             {
                 var pg = new PersonGrouper(FTMakerContext.CreateSourceDB(imsgConfigHelper),
-                                FTMakerCacheContext.CreateCacheDB(imsgConfigHelper), new ConsoleWrapper());
+                                FTMakerCacheContext.CreateCacheDB(imsgConfigHelper), new Log());
 
                 pg.PopulateDupeEntries();
             }

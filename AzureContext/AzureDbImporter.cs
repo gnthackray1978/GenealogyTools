@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using AzureContext.Models;
 using ConfigHelper;
-using ConsoleTools; 
-using FTMContext.Models; 
+using FTMContext.Models;
+using LoggingLib;
 using FTMPersonView = AzureContext.Models.FTMPersonView;
 
 namespace AzureContext
@@ -12,9 +12,9 @@ namespace AzureContext
     public class AzureDbImporter
     {
         private IMSGConfigHelper _imsgConfigHelper;
-        private IConsoleWrapper _console;
+        private Ilog _console;
 
-        public AzureDbImporter(IConsoleWrapper console, IMSGConfigHelper imsgConfigHelper)
+        public AzureDbImporter(Ilog console, IMSGConfigHelper imsgConfigHelper)
         {
             _console = console;
             _imsgConfigHelper = imsgConfigHelper;

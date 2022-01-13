@@ -1,5 +1,4 @@
-﻿using ConsoleTools;
-using FTMContext;
+﻿using FTMContext;
 using FTMContext.Models;
 using MyFamily.Shared;
 using Newtonsoft.Json;
@@ -9,25 +8,26 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using LoggingLib;
 
 namespace FTMContext
 {
     public class FTMViewCreator
     {
-        protected IConsoleWrapper _consoleWrapper;
+        protected Ilog Ilog;
 
         protected CacheObject _srcCache;
 
         protected FTMakerCacheContext _destinationContext;
         
         public FTMViewCreator(FTMakerContext _sourceContext,  FTMakerCacheContext _destinationContext, 
-            IConsoleWrapper consoleWrapper) {
+            Ilog ilog) {
 
-            _consoleWrapper = consoleWrapper;
+            Ilog = ilog;
 
             this._destinationContext = _destinationContext;
 
-            _sourceContext.CreateCacheObject(_destinationContext.FTMPlaceCache,this._destinationContext.FTMPersonOrigins, consoleWrapper);
+            _sourceContext.CreateCacheObject(_destinationContext.FTMPlaceCache,this._destinationContext.FTMPersonOrigins, ilog);
 
             this._srcCache = _sourceContext.CacheObject;
 
@@ -43,13 +43,13 @@ namespace FTMContext
                 this._srcCache.GetAllLocationsForPerson(p.Id);
 
                 if (idx % 250 == 0) {
-                    _consoleWrapper.WriteLine(idx.ToString());
+                    Ilog.WriteLine(idx.ToString());
                 }
 
                 idx++;
             }
 
-            _consoleWrapper.WriteLine("finished");
+            Ilog.WriteLine("finished");
         }
 
 
@@ -66,7 +66,7 @@ namespace FTMContext
             int counter = 0;
             int saveCounter = 0;
 
-            _consoleWrapper.WriteLine(peopleCount + " Records ");
+            Ilog.WriteLine(peopleCount + " Records ");
  
             foreach (var p in this._srcCache.personCache.Values)
             {
@@ -112,7 +112,7 @@ namespace FTMContext
             int counter = 0;
             int saveCounter = 0;
 
-            _consoleWrapper.WriteLine(peopleCount + " record to process");
+            Ilog.WriteLine(peopleCount + " record to process");
 
             int idCounter = _destinationContext.FTMPersonView.Count() +1;
 
@@ -164,7 +164,7 @@ namespace FTMContext
                 idCounter++;
 
                 if (saveCounter == 1000) {
-                    _consoleWrapper.WriteCounter("Saving - " + counter + " of " + peopleCount);
+                    Ilog.WriteCounter("Saving - " + counter + " of " + peopleCount);
                     _destinationContext.SaveChanges();
                     saveCounter = 0;
 

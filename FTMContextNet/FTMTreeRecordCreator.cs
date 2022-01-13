@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using ConsoleTools;
 using FTMContext.Models;
+using LoggingLib;
 
 namespace FTMContext
 {
@@ -11,15 +11,15 @@ namespace FTMContext
     {
         private FTMakerContext _context;
         private FTMakerCacheContext _cacheContext;
-        private IConsoleWrapper _consoleWrapper;
+        private Ilog _ilog;
 
         public List<int> AddedPersons = new List<int>();
 
         public FTMTreeRecordCreator(FTMakerContext context,
             FTMakerCacheContext cacheContext,
-            IConsoleWrapper consoleWrapper)
+            Ilog ilog)
         {
-            _consoleWrapper = consoleWrapper;
+            _ilog = ilog;
             _context = context;
             _cacheContext = cacheContext;
         }
@@ -29,7 +29,7 @@ namespace FTMContext
         public void Create()
         {
  
-            _consoleWrapper.WriteLine("Creating Tree Records");
+            _ilog.WriteLine("Creating Tree Records");
 
             int idx = _cacheContext.TreeRecords.Count() + 1;
 
@@ -40,7 +40,7 @@ namespace FTMContext
              
                 string familyName = family.First().Origin ?? "Unknown";
                   
-                _consoleWrapper.WriteCounter("Adding Tree " + familyName + " " + family.Count() + " ancestors");
+                _ilog.WriteCounter("Adding Tree " + familyName + " " + family.Count() + " ancestors");
 
                 List<string> locationList = new List<string>();
 

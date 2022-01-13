@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore;
 using GenDBContext.Models;
 using DNAGedLib.Models;
 using GedcomParser.Entities;
+using LoggingLib;
 using Microsoft.Data.Sqlite;
-using ConsoleTools;
 
 namespace GedcomImporter
 {
@@ -72,7 +72,7 @@ namespace GedcomImporter
             //reason for this is that deleting the existing tree persons from the old persons table
             //couldn't be made to work in a reasonable time frame!
             var parts = filePath.Split('/');
-            var consoleWrapper = new ConsoleWrapper();
+            var consoleWrapper = new Log();
 
             Console.WriteLine("");
 
@@ -189,7 +189,7 @@ namespace GedcomImporter
         private static void update(string homePerson, Persons child, 
             List<Persons> personList)
         {
-            var consoleWrapper = new ConsoleWrapper();
+            var consoleWrapper = new Log();
             var father = personList.FirstOrDefault(f => f.IDString == child.FatherString);
             
             var mother = personList.FirstOrDefault(f => f.IDString == child.MotherString);

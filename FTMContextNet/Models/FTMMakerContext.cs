@@ -5,8 +5,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using ConfigHelper;
-using ConsoleTools;
 using FTMContext.lib;
+using LoggingLib;
 using Microsoft.EntityFrameworkCore;
 using MyFamily.Shared;
 
@@ -42,7 +42,7 @@ namespace FTMContext.Models
         public void Create(FTMakerContext _sourceContext,
                            DbSet<FTMPlaceCache> fTMPlaceCache,
                            DbSet<FTMPersonOrigin> ftmPersonOrigins,
-                            IConsoleWrapper _consoleWrapper)
+                            Ilog ilog)
         {
             Type90Facts = _sourceContext.Fact.Where(w => w.FactTypeId == 90 && w.LinkTableId == 5)
                 .Select(s => new KeyValuePair<int, string>(s.LinkId, s.Text)).ToList();
@@ -290,7 +290,7 @@ namespace FTMContext.Models
                 idx++;
             }
 
-            _consoleWrapper.WriteLine("Cache Created");
+            ilog.WriteLine("Cache Created");
 
         }
 
@@ -1300,9 +1300,9 @@ namespace FTMContext.Models
         public virtual DbSet<WebLink> WebLink { get; set; }
 
 
-        public void CreateCacheObject(DbSet<FTMPlaceCache> fTMPlaceCache, DbSet<FTMPersonOrigin> ftmPersonOrigins, IConsoleWrapper _consoleWrapper)
+        public void CreateCacheObject(DbSet<FTMPlaceCache> fTMPlaceCache, DbSet<FTMPersonOrigin> ftmPersonOrigins, Ilog ilog)
         {
-            this.CacheObject.Create(this, fTMPlaceCache, ftmPersonOrigins, _consoleWrapper);
+            this.CacheObject.Create(this, fTMPlaceCache, ftmPersonOrigins, ilog);
 
         }
         private SQLiteConnection GetCon()
