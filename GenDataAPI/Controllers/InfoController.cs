@@ -1,15 +1,12 @@
-﻿using FTMContext;
-using FTMContext.Models;
-using System.Linq;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using ConfigHelper;
+using FTMContext;
+using FTMContext.Models;
+using GenDataAPI.Hub;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 
-namespace FTMServices4.Controllers
+namespace GenDataAPI.Controllers
 {
     [ApiController]
     [Route("[controller]")]
@@ -46,18 +43,7 @@ namespace FTMServices4.Controllers
                     };
 
                     break;
-
-                //case "destination_contents":
-                //    var ftmMakerContext = FTMakerContext.CreateDestinationDB();
-                //    var r = ftmMakerContext.DumpCount();
-
-                //    returnVal = new Info()
-                //    {
-                //        RecordCount = r.Count,
-                //        Results = r
-                //    };
-
-                //    break;
+                     
             }
 
             return returnVal;

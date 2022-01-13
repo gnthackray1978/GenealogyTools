@@ -161,7 +161,7 @@ namespace FTMContext
                 foreach (var p in data.missingPlaces)
                 {
 
-                    a.FTMPlaceCache.Add(new Models.FTMPlaceCache()
+                    a.FTMPlaceCache.Add(new Models.FtmPlaceCache()
                     {
                         Id = newId,
                         FTMOrginalName = p.Name,

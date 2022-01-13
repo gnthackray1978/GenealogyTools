@@ -40,7 +40,7 @@ namespace FTMContext.Models
         public List<KeyValuePair<int, string>> Type90Facts;
 
         public void Create(FTMakerContext _sourceContext,
-                           DbSet<FTMPlaceCache> fTMPlaceCache,
+                           DbSet<FtmPlaceCache> fTMPlaceCache,
                            DbSet<FTMPersonOrigin> ftmPersonOrigins,
                             Ilog ilog)
         {
@@ -1300,7 +1300,7 @@ namespace FTMContext.Models
         public virtual DbSet<WebLink> WebLink { get; set; }
 
 
-        public void CreateCacheObject(DbSet<FTMPlaceCache> fTMPlaceCache, DbSet<FTMPersonOrigin> ftmPersonOrigins, Ilog ilog)
+        public void CreateCacheObject(DbSet<FtmPlaceCache> fTMPlaceCache, DbSet<FTMPersonOrigin> ftmPersonOrigins, Ilog ilog)
         {
             this.CacheObject.Create(this, fTMPlaceCache, ftmPersonOrigins, ilog);
 

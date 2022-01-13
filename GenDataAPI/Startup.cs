@@ -11,7 +11,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ConfigHelper;
-using static FTMServices4.Program2;
+using GenDataAPI.Hub;
+using static GenDataAPI.Program2;
 
 namespace FTMServices4
 {

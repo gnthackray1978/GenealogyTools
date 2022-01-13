@@ -1,7 +1,9 @@
-﻿using LoggingLib;
+﻿
+using GenDataAPI.Hub;
+using LoggingLib;
 using Microsoft.AspNetCore.SignalR;
 
-namespace FTMServices4.Controllers
+namespace GenDataAPI.Controllers
 {
     public class OutputHandler : Ilog
     {

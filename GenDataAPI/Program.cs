@@ -1,13 +1,8 @@
+using FTMServices4;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace FTMServices4
+namespace GenDataAPI
 {
     public class Program2
     {
@@ -22,12 +17,5 @@ namespace FTMServices4
                 {
                     webBuilder.UseStartup<Startup>();
                 });
-
-        public class Global
-        {
-            public delegate void DelLogMessage(string data);
-            public static DelLogMessage LogMessage;
-        }
     }
 }
-//

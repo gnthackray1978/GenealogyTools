@@ -1,13 +1,13 @@
-﻿using FTMContext;
-using FTMContext.Models;
-using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Collections.Generic;
 using System.Linq;
 using ConfigHelper;
+using FTMContext;
+using FTMContext.Models;
+using GenDataAPI.Hub;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 
-namespace FTMServices4.Controllers
+namespace GenDataAPI.Controllers
 {
     public class Result
     { 

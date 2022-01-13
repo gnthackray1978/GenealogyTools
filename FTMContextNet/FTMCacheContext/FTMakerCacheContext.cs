@@ -10,88 +10,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FTMContext.Models
 {
-
-
-    public partial class FTMPersonView
-    {
-        public int Id { get; set; }
-
-        public string FirstName { get; set; }
-        public string Surname { get; set; }
-
-        public int BirthFrom { get; set; }
-        public int BirthTo { get; set; }
-
-        public string BirthLocation { get; set; }
-        public double BirthLat { get; set; }
-        public double BirthLong { get; set; }
-
-        public string AltLocationDesc { get; set; }
-        public string AltLocation { get; set; }
-        public double AltLat { get; set; }
-        public double AltLong { get; set; }
-
-        public string Origin { get; set; }
-
-        public int PersonId { get; set; }
-
-        public int FatherId { get; set; }
-
-        public int MotherId { get; set; }
-
-        public string LinkedLocations { get; set; }
-    }
-
-    public partial class DupeEntry
-    {
-        public int Id { get; set; }
-        public int PersonId { get; set; }
-        public string Ident { get; set; }
-        public string Origin { get; set; }
-        public int BirthYearFrom { get; set; }
-        public int BirthYearTo { get; set; }
-        public string Location { get; set; }
-        public string ChristianName { get; set; }
-        public string Surname { get; set; }
-    }
-
-    public partial class FTMPlaceCache
-    {
-
-        public int Id { get; set; }
-
-        public int FTMPlaceId { get; set; }
-
-        public string FTMOrginalName { get; set; }
-        public string FTMOrginalNameFormatted { get; set; }
-        public string JSONResult { get; set; }
-        public string County { get; set; }
-        public string Country { get; set; }
-        public bool Searched { get; set; }
-
-    }
-
-
-    public partial class TreeRecord
-    {
-        public int Id { get; set; }
-        public int PersonCount { get; set; }
-        public string Origin { get; set; }
-        public string Name { get; set; }
-        public int CM { get; set; }
-
-        public bool Located { get; set; }
-    
-    }
-
-    public partial class FTMPersonOrigin
-    {
-        public int Id { get; set; }
-        public int PersonId { get; set; }
-        public string Origin { get; set; }
-        
-    }
-
     public partial class FTMakerCacheContext : DbContext
     {
 
@@ -198,7 +116,7 @@ namespace FTMContext.Models
         public virtual DbSet<TreeRecord> TreeRecords { get; set; }
         public virtual DbSet<DupeEntry> DupeEntries { get; set; }
         public virtual DbSet<FTMPersonView> FTMPersonView { get; set; }
-        public virtual DbSet<FTMPlaceCache> FTMPlaceCache { get; set; }
+        public virtual DbSet<FtmPlaceCache> FTMPlaceCache { get; set; }
 
 
         public void DeleteTempData()

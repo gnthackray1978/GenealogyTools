@@ -1,16 +1,14 @@
-﻿using FTMContext;
-using FTMContext.Models;
+﻿using System.Collections.Generic;
 using System.Linq;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using AzureContext;
 using ConfigHelper;
+using FTMContext;
+using FTMContext.Models;
+using GenDataAPI.Hub;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 
-namespace FTMServices4.Controllers
+namespace GenDataAPI.Controllers
 {
 
     public class Upload
@@ -35,10 +33,8 @@ namespace FTMServices4.Controllers
             _hubContext = hubContext;
             _iMSGConfigHelper = iMSGConfigHelper;
         }
-
-        public object AzureDbImporter { get; private set; }
-
-
+        
+        
         // GET api/values
         public IEnumerable<PlaceLookup> Get()
         {
