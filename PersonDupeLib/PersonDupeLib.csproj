@@ -9,7 +9,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ConsoleTools2\ConsoleTools2.csproj" />
     <ProjectReference Include="..\GenDBContextNET\GenDBContextNET.csproj" />
     <ProjectReference Include="..\PlaceLibNet\PlaceLibNet.csproj" />
   </ItemGroup>

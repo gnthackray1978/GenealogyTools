@@ -18,8 +18,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ConsoleTools2\ConsoleTools2.csproj" />
     <ProjectReference Include="..\GenDBContextNET\GenDBContextNET.csproj" />
+    <ProjectReference Include="..\LoggingLib\LoggingLib.csproj" />
   </ItemGroup>
 
 </Project>

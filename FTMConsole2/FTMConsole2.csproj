@@ -13,7 +13,6 @@
     <ProjectReference Include="..\AzureContext\AzureContext.csproj" />
     <ProjectReference Include="..\Clusterer\Clusterer.csproj" />
     <ProjectReference Include="..\ConfigHelper\ConfigHelper.csproj" />
-    <ProjectReference Include="..\ConsoleTools2\ConsoleTools2.csproj" />
     <ProjectReference Include="..\FTMContextNet\FTMContextNet.csproj" />
   </ItemGroup>
 

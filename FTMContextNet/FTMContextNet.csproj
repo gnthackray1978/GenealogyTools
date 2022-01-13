@@ -36,7 +36,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ConfigHelper\ConfigHelper.csproj" />
-    <ProjectReference Include="..\ConsoleTools2\ConsoleTools2.csproj" />
+    <ProjectReference Include="..\LoggingLib\LoggingLib.csproj" />
     <ProjectReference Include="..\PlaceLibNet\PlaceLibNet.csproj" />
   </ItemGroup>
 
