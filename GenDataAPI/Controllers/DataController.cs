@@ -65,13 +65,7 @@ namespace FTMServices4.Controllers
             var sourceDB = FTMakerContext.CreateSourceDB(_iMSGConfigHelper);
 
             switch (upload.Value) {
-                case "backupAndDecryptFTMDB":
-
-                   
-                    FTMTools.ExtractFTMDB(sourceDB, outputHandler);
-
-                    break;
-
+             
                 case "addResetMissingPlaces":
                     
                     

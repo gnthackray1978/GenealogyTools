@@ -19,7 +19,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GenealogyTools", "Genealogy
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AzureContext", "AzureContext\AzureContext.csproj", "{2034D27F-72FF-41DA-9955-C42304190435}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FTMServices4", "FTMServices4\FTMServices4.csproj", "{95778526-ECA7-4C38-A6AD-2BBC69DD7823}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GenDataAPI", "GenDataAPI\GenDataAPI.csproj", "{95778526-ECA7-4C38-A6AD-2BBC69DD7823}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FTMConsole2", "FTMConsole2\FTMConsole2.csproj", "{A8DE8C9F-5145-4515-80A5-D24C3543322D}"
 EndProject

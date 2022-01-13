@@ -244,59 +244,6 @@ namespace FTMContext
 
             //Console.WriteLine(destinationContext.FTMPlaceCache.Count());
         }
-
-        public static void ExtractFTMDB(FTMakerContext source, IConsoleWrapper consoleWrapper)
-        {
-            IMSGConfigHelper imsgConfigHelper = new MSGConfigHelper();
-
-
-            string path = Path.GetDirectoryName((new System.Uri(Assembly.GetExecutingAssembly().CodeBase)).LocalPath);
-                        
-            File.Copy(Path.Combine(path, "blank.db"), imsgConfigHelper.DNA_Match_File_Path + imsgConfigHelper.DNA_Match_File_FileName, true);
-            
-            FTMakerContext destination = FTMakerContext.CreateDestinationDB(imsgConfigHelper);
-
-            consoleWrapper.WriteLine("Decrypting FTM data from " + source.FileName + " to " + destination.FileName);
-
-
-            consoleWrapper.WriteLine("Adding tables");
-
-            destination.SyncFact.AddRange(source.SyncFact);
-            destination.SyncArtifact.AddRange(source.SyncArtifact);
-            destination.SyncArtifactReference.AddRange(source.SyncArtifactReference);
-            destination.SyncState.AddRange(source.SyncState);
-            destination.SyncPerson.AddRange(source.SyncPerson);
-
-          
-            destination.ChildRelationship.AddRange(source.ChildRelationship);
-            destination.Deleted.AddRange(source.Deleted);
-            destination.FactType.AddRange(source.FactType);
-            destination.HistoryList.AddRange(source.HistoryList);
-            destination.MasterSource.AddRange(source.MasterSource);
-            destination.MediaLink.AddRange(source.MediaLink);
-            destination.Note.AddRange(source.Note);
-            destination.PersonExternal.AddRange(source.PersonExternal);
-            destination.PersonGroup.AddRange(source.PersonGroup);
-            destination.Publication.AddRange(source.Publication);
-            destination.Repository.AddRange(source.Repository);
-            destination.Setting.AddRange(source.Setting);
-            destination.Source.AddRange(source.Source);
-            destination.SourceLink.AddRange(source.SourceLink);
-            destination.Tag.AddRange(source.Tag);
-            destination.TagLink.AddRange(source.TagLink);
-            destination.Task.AddRange(source.Task);
-            destination.Person.AddRange(source.Person);
-            destination.Fact.AddRange(source.Fact);
-            destination.Place.AddRange(source.Place);
-            destination.Relationship.AddRange(source.Relationship);
-            destination.MediaFile.AddRange(source.MediaFile);
-            destination.WebLink.AddRange(source.WebLink);
-
-            consoleWrapper.WriteLine("Saving Data");
-            destination.SaveChanges();
-
-            consoleWrapper.WriteLine("Completed");
-
-        }
+        
     }
 }
