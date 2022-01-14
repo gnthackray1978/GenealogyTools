@@ -17,7 +17,7 @@ namespace DNAGedLib
 
     public class ImportStageUpdateStats : ImportStage
     {
-        public ImportStageUpdateStats(ImportationContext personImporter)
+        public ImportStageUpdateStats(ImportDataStore personImporter)
         {
             base.personImporter = personImporter;
         }

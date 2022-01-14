@@ -2,19 +2,22 @@
 using FTMContext;
 using FTMContext.Models;
 using System;
-using System.Linq;
-using Clusterer;
+using System.Linq; 
 using ConfigHelper;
+using FTMContextNet;
 using LoggingLib;
 
 namespace FTMConsole2
 {
-    //
+    
     class Program
     {
         static void Main(string[] args)
         {
             IMSGConfigHelper imsgConfigHelper = new MSGConfigHelper();
+
+           
+            var facade = new FTMFacade(imsgConfigHelper, new Log());
 
 
             Console.WriteLine("1. Update FTM DBs");
@@ -28,10 +31,8 @@ namespace FTMConsole2
             Console.WriteLine("5. Run Grouping");
 
             Console.WriteLine("6. Debug Option");
-
-            Console.WriteLine("7. Clustering");
-
-            Console.WriteLine("8. Quit");
+            
+            Console.WriteLine("7. Quit");
 
 
 
@@ -40,7 +41,7 @@ namespace FTMConsole2
 
             var input = Console.ReadKey();
 
-            while (!int.TryParse(input.KeyChar.ToString(), out sin) || sin > 8 || sin == 0)
+            while (!int.TryParse(input.KeyChar.ToString(), out sin) || sin > 7 || sin == 0)
             {
                 Console.WriteLine("Not a valid Selection");
                 input = Console.ReadKey();
@@ -48,66 +49,32 @@ namespace FTMConsole2
 
             if (sin == 1)
             {
-
-                var sourceDB = FTMakerContext.CreateSourceDB(imsgConfigHelper);
-                var cacheDB = FTMakerCacheContext.CreateCacheDB(imsgConfigHelper);
-                var sourcePlaces = sourceDB.Place.ToList();
-
-                Console.WriteLine("Press a key to Add Missing Places");
-                Console.ReadKey();
-
-                FTMGeoCoding.AddMissingPlaces(sourcePlaces, FTMakerCacheContext.CreateCacheDB(imsgConfigHelper), new Log());
-
-                Console.WriteLine("Press a key to Reset Updated Places");
-                Console.ReadKey();
-
-                FTMGeoCoding.ResetUpdatedPlaces(sourcePlaces, FTMakerCacheContext.CreateCacheDB(imsgConfigHelper), new Log());
-
-                // now loadftmservices and geolocate the cache entries 
-                // which dont have a json result set.
-
-                // once place ids have been updated
-                // set date and location fact to each person in db.
-
-                Console.WriteLine("Finished");
+                facade.UpdateMissingPlaces();
                 Console.ReadKey();
             }
 
             if (sin == 2)
             {
-                FTMGeoCoding.UpdateFTMCacheMetaData(FTMakerCacheContext.CreateCacheDB(imsgConfigHelper), new Log());
-
-                Console.WriteLine("Finished");
+                facade.UpdatePlaceMetaData();
                 Console.ReadKey();
             }
 
 
             if (sin == 3)
             {
-                var ftmDupe = new FTMViewCreator(FTMakerContext.CreateSourceDB(imsgConfigHelper), FTMakerCacheContext.CreateCacheDB(imsgConfigHelper), new Log());
-
-                ftmDupe.Run();
-
-                Console.WriteLine("Finished");
+                facade.SetDateLocPop();
                 Console.ReadKey();
             }
 
             if (sin == 4)
             {
-                //var ftmMostRecentAncestor = new FTMMostRecentAncestor(FTMakerContext.CreateSourceDB(), new ConsoleWrapper());
-
-                //ftmMostRecentAncestor.MarkMostRecentAncestor();
-
-                Console.WriteLine("Finished");
+                facade.SetOriginPerson();
                 Console.ReadKey();
             }
 
             if (sin == 5)
             {
-                var pg = new PersonGrouper(FTMakerContext.CreateSourceDB(imsgConfigHelper),
-                                FTMakerCacheContext.CreateCacheDB(imsgConfigHelper), new Log());
-
-                pg.PopulateDupeEntries();
+                facade.CreateDupeView();
             }
 
             if (sin == 6)
@@ -139,10 +106,7 @@ namespace FTMConsole2
                 Console.ReadKey();
             }
 
-            if (sin == 7)
-            {
-                var c = new Cluster();
-            }
+            
 
         }
 

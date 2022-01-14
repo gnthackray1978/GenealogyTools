@@ -4,6 +4,7 @@ using AzureContext;
 using ConfigHelper;
 using FTMContext;
 using FTMContext.Models;
+using FTMContextNet;
 using GenDataAPI.Hub;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -25,24 +26,23 @@ namespace GenDataAPI.Controllers
     [Route("[controller]")]
     public class DataController : ControllerBase
     {
-        private readonly IHubContext<NotificationHub> _hubContext;
+        
         private readonly IMSGConfigHelper _iMSGConfigHelper;
+        private readonly OutputHandler _outputHandler;
+        private readonly FTMFacade _facade;
 
         public DataController(IHubContext<NotificationHub> hubContext, IMSGConfigHelper iMSGConfigHelper)
-        {
-            _hubContext = hubContext;
+        { 
             _iMSGConfigHelper = iMSGConfigHelper;
+            _outputHandler = new OutputHandler(hubContext);
+            _facade = new FTMFacade(_iMSGConfigHelper, _outputHandler);
         }
         
         
         // GET api/values
         public IEnumerable<PlaceLookup> Get()
         {
-            var outputHandler = new OutputHandler(_hubContext);
-
-            var context = FTMakerCacheContext.CreateCacheDB(_iMSGConfigHelper);
-
-            return FTMGeoCoding.GetUnknownPlaces(context, outputHandler).Take(75);
+            return _facade.GetUnknownPlaces(75);
         }
 
         // GET api/values/5
@@ -55,100 +55,50 @@ namespace GenDataAPI.Controllers
         // POST api/values
         public void Post(Upload upload)
         {
-            //Debug.WriteLine(upload.Value);
-            var outputHandler = new OutputHandler(_hubContext);
-            var cacheDB = FTMakerCacheContext.CreateCacheDB(_iMSGConfigHelper);
-            var sourceDB = FTMakerContext.CreateSourceDB(_iMSGConfigHelper);
+            
+
 
             switch (upload.Value) {
              
                 case "addResetMissingPlaces":
-                    
-                    
-                    var sourcePlaces = sourceDB.Place.ToList();
 
-
-                    outputHandler.WriteLine("Adding missing places");
-
-
-
-                    FTMGeoCoding.AddMissingPlaces(sourcePlaces, cacheDB, outputHandler);
-
-
-                    outputHandler.WriteLine("Updating places where required");
-
-
-                    FTMGeoCoding.ResetUpdatedPlaces(sourcePlaces, cacheDB, outputHandler);
-                     
-                    outputHandler.WriteLine("Finished Updating Place Names");
-                    
-
+                    _facade.UpdateMissingPlaces();
                     break;
 
                 case "updatePlaceMetadata":
 
-                    FTMGeoCoding.UpdateFTMCacheMetaData(cacheDB, outputHandler);
-
-                    outputHandler.WriteLine("Finished setting counties and countries in FTMPlaceCache table");
-
+                    _facade.UpdatePlaceMetaData();
                     break;
 
                 case "cleardata":
 
-                    outputHandler.WriteLine("Clearing existing data");
-
-                    cacheDB.DeleteTempData();
-
-                    outputHandler.WriteLine("Finished Deleting data");
-
+                    _facade.ClearData();
                     break;
 
                 case "setOriginPerson":
 
-                    var ftmMostRecentAncestor = new FTMMostRecentAncestor(sourceDB, cacheDB, outputHandler);
-
-                    ftmMostRecentAncestor.MarkMostRecentAncestor();
-
-                    outputHandler.WriteLine("Finished Setting Origin Person");
-
+                    _facade.SetOriginPerson();
                     break;
 
 
                 case "setDateLocPop":
-
-                    var ftmDupe = new FTMViewCreator(sourceDB, cacheDB, outputHandler);
-
-                    ftmDupe.Run();
-
-                    outputHandler.WriteLine("Finished Setting Date Loc Pop");
-
+                    _facade.SetDateLocPop();
                     break;
                 case "createDupeView":
-
-                    var pg = new PersonGrouper(sourceDB, cacheDB, outputHandler);
-
-                    pg.PopulateDupeEntries();
-
-                    outputHandler.WriteLine("Finished Creating Dupe View");
+                    _facade.CreateDupeView();
                     break;
                 case "createTreeRecord":
-                    FTMTreeRecordCreator ftmTreeRecordCreator = new FTMTreeRecordCreator(sourceDB, cacheDB, outputHandler);
-
-                    ftmTreeRecordCreator.Create();
-
-                    outputHandler.WriteLine("Finished Creating Tree Record View");
-
+                    _facade.CreateTreeRecord();
                     break;
 
                 case "azureimport":
-                    var az = new AzureDbImporter(outputHandler, _iMSGConfigHelper);
-                    outputHandler.WriteLine("Importing into azure DB");
+                    var az = new AzureDbImporter(_outputHandler, _iMSGConfigHelper);
+                    _outputHandler.WriteLine("Importing into azure DB");
                     az.Import();
-                    outputHandler.WriteLine("Finished importing into azure DB");
+                    _outputHandler.WriteLine("Finished importing into azure DB");
                     break;
 
             }
-
         }
          
     }

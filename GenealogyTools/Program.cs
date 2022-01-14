@@ -59,7 +59,7 @@ namespace GenealogyTools
 
                 var stages = new List<ImportStage>()
                 {
-                    new ImportStageICW(new ImportationContext()),
+                    new ImportStageICW(new ImportDataStore()),
                 };
 
                 stages.ForEach(f => f.Import());
@@ -85,7 +85,7 @@ namespace GenealogyTools
             //import from dnagedcom db
             if (sin == 2)
             {
-                DNAGEDComImporter.Import();
+                DNAGedImporter.Import();
 
                 Console.WriteLine("Finished - press a key");
                 Console.ReadKey();

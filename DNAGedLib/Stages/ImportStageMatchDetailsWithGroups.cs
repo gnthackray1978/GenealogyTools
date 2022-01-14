@@ -9,7 +9,7 @@ namespace DNAGedLib
     {
       
 
-        public ImportStageMatchDetailsWithGroups(ImportationContext personImporter)
+        public ImportStageMatchDetailsWithGroups(ImportDataStore personImporter)
         {
            
             base.personImporter = personImporter;

@@ -8,7 +8,7 @@ namespace DNAGedLib
 {
     public class ImportStageTrees : ImportStage
     {
-        public ImportStageTrees(ImportationContext personImporter)
+        public ImportStageTrees(ImportDataStore personImporter)
         {
             base.personImporter = personImporter;
         }

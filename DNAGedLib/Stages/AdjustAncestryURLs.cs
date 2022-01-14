@@ -6,7 +6,7 @@ namespace DNAGedLib
 {
     public class AdjustAncestryURLs : ImportStage
     {
-        public AdjustAncestryURLs(ImportationContext personImporter)
+        public AdjustAncestryURLs(ImportDataStore personImporter)
         {
             base.personImporter = personImporter;
         }

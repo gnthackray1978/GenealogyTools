@@ -7,7 +7,7 @@ namespace DNAGedLib
     public class SelectProfile : ImportStage
     {
     
-        public SelectProfile(ImportationContext personImporter)
+        public SelectProfile(ImportDataStore personImporter)
         {
             base.personImporter = personImporter;
             

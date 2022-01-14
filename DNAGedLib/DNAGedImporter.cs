@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace DNAGedLib
 {
-    public class DNAGEDComImporter {
+    public class DNAGedImporter {
         public static void Import()
         {
 
@@ -11,18 +11,18 @@ namespace DNAGedLib
             Console.WriteLine("Select User to update/import");
             Console.WriteLine("****************************");
 
-            var p = new ImportationContext();
+            var importDataStore = new ImportDataStore();
 
             var stages = new List<ImportStage>()
             {
-                new SelectProfile(p),
-                new ReadDNAGedComSQLLiteDB(p),
-                new WriteStagePeople(p),
-                new ImportStageTrees(p),
-                new ImportStageICW(p),
-                new ImportStageMatchDetailsWithGroups(p),
-                new ImportStageKitStats(p),
-                new AdjustAncestryURLs(p)
+                new SelectProfile(importDataStore),
+                new ReadDNAGedComSQLLiteDB(importDataStore),
+                new WriteStagePeople(importDataStore),
+                new ImportStageTrees(importDataStore),
+                new ImportStageICW(importDataStore),
+                new ImportStageMatchDetailsWithGroups(importDataStore),
+                new ImportStageKitStats(importDataStore),
+                new AdjustAncestryURLs(importDataStore)
             };
 
 

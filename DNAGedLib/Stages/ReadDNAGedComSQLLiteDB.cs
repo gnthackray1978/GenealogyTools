@@ -7,7 +7,7 @@ namespace DNAGedLib
 {
     public class ReadDNAGedComSQLLiteDB : ImportStage
     {
-        public ReadDNAGedComSQLLiteDB(ImportationContext personImporter)
+        public ReadDNAGedComSQLLiteDB(ImportDataStore personImporter)
         {
             base.personImporter = personImporter;
         }

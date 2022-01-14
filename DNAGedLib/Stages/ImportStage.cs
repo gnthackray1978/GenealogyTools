@@ -1,7 +1,7 @@
 ﻿namespace DNAGedLib
 {
     public abstract class ImportStage { 
-        protected ImportationContext personImporter;
+        protected ImportDataStore personImporter;
 
         public abstract Response Import();
     }

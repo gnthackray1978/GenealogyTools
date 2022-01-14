@@ -9,7 +9,7 @@ namespace DNAGedLib
 {
     public class ImportStageKitStats : ImportStage
     {
-        public ImportStageKitStats(ImportationContext personImporter)
+        public ImportStageKitStats(ImportDataStore personImporter)
         {
             base.personImporter = personImporter;
             

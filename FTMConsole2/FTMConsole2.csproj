@@ -11,7 +11,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AzureContext\AzureContext.csproj" />
-    <ProjectReference Include="..\Clusterer\Clusterer.csproj" />
     <ProjectReference Include="..\ConfigHelper\ConfigHelper.csproj" />
     <ProjectReference Include="..\FTMContextNet\FTMContextNet.csproj" />
   </ItemGroup>

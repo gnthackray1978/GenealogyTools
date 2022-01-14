@@ -7,7 +7,7 @@ namespace DNAGedLib
 {
     public class WriteStagePeople : ImportStage
     {
-        public WriteStagePeople(ImportationContext personImporter)
+        public WriteStagePeople(ImportDataStore personImporter)
         {
             base.personImporter = personImporter;
         }

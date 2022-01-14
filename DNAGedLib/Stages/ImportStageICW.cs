@@ -7,7 +7,7 @@ namespace DNAGedLib
 {
     public class ImportStageICW : ImportStage
     {        
-        public ImportStageICW(ImportationContext personImporter) {
+        public ImportStageICW(ImportDataStore personImporter) {
             base.personImporter = personImporter;
         }
         public override Response Import()

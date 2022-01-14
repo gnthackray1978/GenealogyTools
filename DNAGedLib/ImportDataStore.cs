@@ -1,17 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using DNAGedLib.Models;
-using PlaceLib;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System.Security.Permissions;
 using GenDBContext.Models;
 
 namespace DNAGedLib
 {
 
-    public class ImportationContext  
+    public class ImportDataStore  
     {
         #region props
 
@@ -37,7 +32,7 @@ namespace DNAGedLib
 
         #endregion
 
-        public ImportationContext() {
+        public ImportDataStore() {
             DNAGedContext = new DNAGEDContext();
             Path = @"C:\Users\george\Documents\DNAGedcom.db";
             Destination = @"Data Source=DESKTOP-KGS70RI\SQL2016EX;Initial Catalog=DNAGED;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";

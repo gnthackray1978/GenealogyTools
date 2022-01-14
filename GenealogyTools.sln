@@ -31,8 +31,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FTMContextNet", "FTMContext
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConfigHelper", "ConfigHelper\ConfigHelper.csproj", "{AD4614C4-0F64-4491-9502-ABF898AA4A41}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clusterer", "Clusterer\Clusterer.csproj", "{1B25CA34-8BB8-4944-A0A2-2C46DBED6B7C}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoggingLib", "LoggingLib\LoggingLib.csproj", "{200E6D88-0F8B-4431-AC58-D75162197AB9}"
 EndProject
 Global
@@ -97,10 +95,6 @@ Global
 		{AD4614C4-0F64-4491-9502-ABF898AA4A41}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AD4614C4-0F64-4491-9502-ABF898AA4A41}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AD4614C4-0F64-4491-9502-ABF898AA4A41}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1B25CA34-8BB8-4944-A0A2-2C46DBED6B7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1B25CA34-8BB8-4944-A0A2-2C46DBED6B7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1B25CA34-8BB8-4944-A0A2-2C46DBED6B7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1B25CA34-8BB8-4944-A0A2-2C46DBED6B7C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{200E6D88-0F8B-4431-AC58-D75162197AB9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{200E6D88-0F8B-4431-AC58-D75162197AB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{200E6D88-0F8B-4431-AC58-D75162197AB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
