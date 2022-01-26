@@ -103,7 +103,8 @@ namespace AzureContext
                     CM = d.CM,
                     Name = d.Name,
                     PersonCount = d.PersonCount,
-                    Located = d.Located
+                    Located = d.Located,
+                    GroupNumber = 0
                 });
 
             }

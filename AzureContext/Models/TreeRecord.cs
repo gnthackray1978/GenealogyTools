@@ -10,5 +10,7 @@
         public int? CM { get; set; }
 
         public bool Located { get; set; }
+
+        public int? GroupNumber { get; set; }
     }
 }
