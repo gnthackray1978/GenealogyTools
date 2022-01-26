@@ -153,8 +153,8 @@ namespace FTMContext
                     Surname = p.FamilyName,
                     Origin = origin,
                     LinkedLocations = processLocationReturnType.LocationString,
-                    FatherId = parents[1],
-                    MotherId = parents[0]
+                    FatherId = parents[0],
+                    MotherId = parents[1]
                 };
 
                 _destinationContext.FTMPersonView.Add(fTMPersonView);
