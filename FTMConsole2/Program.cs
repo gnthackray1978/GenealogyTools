@@ -80,29 +80,13 @@ namespace FTMConsole2
             if (sin == 6)
             {
 
-                AzureDBContext ac = new AzureDBContext(imsgConfigHelper.MSGGenDB01Local);
+                AzureDBContext ac = new AzureDBContext(imsgConfigHelper.MSGGenDB01);
 
+                var gb = new GraphBuilder(ac);
 
-                var c = ac.ParishTranscriptionDetails.ToList();
-
-
-                AzureDBContext ac2 = new AzureDBContext(imsgConfigHelper.MSGGenDB01);
-
-                foreach (var rec in c)
-                {
-                    ac2.ParishTranscriptionDetails2.Add(new ParishTranscriptionDetails2()
-                    {
-
-                        ParishDataString = rec.ParishDataString,
-                        ParishId = rec.ParishId,
-                        ParishTranscriptionId = rec.ParishTranscriptionId
-                    });
-                }
-
-                ac2.SaveChanges();
-
-                Console.WriteLine(c);
-
+                gb.GenerateDescendantGraph();
+                
+                 
                 Console.ReadKey();
             }
 
