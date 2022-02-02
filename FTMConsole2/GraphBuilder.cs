@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,86 +11,30 @@ using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 namespace FTMConsole2
 {
     public class GraphPerson
-    {
-        public object RecordLink { get; set; }
-        //RecordLink: this.RecordLinkLoader.fill(rawPerson),
+    {   
         public int ChildCount { get; set; }
-        //ChildCount: 1,
-        public int ChildIdx { get; set; }
-        //ChildIdx: 0,
-
         public List<int> ChildIdxLst { get; set; }
-        //ChildIdxLst: [],
         public List<int> ChildLst { get; set; }
-        //ChildLst: [],
         public List<object> Children { get; set; }
-        //Children:[],
         public int DescendantCount { get; set; }
-        //DescendentCount: 0,
         public object Father { get; set; }
-        //Father:undefined,
         public int FatherId { get; set; }
-        //FatherId: '',
         public int FatherIdx { get; set; }
-        //FatherIdx: -1,
-
         public int GenerationIdx { get; set; }
-        //GenerationIdx: rawPerson.generation,
         public int Index { get; set; }
-        //Index: 0,
-
         public bool IsDisplayed { get; set; }
-        //IsDisplayed: true,
-
         public bool IsFamilyEnd { get; set; }
-        //IsFamilyEnd: true,
-
         public bool IsFamilyStart { get; set; }
-        //IsFamilyStart: rawPerson.isFirst,
-
         public bool IsHtmlLink { get; set; }
-        //IsHtmlLink: false,
-
         public bool IsParentalLink { get; set; }
-        //IsParentalLink: false,
-
-        public object Mother { get; set; }
-        //Mother:undefined,
-
         public int MotherId { get; set; }
-
         public int MotherIdx { get; set; }
-        //MotherIdx: -1,
         public int PersonId { get; set; }
-        //PersonId: rawPerson.id,
-        public int RelationType { get; set; }
-        //RelationType: 0,
-
         public List<int> SpouseIdxLst { get; set; }
-        //SpouseIdxLst: [],
-
         public List<int> SpouseIdLst { get; set; }
-        //SpouseIdLst: [],
-
-        public List<object> Spouses { get; set; }
-        //Spouses: [],
-        
-        //X1: 0,
-        //X2: 0,
-        //Y1: 0,
-        //Y2: 0,
-
-        //zoom: 0
-
-
-
-
         public string ChristianName { get; set; }
-
         public string Surname { get; set; }
-
         public string BirthLocation { get; set; }
-
         public string DOB { get; set; }
 
     }
@@ -98,6 +43,152 @@ namespace FTMConsole2
     {
         public int FatherId { get; set; }
         public int MotherId { get; set; }
+    }
+
+    public class AncestorGraphBuilder {
+        private readonly AzureDBContext _azureDbContext;
+        private List<FTMPersonView> _persons;
+        private List<GraphMarriage> _graphMarriages;
+
+        public AncestorGraphBuilder(AzureDBContext azureDbContext)
+        {
+            _azureDbContext = azureDbContext;
+
+            _persons = _azureDbContext.FTMPersonView.Where(w => w.Origin == "_34_Kennington").ToList();
+
+            _graphMarriages = new List<GraphMarriage>();
+
+            var g = _persons.GroupBy(d => new { d.FatherId, d.MotherId })
+                .Select(m => new { m.Key.FatherId, m.Key.MotherId });
+
+            foreach (var group in g)
+            {
+                _graphMarriages.Add(new GraphMarriage() { FatherId = group.FatherId.GetValueOrDefault(), MotherId = group.MotherId.GetValueOrDefault() });
+            }
+
+
+        }
+
+        public void GenerateAncestorGraph(int personId) {
+            List<List<GraphPerson>> results = new List<List<GraphPerson>>();
+
+            Console.WriteLine("GenerateDescendantGraph");
+
+            var startPerson = _persons.FirstOrDefault(fd => fd.PersonId == personId);
+            int currentGeneration = 0;
+
+            results.Add(new List<GraphPerson>());
+            results.Last().Add(new GraphPerson()
+            {
+                PersonId = startPerson.PersonId.GetValueOrDefault(),
+                BirthLocation = startPerson.BirthLocation,
+                ChristianName = startPerson.FirstName,
+                Surname = startPerson.Surname,
+                DOB = startPerson.BirthFrom.ToString(),
+                FatherId = startPerson.FatherId.GetValueOrDefault(),
+                MotherId = startPerson.MotherId.GetValueOrDefault(),
+                ChildIdxLst = new List<int>(),
+                ChildLst = new List<int>(),
+                SpouseIdxLst = new List<int>(),
+                SpouseIdLst = new List<int>(),
+                GenerationIdx =0
+            }
+            );
+
+            fillParents(results.Last().Last(), ref results, ref currentGeneration);
+
+            //add to array
+
+            //look up this persons parents.
+
+            //
+
+            foreach(var p in results[5])
+            {
+                Console.WriteLine(p.PersonId + " " + p.ChristianName + " " + p.Surname);
+            }
+        }
+
+        private void fillParents(GraphPerson child,
+            ref List<List<GraphPerson>> results, ref int currentGeneration)
+        {
+            if (child == null) return;
+
+            if(child.PersonId == 3219)
+            {
+                Console.WriteLine("test");
+            }
+
+            int fatherId = child.FatherId;
+            int motherId = child.MotherId;
+
+
+            var father = _persons.FirstOrDefault(fd => fd.PersonId == fatherId);
+            var mother = _persons.FirstOrDefault(fd => fd.PersonId == motherId);
+
+            if (father == null && mother == null)
+                return; 
+        //    results.Add(new List<GraphPerson>());
+
+            currentGeneration = child.GenerationIdx + 1;
+
+            if (currentGeneration >= results.Count)
+            {
+                results.Add(new List<GraphPerson>());
+            }
+
+            GraphPerson newFather = null;
+            GraphPerson newMother = null;
+            
+            if (father != null)
+            {
+                newFather = new GraphPerson()
+                {
+                    PersonId = father.PersonId.GetValueOrDefault(),
+                    BirthLocation = father.BirthLocation,
+                    ChristianName = father.FirstName,
+                    Surname = father.Surname,
+                    DOB = father.BirthFrom.ToString(),
+                    FatherId = father.FatherId.GetValueOrDefault(),
+                    MotherId = father.MotherId.GetValueOrDefault(),
+                    ChildIdxLst = new List<int>(),
+                    ChildLst = new List<int>() { child.PersonId },
+                    SpouseIdxLst = new List<int>(),
+                    SpouseIdLst = new List<int>(),
+                    GenerationIdx = currentGeneration,
+                    IsDisplayed = true,
+                    IsHtmlLink = true
+                };
+
+                results[currentGeneration].Add(newFather);
+            }
+
+            if (mother != null)
+            {
+                newMother = new GraphPerson()
+                {
+                    PersonId = mother.PersonId.GetValueOrDefault(),
+                    BirthLocation = mother.BirthLocation,
+                    ChristianName = mother.FirstName,
+                    Surname = mother.Surname,
+                    DOB = mother.BirthFrom.ToString(),
+                    FatherId = mother.FatherId.GetValueOrDefault(),
+                    MotherId = mother.MotherId.GetValueOrDefault(),
+                    ChildIdxLst = new List<int>(),
+                    ChildLst = new List<int>() { child.PersonId },
+                    SpouseIdxLst = new List<int>(),
+                    SpouseIdLst = new List<int>(),
+                    GenerationIdx = currentGeneration,
+                    IsDisplayed = true,                    
+                    IsHtmlLink = true
+                };
+
+                results[currentGeneration].Add(newMother);
+            }
+
+            fillParents(newFather, ref results, ref currentGeneration);
+            fillParents(newMother, ref results, ref currentGeneration);
+        }
     }
 
     public class GraphBuilder
@@ -124,6 +215,8 @@ namespace FTMConsole2
 
 
         }
+
+
 
         public void GenerateDescendantGraph()
         {
@@ -157,6 +250,21 @@ namespace FTMConsole2
             int currentGeneration = 0;
 
             fillChildGenerations(result, ref results, ref currentGeneration);
+
+            List<GraphPerson> flattenedResults = new List<GraphPerson>();
+
+            foreach (var g in results) {
+                var idx = 0;
+                foreach(var p in g)
+                {
+                    p.Index = idx;
+                    idx++;
+                    flattenedResults.Add(p);
+                }
+            }
+
+
+
 
             Console.WriteLine(result);
 
@@ -231,11 +339,13 @@ namespace FTMConsole2
             var workingCopy = destination[currentGeneration];
 
             List<int> newlyAdded = new List<int>();
+            int childIdx = 0;
+            int spouseCount = 0;
 
             foreach (var child in children)
             {
-                int childIdx = 0;
-                int spouseCount = 0;
+                
+                
                 int fatherIdx = -1;
                 int motherIdx = -1;
 
@@ -245,28 +355,28 @@ namespace FTMConsole2
                     motherIdx = GetIndexFromGeneration(destination[currentGeneration - 1], child.MotherId.GetValueOrDefault());
                 }
 
-
+               
              
                 workingCopy.Add(new GraphPerson()
-                        {
-                            IsFamilyEnd = childIdx == (children.Count + spouseCount),
-                            IsFamilyStart = childIdx == 0,
-                            PersonId = child.PersonId.GetValueOrDefault(),
-                            BirthLocation = child.BirthLocation,
-                            ChristianName = child.FirstName,
-                            Surname = child.Surname,
-                            DOB = child.BirthFrom.ToString(),
-                            FatherId = child.FatherId.GetValueOrDefault(),
-                            FatherIdx = fatherIdx,
-                            MotherId = child.MotherId.GetValueOrDefault(),
-                            MotherIdx = motherIdx,
-                            GenerationIdx = currentGeneration,
-                            ChildIdxLst = new List<int>(),
-                            ChildLst = new List<int>(),
-                             SpouseIdxLst = new List<int>(),
-                             SpouseIdLst = new List<int>()
-                        }
-                    );
+                {
+                           
+                    IsFamilyStart = childIdx == 0,
+                    PersonId = child.PersonId.GetValueOrDefault(),
+                    BirthLocation = child.BirthLocation,
+                    ChristianName = child.FirstName,
+                    Surname = child.Surname,
+                    DOB = child.BirthFrom.ToString(),
+                    FatherId = child.FatherId.GetValueOrDefault(),
+                    FatherIdx = fatherIdx,
+                    MotherId = child.MotherId.GetValueOrDefault(),
+                    MotherIdx = motherIdx,
+                    GenerationIdx = currentGeneration,
+                    ChildIdxLst = new List<int>(),
+                    ChildLst = new List<int>(),
+                    SpouseIdxLst = new List<int>(),
+                    SpouseIdLst = new List<int>()
+                }
+            );
 
 
                 var spouseList = makeSpouse(child.PersonId.GetValueOrDefault(), currentGeneration);
@@ -306,22 +416,33 @@ namespace FTMConsole2
                         destination[currentGeneration - 1][motherIdx].ChildCount = children.Count;
                     }
                 }
-                    //lastAdded.SpouseIdxLst.
+                
+                workingCopy.AddRange(spouseList);
 
-                    workingCopy.AddRange(spouseList);
-
-
-                    newlyAdded.Add(child.PersonId.GetValueOrDefault());
+                newlyAdded.Add(child.PersonId.GetValueOrDefault());
                     
-                    spouseCount += spouseList.Count;
+                spouseCount += spouseList.Count;
+
+                //the last child
+                if(childIdx == (children.Count-1))
+                {
+                    //family length 
+                    var familyLength = childIdx + spouseCount;
+
+                    var midPoint = (int)Math.Floor((decimal)familyLength / 2);
+
+                    workingCopy[midPoint].IsParentalLink = true;
+                    workingCopy[familyLength].IsFamilyEnd = true;
+                }
                     
-                    childIdx++;
+                childIdx++;
+
+
             }
 
             //gen 1
             foreach (var person in newlyAdded)
             {
-
                 fillChildGenerations(person, ref destination, ref currentGeneration);
             }
 

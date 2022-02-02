@@ -44,6 +44,12 @@
     <Reference Include="MyFamily.Shared">
       <HintPath>MyFamily.Shared.dll</HintPath>
     </Reference>
+    <Reference Include="System.Data.SQLite">
+      <HintPath>System.Data.SQLite.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Data.SQLite.Linq">
+      <HintPath>System.Data.SQLite.Linq.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>
