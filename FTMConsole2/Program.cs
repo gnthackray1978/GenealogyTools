@@ -82,11 +82,15 @@ namespace FTMConsole2
 
                 AzureDBContext ac = new AzureDBContext(imsgConfigHelper.MSGGenDB01);
 
+                ////var gb = new AncestorGraphBuilder(ac);
+
+                ////gb.GenerateAncestorGraph(3217);
+
+
                 var gb = new GraphBuilder(ac);
 
-                gb.GenerateDescendantGraph();
-                
-                 
+                gb.GenerateDescendantGraph(3217);
+
                 Console.ReadKey();
             }
 
