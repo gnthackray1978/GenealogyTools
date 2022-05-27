@@ -28,6 +28,8 @@ namespace AzureContext
 
             var a = FTMakerCacheContext.CreateCacheDB(_imsgConfigHelper);
 
+            
+
             _console.WriteCounter("Emptying TreeRecord FTMPersonView and DupeEntries");
 
             using (var executor = new AzureDBContext(_imsgConfigHelper.MSGGenDB01))
@@ -35,6 +37,7 @@ namespace AzureContext
                 executor.ExecuteCommand("TRUNCATE TABLE DNA.TreeRecord");
                 executor.ExecuteCommand("TRUNCATE TABLE DNA.FTMPersonView");
                 executor.ExecuteCommand("TRUNCATE TABLE DNA.DupeEntries");
+                executor.ExecuteCommand("TRUNCATE TABLE DNA.Relationships");
             }
 
             _console.WriteCounter("Adding new dupes");
@@ -112,7 +115,26 @@ namespace AzureContext
             destination.SaveChanges();
             //  destination.BulkInsert(destination.TreeRecord.ToList());
 
+            _console.WriteCounter("Adding new marriages");
 
+            foreach (var d in a.FTMMarriages)
+            {
+                destination.Relationships.Add(new Models.Relationships()
+                {
+                    Id = d.Id, 
+                    BrideId = d.BrideId,
+                    DateStr = d.MarriageDateStr,
+                    GroomId = d.GroomId,
+                    Location = d.MarriageLocation,
+                    Notes = d.Notes,
+                    Year = d.MarriageYear,
+                    Origin = d.Origin
+                    
+                });
+
+            }
+
+            destination.SaveChanges();
         }
 
          

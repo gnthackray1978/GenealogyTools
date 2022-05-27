@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using FTMContext.Models;
 using Microsoft.Data.SqlClient;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -86,6 +87,8 @@ namespace AzureContext.Models
         public virtual DbSet<DupeEntry> DupeEntries { get; set; }
 
         public virtual DbSet<TreeRecord> TreeRecord { get; set; }
+
+        public virtual DbSet<Relationships> Relationships { get; set; }
 
         private string ConString = "";
 
@@ -674,6 +677,15 @@ namespace AzureContext.Models
                 entity.Property(e => e.AltLat).HasColumnType("decimal(14, 10)");
 
                 entity.Property(e => e.AltLong).HasColumnType("decimal(14, 10)");
+
+            });
+
+            modelBuilder.Entity<Relationships>(entity =>
+            {
+                entity.ToTable("Relationships", "DNA");
+
+                entity.Property(e => e.Id).ValueGeneratedNever();
+                 
 
             });
 

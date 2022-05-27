@@ -80,6 +80,7 @@ namespace FTMContext.Models
                     cachedPlace.Country = "";
                     cachedPlace.County = "";
                     cachedPlace.Searched = true;
+                    cachedPlace.BadData = false;
                 }
 
                 this.SaveChanges();
@@ -116,6 +117,9 @@ namespace FTMContext.Models
         public virtual DbSet<TreeRecord> TreeRecords { get; set; }
         public virtual DbSet<DupeEntry> DupeEntries { get; set; }
         public virtual DbSet<FTMPersonView> FTMPersonView { get; set; }
+
+        public virtual DbSet<FTMMarriage> FTMMarriages { get; set; }
+
         public virtual DbSet<FtmPlaceCache> FTMPlaceCache { get; set; }
 
 
@@ -148,6 +152,13 @@ namespace FTMContext.Models
                 connection.Close();
 
                 command.CommandText = "DELETE FROM TreeRecords";
+
+
+                connection.Open();
+                command.ExecuteNonQuery();
+                connection.Close();
+
+                command.CommandText = "DELETE FROM FTMMarriages";
 
 
                 connection.Open();

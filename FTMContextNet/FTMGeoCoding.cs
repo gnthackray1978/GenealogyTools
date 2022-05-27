@@ -111,7 +111,8 @@ namespace FTMContext
 
             var places = new List<PlaceLookup>();
 
-                places = context.FTMPlaceCache.Where(w => (w.JSONResult == null || w.JSONResult == "null"))
+                places = context.FTMPlaceCache
+                    .Where(w => (w.JSONResult == null || w.JSONResult == "null" || w.JSONResult == "[]") && w.BadData == false)
                     .Select(s => new PlaceLookup() { placeid = s.FTMPlaceId, placeformatted = s.FTMOrginalNameFormatted })
                     .ToList();
 
@@ -129,8 +130,8 @@ namespace FTMContext
 
             var places = new List<PlaceLookup>();
                 
-            places = context.FTMPlaceCache.Where(w => (w.JSONResult == null || w.JSONResult == "null")
-                                                      && !w.Searched)
+            places = context.FTMPlaceCache.Where(w => (w.JSONResult == null || w.JSONResult == "null" || w.JSONResult == "[]")
+                                                      && !w.Searched && !w.BadData)
                 .Select(s => new PlaceLookup() { placeid = s.FTMPlaceId, placeformatted = s.FTMOrginalNameFormatted })
                 .ToList();
 
@@ -168,7 +169,8 @@ namespace FTMContext
                         JSONResult = null,
                         FTMOrginalNameFormatted = GoogleGeoCodingHelpers.FormatPlace(p.Name),
                         FTMPlaceId = p.Id,
-                        Searched = false
+                        Searched = false,
+                        BadData = false
                     });
 
                     newId++;

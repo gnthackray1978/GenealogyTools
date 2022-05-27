@@ -163,10 +163,48 @@ namespace FTMContext.Models
 
                 var relation = relationships.FirstOrDefault(r => r.Id == f.LinkId);
 
+                var origin = "";
+
+                if (originDictionary.ContainsKey(relation.Person1Id.GetValueOrDefault()))
+                    origin = originDictionary[relation.Person1Id.GetValueOrDefault()];
+
+                
+                relation.Date    = f.Date;
+                relation.Text    = f.Text;
+                relation.LinkId  = f.LinkId;
+                relation.PlaceId = f.PlaceId.GetValueOrDefault();
+                relation.Origin = origin;
+               
+
                 updateDictionary(marriageFactCache, f, relation.Person1Id);
 
                 updateDictionary(marriageFactCache, f, relation.Person2Id);
             }
+
+            foreach (var r in relationships)
+            {
+                var origin = "";
+
+                if (originDictionary.ContainsKey(r.Person1Id.GetValueOrDefault()))
+                    origin = originDictionary[r.Person1Id.GetValueOrDefault()];
+
+                if (origin == "")
+                {
+                    if (originDictionary.ContainsKey(r.Person2Id.GetValueOrDefault()))
+                        origin = originDictionary[r.Person2Id.GetValueOrDefault()];
+                }
+
+                r.Origin = origin;
+                //fTMPlaceCaches
+
+                if (r.PlaceId != null && fTMPlaceCaches.ContainsKey(r.PlaceId.Value))
+                {
+                    var placeName = fTMPlaceCaches[r.PlaceId.Value];
+
+                    r.PlaceName = placeName.FTMOrginalNameFormatted;
+                }
+            }
+
 
             personMapRelationshipDictionary = new Dictionary<int, List<int>>();
             relationshipDictionary = new Dictionary<int, RelationSubSet>();

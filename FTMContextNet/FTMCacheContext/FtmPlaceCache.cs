@@ -14,5 +14,7 @@
         public string Country { get; set; }
         public bool Searched { get; set; }
 
+        public bool BadData { get; set; }
+
     }
 }

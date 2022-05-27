@@ -158,7 +158,10 @@ namespace FTMContext
                 };
 
                 _destinationContext.FTMPersonView.Add(fTMPersonView);
-               
+
+             
+
+                //_destinationContext.FTMMarriages
 
                 counter++;
                 idCounter++;
@@ -170,6 +173,38 @@ namespace FTMContext
 
                 }
                 saveCounter++;
+            }
+
+            _destinationContext.SaveChanges();
+            
+
+            
+
+            idCounter = _destinationContext.FTMMarriages.Count() + 1;
+
+            foreach (var r in _srcCache.relationshipDictionary.Values)
+            {
+                int year = 0;
+
+                if (r.Date != null && r.Date.HasYear())
+                    year = r.Date.Year.GetValueOrDefault();
+
+                var marriage = new FTMMarriage()
+                {
+                    Id = idCounter,
+                    BrideId = r.Person1Id.GetValueOrDefault(),
+                    GroomId = r.Person2Id.GetValueOrDefault(),
+                    MarriageDateStr = year.ToString(),
+                    MarriageLocationId = r.PlaceId.GetValueOrDefault(),
+                    MarriageYear = year,
+                    Notes = r.Text,
+                    Origin = r.Origin,
+                    MarriageLocation = r.PlaceName
+
+                };
+
+                _destinationContext.FTMMarriages.Add(marriage);
+                idCounter++;
             }
 
             _destinationContext.SaveChanges();
