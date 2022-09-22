@@ -9,8 +9,8 @@ function PlaceObj(webConsole) {
 
 PlaceObj.prototype = {
 
-    countOfUnknownLocations: function () {
-        var printLocationCount = this.console.printLocationCount;
+    displayStats: function () {
+        var that = this;
 
         $.ajax({
             url: "./info/",
@@ -19,8 +19,7 @@ PlaceObj.prototype = {
                 infoType: 'unknown_places_count'
             },
             success: function (result) {
-                //document.getElementById("count").innerHTML = result.recordCount;
-                printLocationCount(result.recordCount);
+                that.console.displayStats(result);
             },
             error: function (xhr) {
                 //Do Something to handle error
@@ -29,10 +28,10 @@ PlaceObj.prototype = {
 
         return true;
     },
-    
-    
 
     addResetMissingPlaces: function () {
+
+        var that = this;
 
         var Upload = {
             Value: 'addResetMissingPlaces'
@@ -40,27 +39,34 @@ PlaceObj.prototype = {
 
         $.ajax({
             type: "post",
-            url: "/data", // "/api/controllerName/methodName"
+            url: "/data/places",
             contentType: "application/json",
             dataType: "json",
-            data: JSON.stringify(Upload)  //the parameter in method
-
+            data: JSON.stringify(Upload),
+            success: function (response) {
+                that.displayStats();
+            }
         });
         return true;
     },
 
     updatePlaceMetadata: function () {
 
+        var that = this;
+
         var Upload = {
             Value: 'updatePlaceMetadata'
         };
 
         $.ajax({
-            type: "post",
-            url: "/data", // "/api/controllerName/methodName"
+            type: "put",
+            url: "/data/places", // "/api/controllerName/methodName"
             contentType: "application/json",
             dataType: "json",
-            data: JSON.stringify(Upload)  //the parameter in method
+            data: JSON.stringify(Upload),
+            success: function (response) {
+                that.displayStats();
+            }
 
         });
          
@@ -69,50 +75,41 @@ PlaceObj.prototype = {
 
     setOriginPerson: function () {
 
+        var that = this;
+
         var Upload = {
             Value: 'setOriginPerson'
         };
 
         $.ajax({
             type: "post",
-            url: "/data", // "/api/controllerName/methodName"
+            url: "/data/origins", // "/api/controllerName/methodName"
             contentType: "application/json",
             dataType: "json",
-            data: JSON.stringify(Upload)  //the parameter in method
+            data: JSON.stringify(Upload),
+            success: function (response) {
+                that.displayStats();
+            }
 
         });
         return true;
     },
 
-    clearData: function () {
+    importPersons: function () {
 
-        var Upload = {
-            Value: 'cleardata'
-        };
+        var that = this;
 
-        $.ajax({
-            type: "post",
-            url: "/data",  
-            contentType: "application/json",
-            dataType: "json",
-            data: JSON.stringify(Upload)  
-
-        });
-        return true;
-    },
-
-    setDateLocPop: function () {
-
-        var Upload = {
-            Value: 'setDateLocPop'
-        };
+        var Upload = {  };
 
         $.ajax({
             type: "post",
-            url: "/data", // "/api/controllerName/methodName"
+            url: "/data/persons", // "/api/controllerName/methodName"
             contentType: "application/json",
             dataType: "json",
-            data: JSON.stringify(Upload)  //the parameter in method
+            data: JSON.stringify(Upload),
+            success: function (response) {
+                that.displayStats();
+            }
 
         });
         return true;
@@ -120,16 +117,19 @@ PlaceObj.prototype = {
 
     createDupeView: function () {
 
-        var Upload = {
-            Value: 'createDupeView'
-        };
+        var that = this;
+
+        var Upload = {   };
 
         $.ajax({
             type: "post",
-            url: "/data", // "/api/controllerName/methodName"
+            url: "/data/dupes",
             contentType: "application/json",
             dataType: "json",
-            data: JSON.stringify(Upload)  //the parameter in method
+            data: JSON.stringify(Upload),
+            success: function (response) {
+                that.displayStats();
+            }
 
         });
         return true;
@@ -137,16 +137,21 @@ PlaceObj.prototype = {
 
     createTreeRecord: function () {
 
+        var that = this;
+
         var Upload = {
             Value: 'createTreeRecord'
         };
 
         $.ajax({
             type: "post",
-            url: "/data", // "/api/controllerName/methodName"
+            url: "/data/trees", // "/api/controllerName/methodName"
             contentType: "application/json",
             dataType: "json",
-            data: JSON.stringify(Upload)  //the parameter in method
+            data: JSON.stringify(Upload),
+            success: function (response) {
+                that.displayStats();
+            }
 
         });
         return true;
@@ -154,16 +159,21 @@ PlaceObj.prototype = {
 
     azureimport: function () {
 
+        var that = this;
+
         var Upload = {
             Value: 'azureimport'
         };
 
         $.ajax({
             type: "post",
-            url: "/data", // "/api/controllerName/methodName"
+            url: "/data/azure", // "/api/controllerName/methodName"
             contentType: "application/json",
             dataType: "json",
-            data: JSON.stringify(Upload)  //the parameter in method
+            data: JSON.stringify(Upload),
+            success: function (response) {
+                that.displayStats();
+            }
 
         });
         return true;
@@ -171,6 +181,7 @@ PlaceObj.prototype = {
 
 
     saveGeoCodedLocationToServer: function (placeLookup) {
+        var that = this;
 
         $.ajax({
             type: "post",
@@ -189,7 +200,8 @@ PlaceObj.prototype = {
     getUnEncodedLocationsFromServer: function () {
        
         var sh = this;
-        var printBasic = this.console.printBasic;
+        var printBasic = this.console.printOutputLine;
+        let displayStats = this.displayStats;
 
         printBasic('GET geocode endpoint for unencoded places');
          
@@ -200,9 +212,16 @@ PlaceObj.prototype = {
                 infoType: ''
             },
             success: function (result) {
-                printBasic('GET geocode returned data');
-                sh.data = result.results;
-                sh.start();
+                if (result && result.results) {
+                    printBasic('GET geocode returned ' + result.results.length + ' places');
+
+                    sh.data = result.results;
+
+                    sh.start();
+                }
+                else {
+                    printBasic('GET geocode did not return data');
+                }
             },
             error: function (xhr) {
                 //Do Something to handle error
@@ -219,7 +238,7 @@ PlaceObj.prototype = {
         sh.count = 0; 
         var printBasic = this.console.printBasic;
         var printGeoCodeProgressCount = this.console.printGeoCodeProgressCount;
-        var printProgressCount = this.console.printProgressCount;
+        var printTrace = this.console.printTrace;
 
         var geocoder = new google.maps.Geocoder();
 
@@ -230,12 +249,13 @@ PlaceObj.prototype = {
             if (!d)
                 return;
 
-          //  if (d.placeformatted)
-           //     console.log(d.placeformatted);
+            if (sh.data && (sh.data.length-1) == idx) {
+                sh.displayStats();
+            }
 
-           // document.getElementById("progress").innerHTML = idx;
+            printTrace(idx);
 
-           printProgressCount(idx);
+            console.log('searching: ' + d.placeformatted);
 
             geocoder.geocode({
                 address: d.placeformatted
@@ -245,32 +265,38 @@ PlaceObj.prototype = {
                 
                 printGeoCodeProgressCount(sh.count);
 
-                if (status == "OVER_QUERY_LIMIT") {
+                var result = {
+                    placeid: d.placeid,
+                    place: '',
+                    placeformatted: d.placeformatted,
+                    //results: JSON.stringify(results)
+                };
+
+                switch (status) {
+                    case "OVER_QUERY_LIMIT":
+                        printBasic('GEOCODE FAILED ' + status);
+
+                        setTimeout(function () {
+                            searchAddress(sh.data[idx]);
+                        }, 3000);
+
+                        break;
+                    case "INVALID_REQUEST":
+                        // code block
+                        printBasic('GEOCODE FAILED searched:' + d.placeformatted + ' status ' + status);
+                        break;
+                    default:
+                        result.results = JSON.stringify(results);
+
+                        sh.console.printAddressToOutput(d.placeformatted, results);
+                        sh.saveGeoCodedLocationToServer(result);
+
+                        setTimeout(function () {
+                            idx++;
+                            searchAddress(sh.data[idx]);
+                        }, 500);
+                }
                  
-               
-                    printBasic('GEOCODE FAILED ' + status);
-
-                    setTimeout(function () {                   
-                        searchAddress(sh.data[idx]);
-                    }, 3000);
-                }
-                else {
-                    
-                    var result = {
-                        placeid: d.placeid,
-                        place : '',
-                        placeformatted: d.placeformatted,
-                        results: JSON.stringify(results)
-                    };
-                     
-                    sh.console.printToOutput(d.placeformatted, results);
-                    sh.saveGeoCodedLocationToServer(result);
-
-                    setTimeout(function () {
-                        idx++;
-                        searchAddress(sh.data[idx]);
-                    }, 500);
-                }
             });
 
         };

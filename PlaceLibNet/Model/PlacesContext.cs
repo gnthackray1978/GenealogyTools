@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using ConfigHelper;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -9,8 +10,11 @@ namespace PlaceLib.Model
 {
     public partial class PlacesContext : DbContext
     {
-        public PlacesContext()
+        private IMSGConfigHelper _configObj { get; set; }
+
+        public PlacesContext(IMSGConfigHelper config)
         {
+            _configObj = config;
         }
 
         public PlacesContext(DbContextOptions<PlacesContext> options)
@@ -18,19 +22,21 @@ namespace PlaceLib.Model
         {
         }
 
-        
+
         public virtual DbSet<FTMPlaceCache> FTMPlaceCache { get; set; }
 
         public virtual DbSet<Places> Places { get; set; }
 
+        private string GetCon()
+        {             
+            return _configObj.PlaceConString;
+        }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
+        { 
             if (!optionsBuilder.IsConfigured)
             {
-                //#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                //                optionsBuilder.UseSqlServer("Server=DESKTOP-KGS70RI\\SQL2016EX;Database=UKPlaces;Trusted_Connection=True;");
-
-                optionsBuilder.UseSqlite(@"Data Source=C:\Users\george\Documents\placeDB.db");
+                optionsBuilder.UseSqlite(GetCon());
             }
         }
 
@@ -122,30 +128,30 @@ namespace PlaceLib.Model
             });
         }
 
-        public string SearchPlacesDBForCounty(string searchString)
-        {
-            string county = "";
+        //public string SearchPlacesDBForCounty(string searchString)
+        //{
+        //    string county = "";
 
-            var placedbResult = this.Places.FirstOrDefault(w => w.Place15nm == searchString);
+        //    var placedbResult = this.Places.FirstOrDefault(w => w.Place15nm == searchString);
 
-            if (placedbResult != null)
-            {
-                county = placedbResult.Ctyhistnm;
-            }
-            else
-            {
-                var stripped = searchString.ToLower();
-                stripped = Regex.Replace(stripped, " ", "");
+        //    if (placedbResult != null)
+        //    {
+        //        county = placedbResult.Ctyhistnm;
+        //    }
+        //    else
+        //    {
+        //        var stripped = searchString.ToLower();
+        //        stripped = Regex.Replace(stripped, " ", "");
 
-                placedbResult = this.Places.FirstOrDefault(w => w.Placesort == stripped);
+        //        placedbResult = this.Places.FirstOrDefault(w => w.Placesort == stripped);
 
-                if (placedbResult != null)
-                {
-                    county = placedbResult.Ctyhistnm;
-                }
-            }
+        //        if (placedbResult != null)
+        //        {
+        //            county = placedbResult.Ctyhistnm;
+        //        }
+        //    }
 
-            return county;
-        }
+        //    return county;
+        //}
     }
 }

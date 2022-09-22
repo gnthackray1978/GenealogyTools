@@ -1,6 +1,5 @@
 ﻿using AzureContext.Models;
 using FTMContext;
-using FTMContext.Models;
 using System;
 using System.Linq; 
 using ConfigHelper;
@@ -49,7 +48,7 @@ namespace FTMConsole2
 
             if (sin == 1)
             {
-                facade.UpdateMissingPlaces();
+                facade.AddUnknownPlaces();
                 Console.ReadKey();
             }
 
@@ -62,13 +61,13 @@ namespace FTMConsole2
 
             if (sin == 3)
             {
-                facade.SetDateLocPop();
+                facade.ImportPersons();
                 Console.ReadKey();
             }
 
             if (sin == 4)
             {
-                facade.SetOriginPerson();
+                facade.AssignTreeNamesToPersons();
                 Console.ReadKey();
             }
 
@@ -87,11 +86,11 @@ namespace FTMConsole2
                 ////gb.GenerateAncestorGraph(3217);
 
 
-                var gb = new GraphBuilder(ac);
+                //var gb = new GraphBuilder(ac);
 
-                gb.GenerateDescendantGraph(3217);
+                //gb.GenerateDescendantGraph(3217);
 
-                Console.ReadKey();
+                //Console.ReadKey();
             }
 
             

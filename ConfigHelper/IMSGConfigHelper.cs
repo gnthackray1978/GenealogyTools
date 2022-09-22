@@ -14,6 +14,8 @@
 
         string FTMConString { get; set; }
 
+        string PlaceConString { get; set; }
+
         string CacheData_FileName { get; set; }
 
         string CacheData_Path { get; set; }

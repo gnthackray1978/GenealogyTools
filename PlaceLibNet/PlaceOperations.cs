@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using ConfigHelper;
 using PlaceLib.Model;
 
 namespace PlaceLib
@@ -24,7 +25,7 @@ namespace PlaceLib
     {
         public static void TestConnection()
         {
-            using (var placecontext = new PlacesContext())
+            using (var placecontext = new PlacesContext(new MSGConfigHelper()))
             {
                 var t = placecontext.FTMPlaceCache.Count();
 
@@ -4706,7 +4707,7 @@ namespace PlaceLib
             knowns.Add(new PlaceDto { Place = "zennor", County = "Cornwall" });
             #endregion
 
-            using (var placecontext = new PlacesContext())
+            using (var placecontext = new PlacesContext(new MSGConfigHelper()))
             {
                 foreach (var unk in unknowns)
                 {
@@ -4731,7 +4732,7 @@ namespace PlaceLib
         {
             var counties = new List<CountyDto>();
 
-            using (var placecontext = new PlacesContext())
+            using (var placecontext = new PlacesContext(new MSGConfigHelper()))
             {
                 counties = placecontext.Places.Select(s => new CountyDto()
                 {
@@ -4748,7 +4749,7 @@ namespace PlaceLib
         {
             var places = new List<PlaceDto>();
 
-            using (var placecontext = new PlacesContext())
+            using (var placecontext = new PlacesContext(new MSGConfigHelper()))
             {
                 places = placecontext.Places.Where(w => w.Ctyhistnm != "").Select(s => new PlaceDto()
                 {
@@ -4868,7 +4869,7 @@ namespace PlaceLib
 
         public void Init()
         {
-            var placeContext = new PlacesContext();
+            var placeContext = new PlacesContext(new MSGConfigHelper());
 
             foreach (var place in placeContext.Places)
             {

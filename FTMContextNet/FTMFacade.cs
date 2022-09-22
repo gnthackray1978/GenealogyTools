@@ -1,108 +1,141 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ConfigHelper;
 using FTMContext;
-using FTMContext.Models;
 using LoggingLib;
+using FTMContextNet.Data;
+using FTMContextNet.Application.Models.Read;
+using FTMContextNet.Application.Services;
+using FTMContextNet.Data.Repositories;
+using FTMContextNet.Application.Mapping;
+using AutoMapper;
+using PlaceLib.Model;
 
 namespace FTMContextNet
 {
+
     public class FTMFacade
     {
-        private FTMakerCacheContext cacheDB;
-        private FTMakerContext sourceDB;
-        private Ilog outputHandler;
+        private readonly PersistedCacheRepository _persistedCacheRepository;
+        private readonly PlacesRepository _placesRepository;
+        private readonly FTMMakerRepository _ftMakerRepository;
+        private readonly InMemoryCacheRepository _inMemoryCacheRepository;
+        private readonly Ilog _outputHandler;
+        private readonly IMapper _mapper;
 
-        public FTMFacade(IMSGConfigHelper iMSGConfigHelper, Ilog outputHandlerp)
+        public FTMFacade(IMSGConfigHelper iMSGConfigHelper, Ilog iLog)
         {
-            cacheDB = FTMakerCacheContext.CreateCacheDB(iMSGConfigHelper);
-            sourceDB = FTMakerContext.CreateSourceDB(iMSGConfigHelper);
-            outputHandler = outputHandlerp;
+            //the source db is created by the adapter
+            //the purpose of the facade is to first populate the persisted cache
+            //then update the azure db.
+
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.AddProfile(new AutoMapperConfiguration());
+            });
+
+            var persistedCacheContext = PersistedCacheContext.Create(iMSGConfigHelper);
+
+            var ftMakerContext = FTMakerContext.CreateSourceDB(iMSGConfigHelper);
+
+            _inMemoryCacheRepository = new InMemoryCacheRepository(InMemoryCacheContext.Create(ftMakerContext, persistedCacheContext.FTMPlaceCache, persistedCacheContext.FTMPersonOrigins, iLog), iLog);
+
+            _persistedCacheRepository = new PersistedCacheRepository(persistedCacheContext, iLog);
+
+            _ftMakerRepository = new FTMMakerRepository(ftMakerContext);
+
+            _mapper = config.CreateMapper();
+
+            _placesRepository = new PlacesRepository(new PlacesContext(iMSGConfigHelper));
+
+            _outputHandler = iLog;
+
+            _outputHandler.WriteLine("Service Cache Created");
         }
-        public IEnumerable<PlaceLookup> GetUnknownPlaces(int count)
+        public IEnumerable<PlaceModel> GetUnknownPlaces(int count)
         {
-            return FTMGeoCoding.GetUnknownPlaces(cacheDB, outputHandler).Take(count);
+            var service = new GetUnknownPlacesService(_persistedCacheRepository, _outputHandler, _mapper);
+
+            return service.Execute(count);
         }
-
-        public void UpdateMissingPlaces()
-        {
-         
-            var sourcePlaces = sourceDB.Place.ToList();
-
-
-            outputHandler.WriteLine("Adding missing places");
+        public IEnumerable<PlaceModel> GetPlaceNotGeocoded(int amount) {
             
-            FTMGeoCoding.AddMissingPlaces(sourcePlaces, cacheDB, outputHandler);
-
-            outputHandler.WriteLine("Updating places where required");
-
-            FTMGeoCoding.ResetUpdatedPlaces(sourcePlaces, cacheDB, outputHandler);
-
-            outputHandler.WriteLine("Finished Updating Place Names");
-
-
-        }
-
-        public void UpdatePlaceMetaData()
-        {
-
-            FTMGeoCoding.UpdateFTMCacheMetaData(cacheDB, outputHandler);
-
-            outputHandler.WriteLine("Finished setting counties and countries in FTMPlaceCache table");
-
+            var service = new GetUnknownPlacesSearchedAlreadyServices(_persistedCacheRepository, _outputHandler, _mapper);
+            return service.Execute(amount);
         }
 
         public void ClearData()
         {
-            outputHandler.WriteLine("Clearing existing data");
-
-            cacheDB.DeleteTempData();
-
-            outputHandler.WriteLine("Finished Deleting data");
+            throw new NotImplementedException();
         }
 
-        public void SetOriginPerson()
+        public void UpdatePlaceGeoData(PlaceLookup value)
         {
+            var service = new UpdatePlaceGeoData(_persistedCacheRepository, _outputHandler, _mapper);
 
-            var ftmMostRecentAncestor = new FTMMostRecentAncestor(sourceDB, cacheDB, outputHandler);
+            service.Execute();
+        }
+         
+        /// <summary>
+        /// Add unknown places and reset locations for any place ids that have changed.
+        /// </summary>
+        public void AddUnknownPlaces()
+        {
+            var service = new UpdatePlaceCache(_persistedCacheRepository, _outputHandler, _mapper);
 
-            ftmMostRecentAncestor.MarkMostRecentAncestor();
-
-            outputHandler.WriteLine("Finished Setting Origin Person");
+            service.Execute(_ftMakerRepository.GetPlaces());
         }
 
-
-        public void SetDateLocPop()
+        public void UpdatePlaceMetaData()
         {
-            var ftmDupe = new FTMViewCreator(sourceDB, cacheDB, outputHandler);
+            var service = new UpdatePlaceMetaData(_persistedCacheRepository, _placesRepository, _outputHandler, _mapper);
 
-            ftmDupe.Run();
+            service.Execute();
+        }
 
-            outputHandler.WriteLine("Finished Setting Date Loc Pop");
+        public void AssignTreeNamesToPersons()
+        {
+            var treeStartPerson = UpdateTreePersonOrigins.Create(_ftMakerRepository, _persistedCacheRepository, _outputHandler);
+
+            treeStartPerson.Execute();
+
+            _outputHandler.WriteLine("Finished Setting Origin Person");
+        }
+
+        public void ImportPersons()
+        {
+
+            var createPersonsAndMarriages = new CreatePersonsAndMarriages(_persistedCacheRepository, _inMemoryCacheRepository, _outputHandler);
+
+            createPersonsAndMarriages.Execute();
         }
 
         public void CreateDupeView()
         {
-            var pg = new PersonGrouper(sourceDB, cacheDB, outputHandler);
+            var createDupeEntrys = new CreateDupeEntrys(_persistedCacheRepository, _outputHandler);
 
-            pg.PopulateDupeEntries();
+            createDupeEntrys.Execute();
 
-            outputHandler.WriteLine("Finished Creating Dupe View");
+            _outputHandler.WriteLine("Finished Creating Dupe View");
         }
 
         public void CreateTreeRecord()
         {
-            FTMTreeRecordCreator ftmTreeRecordCreator = new FTMTreeRecordCreator(sourceDB, cacheDB, outputHandler);
+            //    FTMTreeRecords.Create(sourceDB, cacheDB, outputHandler).Delete().SavePersons();
 
-            ftmTreeRecordCreator.Create();
+            var ctr = new CreateTreeRecords(_persistedCacheRepository, _outputHandler);
 
-            outputHandler.WriteLine("Finished Creating Tree Record View");
+            ctr.Execute();
+
+            _outputHandler.WriteLine("Finished Creating Tree Record View");
         }
 
-        
+        public InfoModel GetInfo() {
+
+            var tp = new GetInfoService(_persistedCacheRepository, _outputHandler, _mapper);
+
+            return tp.Execute();
+        }
     }
 
 

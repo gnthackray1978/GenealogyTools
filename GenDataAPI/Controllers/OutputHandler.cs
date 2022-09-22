@@ -2,6 +2,7 @@
 using GenDataAPI.Hub;
 using LoggingLib;
 using Microsoft.AspNetCore.SignalR;
+using System;
 
 namespace GenDataAPI.Controllers
 {
@@ -21,6 +22,9 @@ namespace GenDataAPI.Controllers
 
         public void WriteLine(string line)
         {
+            if (_hubContext == null)
+                throw new Exception("Hub context can't be null");
+
             _hubContext.Clients.All.SendAsync("Notify", line);
         }
 

@@ -1,18 +1,15 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using ConfigHelper;
 using FTMContext;
-using FTMContext.Models;
+using FTMContextNet;
+using FTMContextNet.Application.Models.Read;
 using GenDataAPI.Hub;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 
 namespace GenDataAPI.Controllers
 {
-    public class Result
-    { 
-        public IEnumerable<PlaceLookup> Results { get; set; }
-    }
+ 
 
     [ApiController]
     [Route("[controller]")]
@@ -20,24 +17,23 @@ namespace GenDataAPI.Controllers
     {
         private readonly IMSGConfigHelper _iMSGConfigHelper;
         private readonly IHubContext<NotificationHub> _hubContext;
+        private readonly FTMFacade _facade;
 
         public GeoCodeController(IHubContext<NotificationHub> hubContext, IMSGConfigHelper iMSGConfigHelper)
         {
             _hubContext = hubContext;
             _iMSGConfigHelper = iMSGConfigHelper;
+            _facade = new FTMFacade(_iMSGConfigHelper, new OutputHandler(_hubContext));
         }
 
 
         // GET api/values
         [HttpGet]
-        public Result Get(string infoType)
-        {
-            var context = FTMakerCacheContext.CreateCacheDB(_iMSGConfigHelper);
-
-            var result = new Result()
+        public ResultModel Get(string infoType)
+        {         
+            var result = new ResultModel()
             {
-               // Results = FTMGeoCoding.GetUnknownPlaces(context, new OutputHandler(_hubContext)).Take(75)
-                Results = FTMGeoCoding.GetUnknownPlacesIgnoreSearchedAlready(context, new OutputHandler(_hubContext)).Take(75)
+                Results = _facade.GetPlaceNotGeocoded(75)
             };
 
             return result;
@@ -46,10 +42,7 @@ namespace GenDataAPI.Controllers
         [HttpPost]
         public void Post(PlaceLookup value)
         {
-            //Debug.WriteLine("recieved: " + value.PlaceId + " " + value.results);
-            var outputHandler = new OutputHandler(_hubContext);
-            var cacheDB = FTMakerCacheContext.CreateCacheDB(_iMSGConfigHelper);
-            cacheDB.SetPlaceGeoData(value.placeid, value.results);
+            _facade.UpdatePlaceGeoData(value);
         }
 
     }

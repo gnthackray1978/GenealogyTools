@@ -32,6 +32,8 @@ SignalWrapper.prototype = {
 
         connection.on("Update", function (user, message) {
 
+            console.log('update');
+
             var listItem = $("ul").first();
 
             if (listItem) {

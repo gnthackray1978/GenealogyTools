@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AzureContext.Models;
 using ConfigHelper;
-using FTMContext.Models;
+using FTMContextNet.Data;
 using LoggingLib;
 using FTMPersonView = AzureContext.Models.FTMPersonView;
 
@@ -26,7 +26,7 @@ namespace AzureContext
             
 
 
-            var a = FTMakerCacheContext.CreateCacheDB(_imsgConfigHelper);
+            var a = PersistedCacheContext.Create(_imsgConfigHelper);
 
             
 

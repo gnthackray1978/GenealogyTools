@@ -2,10 +2,26 @@
 
 }
 
-WebConsole.prototype = {
-    printBasic: function (message) {
+//var printOutput = (message) => {
+//    wc.printOutputLine(message);
+//};
 
-        var last = $("#discussion").last();
+//var printTrace = (message) => {
+//    wc.printTrace(message);
+//};
+
+//var printTraceLine = (message) => {
+//    wc.printTraceLine(message);
+//};
+
+//var printErrorLine = (message) => {
+//    wc.printErrorLine(message);
+//};
+
+WebConsole.prototype = {
+    printOutputLine: function (message) {
+
+        var last = $("#output").last();
 
         //we have a last element
         if (last && last.length >0) {
@@ -36,46 +52,49 @@ WebConsole.prototype = {
                 }
             } else {
 
-                $('#discussion').append('<div>' + message + '</div>');
+                $('#output').append('<div>' + message + '</div>');
             }
 
 
         } else {
-            $('#discussion').append('<div>' + message + '</div>');
+            $('#output').append('<div>' + message + '</div>');
         }
 
         return true;
     },
-
-
-    printLocationCount: function(number) {
-        document.getElementById("count").innerHTML = number;
-    },
+  
+    displayStats: function (statsObject) {
+        document.getElementById("dupeCount").innerHTML = 'Dupes:' + statsObject.dupeEntryCount;
+        document.getElementById("originCount").innerHTML = 'Origin Mappings:' + statsObject.originMappingCount;
+        document.getElementById("personCount").innerHTML = 'Persons: '+statsObject.personViewCount;
+        document.getElementById("marriagecount").innerHTML = 'Marriages: ' + statsObject.marriagesCount;
+        document.getElementById("treerecordcount").innerHTML = 'Match Trees: ' + statsObject.treeRecordCount;
+        document.getElementById("placesCount").innerHTML = 'Places: ' + statsObject.placesCount;
+        document.getElementById("incompleteCount").innerHTML = 'Bad Names: ' + statsObject.badLocationsCount;
+        document.getElementById("unsearchedCount").innerHTML = 'Unsearched: '+statsObject.unsearched;
+        document.getElementById("notfoundCount").innerHTML = 'Not Found: '+ statsObject.notFound;
+    },  
 
     printGeoCodeProgressCount: function (number) {  
         document.getElementById("geocodecount").innerHTML = number;
     },
 
-    printProgressCount: function (number) {
-        document.getElementById("progress").innerHTML = number; 
+    printTrace: function (number) {
+        document.getElementById("debug-progress").innerHTML = number; 
+    },
+    printTraceLine: function (message) {
+        $('#debug-trace').append('<div>' + message + '</div>');
     },
 
-    printToOutput: function (search, input) {
-
+    printAddressToOutput: function (search, input) {
         var output = 'failed';
 
         if (input && input.length > 0) {
             output = input[0].formatted_address;
-
-            document.getElementById("progress").innerHTML = search + ' ' +output; 
-            //var element = document.createElement("p");
-            //element.appendChild(document.createTextNode(output));
-            //document.getElementById('output').appendChild(element);
+            this.printTrace(search + ' ' + output);           
         }
         else {
-
-            this.printBasic(search + ' ' +output);
+            this.printOutputLine(search + ' ' +output);
         }
-
     }
 }

@@ -1,27 +1,18 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using AutoMapper;
 using AzureContext;
 using ConfigHelper;
 using FTMContext;
-using FTMContext.Models;
 using FTMContextNet;
+using FTMContextNet.Application.Mapping;
+using FTMContextNet.Application.Models.Read;
 using GenDataAPI.Hub;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 
 namespace GenDataAPI.Controllers
 {
-
-    public class Upload
-    {
-        public string Value { get; set; }       
-    }
-
-    public class Info {
-        public int RecordCount { get; set; }
-        public List<string> Results { get; set; }
-    }
-
     [ApiController]
     [Route("[controller]")]
     public class DataController : ControllerBase
@@ -32,7 +23,9 @@ namespace GenDataAPI.Controllers
         private readonly FTMFacade _facade;
 
         public DataController(IHubContext<NotificationHub> hubContext, IMSGConfigHelper iMSGConfigHelper)
-        { 
+        {
+
+
             _iMSGConfigHelper = iMSGConfigHelper;
             _outputHandler = new OutputHandler(hubContext);
             _facade = new FTMFacade(_iMSGConfigHelper, _outputHandler);
@@ -40,65 +33,84 @@ namespace GenDataAPI.Controllers
         
         
         // GET api/values
-        public IEnumerable<PlaceLookup> Get()
+        public IEnumerable<PlaceModel> Get()
         {
             return _facade.GetUnknownPlaces(75);
         }
 
-        // GET api/values/5
-        public string Get(int id)
+        [HttpPost]
+        [Route("/data/places")]
+        public IActionResult AddToCache()
         {
-            return "value";
+            _facade.AddUnknownPlaces();
+
+            return Ok(true);
+        }
+
+        [HttpPut]
+        [Route("/data/places")]
+        public IActionResult UpdateMeta()
+        {
+            _facade.UpdatePlaceMetaData();
+
+            return Ok(true);
         }
 
         [HttpPost]
-        // POST api/values
-        public void Post(Upload upload)
+        [Route("/data/origins")]
+        public IActionResult AddOrigins()
         {
-            
+            _facade.AssignTreeNamesToPersons();
+
+            return Ok(true);
+        }
+
+        [HttpPost]
+        [Route("/data/persons")]
+        public IActionResult AddPersons()
+        {
+            _facade.ImportPersons();
+
+            return Ok(true);
+        }
+
+        [HttpPost]
+        [Route("/data/dupes")]
+        public IActionResult AddDupes()
+        {
+            _facade.CreateDupeView();
+
+            return Ok(true);
+        }
+
+        [HttpPost]
+        [Route("/data/trees")]
+        public IActionResult AddTrees()
+        {
+            _facade.CreateTreeRecord();
+
+            return Ok(true);
+        }
+
+        [HttpPost]
+        [Route("/data/azure")]
+        public IActionResult AddAzure()
+        {
+            var az = new AzureDbImporter(_outputHandler, _iMSGConfigHelper);
+            _outputHandler.WriteLine("Importing into azure DB");
+            az.Import();
+            _outputHandler.WriteLine("Finished importing into azure DB");
+
+            return Ok(true);
+        }
 
 
-            switch (upload.Value) {
-             
-                case "addResetMissingPlaces":
-
-                    _facade.UpdateMissingPlaces();
-                    break;
-
-                case "updatePlaceMetadata":
-
-                    _facade.UpdatePlaceMetaData();
-                    break;
-
-                case "cleardata":
-
-                    _facade.ClearData();
-                    break;
-
-                case "setOriginPerson":
-
-                    _facade.SetOriginPerson();
-                    break;
-
-
-                case "setDateLocPop":
-                    _facade.SetDateLocPop();
-                    break;
-                case "createDupeView":
-                    _facade.CreateDupeView();
-                    break;
-                case "createTreeRecord":
-                    _facade.CreateTreeRecord();
-                    break;
-
-                case "azureimport":
-                    var az = new AzureDbImporter(_outputHandler, _iMSGConfigHelper);
-                    _outputHandler.WriteLine("Importing into azure DB");
-                    az.Import();
-                    _outputHandler.WriteLine("Finished importing into azure DB");
-                    break;
-
-            }
+        [HttpDelete]
+        [Route("/data")]
+        public IActionResult Delete()
+        {
+            _facade.ClearData();
+            return Ok(true);
         }
          
     }
