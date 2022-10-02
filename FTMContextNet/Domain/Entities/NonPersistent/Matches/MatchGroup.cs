@@ -1,16 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace FTMContext
+namespace FTMContextNet.Domain.Entities.NonPersistent.Matches
 {
-    public class MatchPerson
-    {
-        public int PersonId { get; set; }
-        public string Origin { get; set; }
-        public int YearFrom { get; set; }
-
-    }
-
     public class MatchGroup {
         public string IncludedTrees { get; set; }
         

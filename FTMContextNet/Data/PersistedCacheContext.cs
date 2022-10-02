@@ -40,27 +40,15 @@ namespace FTMContextNet.Data
 
         public virtual DbSet<FTMPersonOrigin> FTMPersonOrigins { get; set; }
         public virtual DbSet<TreeRecord> TreeRecords { get; set; }
+        public virtual DbSet<TreeGroups> TreeGroups { get; set; }
+        public virtual DbSet<TreeRecordMapGroup> TreeRecordMapGroup { get; set; }
         public virtual DbSet<DupeEntry> DupeEntries { get; set; }
         public virtual DbSet<FTMPersonView> FTMPersonView { get; set; }
         public virtual DbSet<FTMMarriage> FTMMarriages { get; set; }
         public virtual DbSet<FtmPlaceCache> FTMPlaceCache { get; set; }
 
-        public void DeleteOrigins()
-        {
-            using var connection = GetCon();
-            var command = connection.CreateCommand();
-            command.CommandText = "DELETE FROM FTMPersonOrigins";
-
-            connection.Open();
-            command.ExecuteNonQuery();
-            connection.Close();
-
-            this.Database.CloseConnection();
-            this.Database.OpenConnection();
-
-        }
-
-        public int BulkInsertFTMPersonOrigins(int nextId, List<int> addedPersons, string origin)
+     
+        public void UpdateFTMPlaceCache(int placeId, string results)
         {
 
             var connectionString = this.Database.GetDbConnection().ConnectionString;
@@ -69,13 +57,44 @@ namespace FTMContextNet.Data
             using var connection = new SqliteConnection(connectionString);
 
             var command = connection.CreateCommand();
-            command.CommandText = "INSERT INTO FTMPersonOrigins(Id, PersonId,Origin)" +
-                                  " VALUES ($Id,$PersonId,$Origin);";
+            command.CommandText = "UPDATE FTMPlaceCache SET JSONResult = $JSONResult, Country = '', County = '', Searched = 1, BadData = 1 WHERE FTMPlaceId = $FTMPlaceId;";
+
+            command.Parameters.Add("$FTMPlaceId", SqliteType.Integer);
+            command.Parameters.Add("$JSONResult", SqliteType.Text);
+
+            connection.Open();
+
+            using var transaction = connection.BeginTransaction();
+
+            command.Transaction = transaction;
+            command.Prepare();
+          
+            command.Parameters["$FTMPlaceId"].Value = placeId;
+            command.Parameters["$JSONResult"].Value = results; 
+            
+            command.ExecuteNonQuery();
+          
+            transaction.Commit();
+            
+        }
+
+        public int BulkInsertFTMPersonOrigins(int nextId, Dictionary<int, bool> addedPersons, string origin)
+        {
+
+            var connectionString = this.Database.GetDbConnection().ConnectionString;
+
+
+            using var connection = new SqliteConnection(connectionString);
+
+            var command = connection.CreateCommand();
+            command.CommandText = "INSERT INTO FTMPersonOrigins(Id, PersonId,Origin, DirectAncestor)" +
+                                  " VALUES ($Id,$PersonId,$Origin, $DirectAncestor);";
 
             command.Parameters.Add("$Id", SqliteType.Integer);
             command.Parameters.Add("$PersonId", SqliteType.Integer);
             command.Parameters.Add("$Origin", SqliteType.Text);
-                
+            command.Parameters.Add("$DirectAncestor", SqliteType.Integer);
+
             connection.Open();
 
             using var transaction = connection.BeginTransaction();
@@ -86,9 +105,9 @@ namespace FTMContextNet.Data
             foreach (var row in addedPersons)
             {
                 command.Parameters["$Id"].Value = idx;
-                command.Parameters["$PersonId"].Value = row;
+                command.Parameters["$PersonId"].Value = row.Key;
                 command.Parameters["$Origin"].Value = origin;
-                        
+                command.Parameters["$DirectAncestor"].Value = row.Value;
                 command.ExecuteNonQuery();
                 idx++;
             }
@@ -98,63 +117,125 @@ namespace FTMContextNet.Data
             return idx;
         }
 
+        public int InsertGroups(int nextId, string groupName)
+        {
+
+            var connectionString = this.Database.GetDbConnection().ConnectionString;
+
+
+            using var connection = new SqliteConnection(connectionString);
+
+            var command = connection.CreateCommand();
+            command.CommandText = "INSERT INTO TreeGroups(Id, GroupName) VALUES ($Id,$GroupName);";
+
+            command.Parameters.Add("$Id", SqliteType.Integer);
+            command.Parameters.Add("$GroupName", SqliteType.Text);
+
+            connection.Open();
+
+            using var transaction = connection.BeginTransaction();
+
+            command.Transaction = transaction;
+            command.Prepare();
+            
+            command.Parameters["$Id"].Value = nextId;
+            command.Parameters["$GroupName"].Value = groupName;
+            command.ExecuteNonQuery();
+              
+            transaction.Commit();
+
+            return nextId;
+        }
+        public int InsertRecordMapGroup(int nextId, string groupName, string treeName)
+        {
+
+            var connectionString = this.Database.GetDbConnection().ConnectionString;
+
+
+            using var connection = new SqliteConnection(connectionString);
+
+            var command = connection.CreateCommand();
+            command.CommandText = "INSERT INTO TreeRecordMapGroup(Id, TreeName, GroupName) VALUES ($Id,$TreeName,$GroupName);";
+
+            command.Parameters.Add("$Id", SqliteType.Integer);
+            command.Parameters.Add("$TreeName", SqliteType.Text);
+            command.Parameters.Add("$GroupName", SqliteType.Text);
+
+            connection.Open();
+
+            using var transaction = connection.BeginTransaction();
+
+            command.Transaction = transaction;
+            command.Prepare();
+
+            command.Parameters["$Id"].Value = nextId;
+            command.Parameters["$GroupName"].Value = groupName;
+            command.Parameters["$TreeName"].Value = treeName;
+            command.ExecuteNonQuery();
+
+            transaction.Commit();
+
+            return nextId;
+        }
+
+
+        #region delete commands
+
+        public void DeleteOrigins()
+        {
+            RunCommand("DELETE FROM FTMPersonOrigins");
+        }
 
         public void DeleteDupes()
         {
-            using (var connection = GetCon())
-            {
-                var command = connection.CreateCommand();
-                command.CommandText = "DELETE FROM DupeEntries";
-
-                connection.Open();
-                command.ExecuteNonQuery();
-                connection.Close();
-            }
+            RunCommand("DELETE FROM DupeEntries");
         }
 
         public void DeletePersons()
         {
-            using (var connection = GetCon())
-            {
-                var command = connection.CreateCommand();
-                command.CommandText = "DELETE FROM FTMPersonView";
-
-                connection.Open();
-                command.ExecuteNonQuery();
-                connection.Close();
-            }
+            RunCommand("DELETE FROM FTMPersonView");
         }
 
         public void DeleteTreeRecords()
         {
-            using (var connection = GetCon())
-            {
-                var command = connection.CreateCommand();
-                command.CommandText = "DELETE FROM TreeRecords";
-
-                connection.Open();
-                command.ExecuteNonQuery();
-                connection.Close();
-            }
+            RunCommand("DELETE FROM TreeRecords");
         }
 
         public void DeleteMarriages()
         {
+            RunCommand("DELETE FROM FTMMarriages");
+        }
+
+      
+        public void DeleteTreeGroups()
+        {
+            RunCommand("DELETE FROM TreeGroups");
+        }
 
 
-            using (var connection = GetCon())
-            {
-                var command = connection.CreateCommand();
+        public void DeleteRecordMapGroups()
+        {
+            RunCommand("DELETE FROM TreeRecordMapGroup");
+        }
+
+        #endregion
+
+        private void RunCommand(string commandText)
+        {
+            using var connection = GetCon();
+
+            var command = connection.CreateCommand();
 
 
-                command.CommandText = "DELETE FROM FTMMarriages";
+            command.CommandText = commandText;
 
 
-                connection.Open();
-                command.ExecuteNonQuery();
-                connection.Close();
-            }
+            connection.Open();
+            command.ExecuteNonQuery();
+            connection.Close();
 
+            this.Database.CloseConnection();
+            this.Database.OpenConnection();
         }
 
 
@@ -203,5 +284,7 @@ namespace FTMContextNet.Data
         }
 
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+
+
     }
 }

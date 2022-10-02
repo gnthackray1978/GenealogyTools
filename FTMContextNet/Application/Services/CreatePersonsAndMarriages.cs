@@ -20,7 +20,9 @@ namespace FTMContextNet.Application.Services
             _ilog.WriteLine("Executing CreatePersonsAndMarriages");
 
             _persistedCacheRepository.DeletePersons();
-            
+
+            _persistedCacheRepository.DeleteMarriages();
+
             _persistedCacheRepository.BeginSavePersons(_inMemoryCacheRepository.GetPersonCacheSize());
 
             foreach (var personSubset in _inMemoryCacheRepository.GetPersons())

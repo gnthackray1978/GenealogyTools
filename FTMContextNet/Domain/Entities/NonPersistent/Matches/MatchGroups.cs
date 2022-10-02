@@ -1,8 +1,8 @@
-﻿
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using FTMContext;
 
-namespace FTMContext
+namespace FTMContextNet.Domain.Entities.NonPersistent.Matches
 {
     public class MatchGroups
     {

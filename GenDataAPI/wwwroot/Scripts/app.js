@@ -145,7 +145,51 @@ PlaceObj.prototype = {
 
         $.ajax({
             type: "post",
-            url: "/data/trees", // "/api/controllerName/methodName"
+            url: "/data/trees", 
+            contentType: "application/json",
+            dataType: "json",
+            data: JSON.stringify(Upload),
+            success: function (response) {
+                that.displayStats();
+            }
+
+        });
+        return true;
+    },
+
+    createTreeGroups: function () {
+
+        var that = this;
+
+        var Upload = {
+            Value: 'createTreeGroup'
+        };
+
+        $.ajax({
+            type: "post",
+            url: "/data/treegroups", 
+            contentType: "application/json",
+            dataType: "json",
+            data: JSON.stringify(Upload),
+            success: function (response) {
+                that.displayStats();
+            }
+
+        });
+        return true;
+    },
+
+    createTreeGroupMappings: function () {
+
+        var that = this;
+
+        var Upload = {
+            Value: 'createTreeGroupMappings'
+        };
+
+        $.ajax({
+            type: "post",
+            url: "/data/treegroupmappings",
             contentType: "application/json",
             dataType: "json",
             data: JSON.stringify(Upload),
@@ -236,7 +280,7 @@ PlaceObj.prototype = {
     start: function() {
         var sh = this;
         sh.count = 0; 
-        var printBasic = this.console.printBasic;
+        var printOutputLine = this.console.printOutputLine;
         var printGeoCodeProgressCount = this.console.printGeoCodeProgressCount;
         var printTrace = this.console.printTrace;
 
@@ -244,14 +288,17 @@ PlaceObj.prototype = {
 
         var idx = 0
      
-        var searchAddress = (d) => {
-
-            if (!d)
-                return;
+        var searchAddress = () => {
 
             if (sh.data && (sh.data.length-1) == idx) {
                 sh.displayStats();
+                return;
             }
+
+            let d = sh.data[idx];
+
+            if (!d)
+                return;
 
             printTrace(idx);
 
@@ -274,26 +321,42 @@ PlaceObj.prototype = {
 
                 switch (status) {
                     case "OVER_QUERY_LIMIT":
-                        printBasic('GEOCODE FAILED ' + status);
+                        console.log('OVER_QUERY_LIMIT');
+                        printTrace('GEOCODE FAILED ' + status);
 
                         setTimeout(function () {
-                            searchAddress(sh.data[idx]);
-                        }, 3000);
+                            console.log('re-search');
+                            
+                                searchAddress();
+
+                        }, 15000);
 
                         break;
                     case "INVALID_REQUEST":
                         // code block
-                        printBasic('GEOCODE FAILED searched:' + d.placeformatted + ' status ' + status);
+                        console.log('INVALID_REQUEST');
+                        printTrace('GEOCODE FAILED searched:' + d.placeformatted + ' status ' + status);
+
+                        setTimeout(function () {
+                            console.log('re-search');
+
+                            idx++;
+
+                            if (sh.data.length > idx)
+                                searchAddress();
+                        }, 3000);
                         break;
+
                     default:
+                        console.log('saving');
                         result.results = JSON.stringify(results);
 
-                        sh.console.printAddressToOutput(d.placeformatted, results);
+                        sh.console.printTrace(d.placeformatted, results);
                         sh.saveGeoCodedLocationToServer(result);
 
                         setTimeout(function () {
                             idx++;
-                            searchAddress(sh.data[idx]);
+                            searchAddress();
                         }, 500);
                 }
                  
@@ -301,7 +364,7 @@ PlaceObj.prototype = {
 
         };
      
-        searchAddress(data[idx]);
+        searchAddress();
   
     
         return true;

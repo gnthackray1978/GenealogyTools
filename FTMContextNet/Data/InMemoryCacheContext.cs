@@ -5,6 +5,7 @@ using System.Linq;
 using FTM.Dates;
 using FTMContext;
 using FTMContextNet.Domain.Entities.NonPersistent;
+using FTMContextNet.Domain.Entities.NonPersistent.Person;
 using FTMContextNet.Domain.Entities.Persistent.Cache;
 using LoggingLib;
 using Microsoft.EntityFrameworkCore;
@@ -13,43 +14,42 @@ namespace FTMContextNet.Data
 {
     public class InMemoryCacheContext
     {
-        public Dictionary<int, string> originDictionary;
+        public Dictionary<int, PersonOrigin> OriginDictionary;
 
-        public Dictionary<int, FactSubset> baptismFactCache;
+        public Dictionary<int, RelationSubSet> RelationshipDictionary;
 
-        public Dictionary<int, FactSubset> marriageFactCache;
-
-        public Dictionary<int, PersonSubset> personCache;
+        public Dictionary<int, PersonSubset> PersonCache;
 
 
-        public Dictionary<int, int> childRelationshipPersonIndex;
+        private Dictionary<int, FactSubset> _baptismFactCache;
 
-        public Dictionary<int, int> childRelationshipIndex;
+        private Dictionary<int, FactSubset> _marriageFactCache;
 
-        public List<ChildRelationshipSubset> childRelationshipCache;
+        private Dictionary<int, int> _childRelationshipPersonIndex;
+
+        private Dictionary<int, int> _childRelationshipIndex;
+
+        private List<ChildRelationshipSubset> _childRelationshipCache;
+
+        private Dictionary<int, List<int>> _personMapRelationshipDictionary;
+        
+        private Dictionary<int, FTMPlaceCacheSubset> _fTmPlaceCaches;
+
+        private List<KeyValuePair<int, string>> _type90Facts;
 
 
-        public Dictionary<int, List<int>> personMapRelationshipDictionary;
-
-        public Dictionary<int, RelationSubSet> relationshipDictionary;
-
-        public Dictionary<int, FTMPlaceCacheSubset> fTMPlaceCaches;
-
-        public List<KeyValuePair<int, string>> Type90Facts;
-
-
-        public InMemoryCacheContext(FTMakerContext _sourceContext,
-                           DbSet<FtmPlaceCache> fTMPlaceCache,
+        public InMemoryCacheContext(FTMakerContext sourceContext,
+                           DbSet<FtmPlaceCache> fTmPlaceCache,
                            DbSet<FTMPersonOrigin> ftmPersonOrigins)
         {
             
-            Type90Facts = _sourceContext.Fact.Where(w => w.FactTypeId == 90 && w.LinkTableId == 5)
+            _type90Facts = sourceContext.Fact.Where(w => w.FactTypeId == 90 && w.LinkTableId == 5)
                     .Select(s => new KeyValuePair<int, string>(s.LinkId, s.Text)).ToList();
 
 
-            fTMPlaceCaches = new Dictionary<int, FTMPlaceCacheSubset>();
+            _fTmPlaceCaches = new Dictionary<int, FTMPlaceCacheSubset>();
 
-            foreach (var f in fTMPlaceCache.Select(s => new FTMPlaceCacheSubset()
+            foreach (var f in fTmPlaceCache.Select(s => new FTMPlaceCacheSubset()
             {
                 FTMPlaceId = s.FTMPlaceId,
                 Id = s.Id,
@@ -60,14 +60,14 @@ namespace FTMContextNet.Data
                 location_long = GoogleMapsHelpers.Location.GetLocation(s.JSONResult).lng
             }))
             {
-                if (!fTMPlaceCaches.ContainsKey(f.FTMPlaceId))
-                    fTMPlaceCaches.Add(f.FTMPlaceId, f);
+                if (!_fTmPlaceCaches.ContainsKey(f.FTMPlaceId))
+                    _fTmPlaceCaches.Add(f.FTMPlaceId, f);
             }
 
 
-            baptismFactCache = new Dictionary<int, FactSubset>();
+            _baptismFactCache = new Dictionary<int, FactSubset>();
 
-            foreach (var f in _sourceContext.Fact.Where(w => w.FactTypeId == 7
+            foreach (var f in sourceContext.Fact.Where(w => w.FactTypeId == 7
                                                  && w.LinkTableId == 5).Select(s => new FactSubset()
                                                  {
                                                      Id = s.Id,
@@ -78,17 +78,17 @@ namespace FTMContextNet.Data
                                                  }))
             {
 
-                if (f.Date != null && !baptismFactCache.ContainsKey(f.LinkId))
-                    baptismFactCache.Add(f.LinkId, f);
+                if (f.Date != null && !_baptismFactCache.ContainsKey(f.LinkId))
+                    _baptismFactCache.Add(f.LinkId, f);
             }
 
 
-            originDictionary = new Dictionary<int, string>();
+            OriginDictionary = new Dictionary<int, PersonOrigin>();
 
             foreach (var person in ftmPersonOrigins)
             {
-                if (!originDictionary.ContainsKey(person.PersonId))
-                    originDictionary.Add(person.PersonId, person.Origin);
+                if (!OriginDictionary.ContainsKey(person.PersonId))
+                    OriginDictionary.Add(person.PersonId, new PersonOrigin {DirectAncestor = person.DirectAncestor, Origin = person.Origin});
             }
             //foreach (var f in _sourceContext.Fact.Where(w => w.FactTypeId == 14
             //                                     && w.LinkTableId == 5).Select(s => new FactSubset()
@@ -105,14 +105,14 @@ namespace FTMContextNet.Data
 
 
 
-            var relationships = _sourceContext.Relationship.Select(s => new RelationSubSet()
+            var relationships = sourceContext.Relationship.Select(s => new RelationSubSet()
             {
                 Id = s.Id,
                 Person1Id = s.Person1Id,
                 Person2Id = s.Person2Id
             }).ToList();
 
-            marriageFactCache = new Dictionary<int, FactSubset>();
+            _marriageFactCache = new Dictionary<int, FactSubset>();
 
 
             Action<Dictionary<int, FactSubset>, FactSubset, int?> updateDictionary = (marrDict, factsubset, personId) =>
@@ -149,7 +149,7 @@ namespace FTMContextNet.Data
                 }
             };
 
-            foreach (var f in _sourceContext.Fact.Where(w => w.FactTypeId == 4
+            foreach (var f in sourceContext.Fact.Where(w => w.FactTypeId == 4
                                                  && w.LinkTableId == 7
                                                  && w.Date != null && w.PlaceId != null).Select(s => new FactSubset()
                                                  {
@@ -165,8 +165,8 @@ namespace FTMContextNet.Data
 
                 var origin = "";
 
-                if (originDictionary.ContainsKey(relation.Person1Id.GetValueOrDefault()))
-                    origin = originDictionary[relation.Person1Id.GetValueOrDefault()];
+                if (OriginDictionary.ContainsKey(relation.Person1Id.GetValueOrDefault()))
+                    origin = OriginDictionary[relation.Person1Id.GetValueOrDefault()].Origin;
 
 
                 relation.Date = f.Date;
@@ -176,38 +176,38 @@ namespace FTMContextNet.Data
                 relation.Origin = origin;
 
 
-                updateDictionary(marriageFactCache, f, relation.Person1Id);
+                updateDictionary(_marriageFactCache, f, relation.Person1Id);
 
-                updateDictionary(marriageFactCache, f, relation.Person2Id);
+                updateDictionary(_marriageFactCache, f, relation.Person2Id);
             }
 
             foreach (var r in relationships)
             {
                 var origin = "";
 
-                if (originDictionary.ContainsKey(r.Person1Id.GetValueOrDefault()))
-                    origin = originDictionary[r.Person1Id.GetValueOrDefault()];
+                if (OriginDictionary.ContainsKey(r.Person1Id.GetValueOrDefault()))
+                    origin = OriginDictionary[r.Person1Id.GetValueOrDefault()].Origin;
 
                 if (origin == "")
                 {
-                    if (originDictionary.ContainsKey(r.Person2Id.GetValueOrDefault()))
-                        origin = originDictionary[r.Person2Id.GetValueOrDefault()];
+                    if (OriginDictionary.ContainsKey(r.Person2Id.GetValueOrDefault()))
+                        origin = OriginDictionary[r.Person2Id.GetValueOrDefault()].Origin;
                 }
 
                 r.Origin = origin;
                 //fTMPlaceCaches
 
-                if (r.PlaceId != null && fTMPlaceCaches.ContainsKey(r.PlaceId.Value))
+                if (r.PlaceId != null && _fTmPlaceCaches.ContainsKey(r.PlaceId.Value))
                 {
-                    var placeName = fTMPlaceCaches[r.PlaceId.Value];
+                    var placeName = _fTmPlaceCaches[r.PlaceId.Value];
 
                     r.PlaceName = placeName.FTMOrginalNameFormatted;
                 }
             }
 
 
-            personMapRelationshipDictionary = new Dictionary<int, List<int>>();
-            relationshipDictionary = new Dictionary<int, RelationSubSet>();
+            _personMapRelationshipDictionary = new Dictionary<int, List<int>>();
+            RelationshipDictionary = new Dictionary<int, RelationSubSet>();
 
             foreach (var relationship in relationships)
             {
@@ -217,9 +217,9 @@ namespace FTMContextNet.Data
 
                 //relationshipMapPersonDictionary.
 
-                if (!relationshipDictionary.ContainsKey(relationship.Id))
+                if (!RelationshipDictionary.ContainsKey(relationship.Id))
                 {
-                    relationshipDictionary.Add(relationship.Id, relationship);
+                    RelationshipDictionary.Add(relationship.Id, relationship);
                 }
                 else
                 {
@@ -229,15 +229,15 @@ namespace FTMContextNet.Data
 
                 if (relationship.Person1Id != null)
                 {
-                    if (personMapRelationshipDictionary.ContainsKey(relationship.Person1Id.Value))
+                    if (_personMapRelationshipDictionary.ContainsKey(relationship.Person1Id.Value))
                     {
-                        personMapRelationshipDictionary[relationship.Person1Id.Value].Add(relationship.Id);
+                        _personMapRelationshipDictionary[relationship.Person1Id.Value].Add(relationship.Id);
                     }
                     else
                     {
                         var tpList = new List<int> { relationship.Id };
 
-                        personMapRelationshipDictionary.Add(relationship.Person1Id.Value, tpList);
+                        _personMapRelationshipDictionary.Add(relationship.Person1Id.Value, tpList);
                     }
                 }
 
@@ -247,23 +247,23 @@ namespace FTMContextNet.Data
             {
                 if (person.Person2Id != null)
                 {
-                    if (personMapRelationshipDictionary.ContainsKey(person.Person2Id.Value))
+                    if (_personMapRelationshipDictionary.ContainsKey(person.Person2Id.Value))
                     {
-                        personMapRelationshipDictionary[person.Person2Id.Value].Add(person.Id);
+                        _personMapRelationshipDictionary[person.Person2Id.Value].Add(person.Id);
                     }
                     else
                     {
                         var tpList = new List<int> { person.Id };
 
-                        personMapRelationshipDictionary.Add(person.Person2Id.Value, tpList);
+                        _personMapRelationshipDictionary.Add(person.Person2Id.Value, tpList);
                     }
                 }
             }
 
 
-            personCache = new Dictionary<int, PersonSubset>();
+            PersonCache = new Dictionary<int, PersonSubset>();
 
-            foreach (var p in _sourceContext.Person.Select(s => new PersonSubset()
+            foreach (var p in sourceContext.Person.Select(s => new PersonSubset()
             {
                 Id = s.Id,
                 Sex = s.Sex,
@@ -275,49 +275,49 @@ namespace FTMContextNet.Data
                 Forename = s.GivenName
             }))
             {
-                personCache.Add(p.Id, p);
+                PersonCache.Add(p.Id, p);
             }
 
-            childRelationshipPersonIndex = new Dictionary<int, int>();
-            childRelationshipIndex = new Dictionary<int, int>();
+            _childRelationshipPersonIndex = new Dictionary<int, int>();
+            _childRelationshipIndex = new Dictionary<int, int>();
 
-            childRelationshipCache = new List<ChildRelationshipSubset>(_sourceContext.ChildRelationship.Select(s => new ChildRelationshipSubset()
+            _childRelationshipCache = new List<ChildRelationshipSubset>(sourceContext.ChildRelationship.Select(s => new ChildRelationshipSubset()
             {
                 Id = s.Id,
                 PersonId = s.PersonId,
                 RelationshipId = s.RelationshipId
             }));
 
-            childRelationshipCache = childRelationshipCache.OrderBy(o => o.RelationshipId).ToList();
+            _childRelationshipCache = _childRelationshipCache.OrderBy(o => o.RelationshipId).ToList();
 
             var idx = 0;
-            var currentRelationShip = childRelationshipCache[0].RelationshipId;
+            var currentRelationShip = _childRelationshipCache[0].RelationshipId;
 
-            childRelationshipCache[0].StartIndex = 0;
+            _childRelationshipCache[0].StartIndex = 0;
             var startIdx = 0;
 
-            while (idx < childRelationshipCache.Count)
+            while (idx < _childRelationshipCache.Count)
             {
                 //if (childRelationshipCache[idx].RelationshipId == 3479) {
                 //    Debug.WriteLine("");
                 //}
 
-                if (currentRelationShip != childRelationshipCache[idx].RelationshipId)
+                if (currentRelationShip != _childRelationshipCache[idx].RelationshipId)
                 {
                     startIdx = idx;
-                    currentRelationShip = childRelationshipCache[idx].RelationshipId;
+                    currentRelationShip = _childRelationshipCache[idx].RelationshipId;
                 }
 
-                childRelationshipCache[idx].StartIndex = startIdx;
+                _childRelationshipCache[idx].StartIndex = startIdx;
 
-                if (!childRelationshipPersonIndex.ContainsKey(childRelationshipCache[idx].PersonId))
+                if (!_childRelationshipPersonIndex.ContainsKey(_childRelationshipCache[idx].PersonId))
                 {
-                    childRelationshipPersonIndex.Add(childRelationshipCache[idx].PersonId, idx);
+                    _childRelationshipPersonIndex.Add(_childRelationshipCache[idx].PersonId, idx);
                 }
 
-                if (!childRelationshipIndex.ContainsKey(childRelationshipCache[idx].RelationshipId))
+                if (!_childRelationshipIndex.ContainsKey(_childRelationshipCache[idx].RelationshipId))
                 {
-                    childRelationshipIndex.Add(childRelationshipCache[idx].RelationshipId, idx);
+                    _childRelationshipIndex.Add(_childRelationshipCache[idx].RelationshipId, idx);
                 }
 
                 idx++;
@@ -327,12 +327,12 @@ namespace FTMContextNet.Data
 
         }
 
-        public static InMemoryCacheContext Create(FTMakerContext _sourceContext,
-                           DbSet<FtmPlaceCache> fTMPlaceCache,
+        public static InMemoryCacheContext Create(FTMakerContext sourceContext,
+                           DbSet<FtmPlaceCache> fTmPlaceCache,
                            DbSet<FTMPersonOrigin> ftmPersonOrigins,
                             Ilog ilog)
         {
-            return new InMemoryCacheContext(_sourceContext, fTMPlaceCache, ftmPersonOrigins);
+            return new InMemoryCacheContext(sourceContext, fTmPlaceCache, ftmPersonOrigins);
         }
 
         private static Date MakeDate(string ftmDate)
@@ -352,7 +352,7 @@ namespace FTMContextNet.Data
         {
             List<DupeAgeInfo> list = new List<DupeAgeInfo>();
 
-            if (personCache.TryGetValue(personId, out PersonSubset person))
+            if (PersonCache.TryGetValue(personId, out PersonSubset person))
             {
                 if (uint.TryParse(person.BirthDate, out uint birthDate))
                 {
@@ -372,7 +372,7 @@ namespace FTMContextNet.Data
                 //get baptisms from fact table
                 // var baptisms = baptismFactCache.Where(w => w.LinkId == personId);//fact type 7
 
-                if (baptismFactCache.TryGetValue(personId, out FactSubset bap))
+                if (_baptismFactCache.TryGetValue(personId, out FactSubset bap))
                 {
                     if (FactSubset.ValidYear(bap.Date))
                     {
@@ -409,10 +409,10 @@ namespace FTMContextNet.Data
             //var parentalRelationship = relationshipCache.Where(w => w.Person1Id == personId
             //                            || w.Person2Id == personId).ToList();
 
-            if (!personMapRelationshipDictionary.ContainsKey(personId)) return null;
+            if (!_personMapRelationshipDictionary.ContainsKey(personId)) return null;
 
             //is this guy part of any parental relationships
-            foreach (var relationshipId in personMapRelationshipDictionary[personId])
+            foreach (var relationshipId in _personMapRelationshipDictionary[personId])
             {
 
                 //  var relationshipId = pr;
@@ -420,13 +420,13 @@ namespace FTMContextNet.Data
                 //    var otherChildren = childRelationshipCache.Where(w => w.RelationshipId == relationshipId).ToList();
                 List<int> children = new List<int>();
 
-                if (childRelationshipIndex.TryGetValue(relationshipId, out int index))
+                if (_childRelationshipIndex.TryGetValue(relationshipId, out int index))
                 {
 
-                    while (childRelationshipCache.Count > index &&
-                           childRelationshipCache[index].RelationshipId == relationshipId)
+                    while (_childRelationshipCache.Count > index &&
+                           _childRelationshipCache[index].RelationshipId == relationshipId)
                     {
-                        children.Add(childRelationshipCache[index].PersonId);
+                        children.Add(_childRelationshipCache[index].PersonId);
                         index++;
                     }
 
@@ -439,7 +439,7 @@ namespace FTMContextNet.Data
 
                     //var person = personCache.FirstOrDefault(w => w.Id == child.PersonId);
 
-                    if (personCache.TryGetValue(childId, out PersonSubset person))
+                    if (PersonCache.TryGetValue(childId, out PersonSubset person))
                     {
                         if (uint.TryParse(person.BirthDate, out uint birthDate))
                         {
@@ -463,7 +463,7 @@ namespace FTMContextNet.Data
                         //get baptisms from fact table
                         //var baptisms = baptismFactCache.Where(w => w.LinkId == personId);// && w.FactTypeId == 7);
 
-                        if (baptismFactCache.TryGetValue(childId, out FactSubset bap))
+                        if (_baptismFactCache.TryGetValue(childId, out FactSubset bap))
                         {
                             if (FactSubset.ValidYear(bap.Date))
                             {
@@ -507,7 +507,7 @@ namespace FTMContextNet.Data
             List<DupeAgeInfo> list = new List<DupeAgeInfo>();
 
 
-            if (personCache.TryGetValue(personId, out PersonSubset person))
+            if (PersonCache.TryGetValue(personId, out PersonSubset person))
             {
                 if (uint.TryParse(person.DeathDate, out uint deathDate))
                 {
@@ -542,7 +542,7 @@ namespace FTMContextNet.Data
         {
             List<DupeAgeInfo> list = new List<DupeAgeInfo>();
 
-            if (marriageFactCache.TryGetValue(personId, out FactSubset marriage))
+            if (_marriageFactCache.TryGetValue(personId, out FactSubset marriage))
             {
                 if (FactSubset.ValidYear(marriage.Date))
                 {
@@ -638,7 +638,7 @@ namespace FTMContextNet.Data
             if (isFather) dupeLocInfoTypes = DupeLocInfoTypes.FatherMarriageLoc;
             if (isMother) dupeLocInfoTypes = DupeLocInfoTypes.MotherMarriageLoc;
 
-            if (marriageFactCache.TryGetValue(personId, out FactSubset marriage))
+            if (_marriageFactCache.TryGetValue(personId, out FactSubset marriage))
             {
                 int? marriageYear = null;
 
@@ -682,7 +682,7 @@ namespace FTMContextNet.Data
             if (isMother) dupeLocInfoTypes = DupeLocInfoTypes.MotherBapLoc;
 
 
-            if (personCache.TryGetValue(personId, out PersonSubset person))
+            if (PersonCache.TryGetValue(personId, out PersonSubset person))
             {
                 int? birthYear = null;
 
@@ -708,7 +708,7 @@ namespace FTMContextNet.Data
 
                 //get baptisms from fact table
 
-                if (baptismFactCache.TryGetValue(personId, out FactSubset bap))
+                if (_baptismFactCache.TryGetValue(personId, out FactSubset bap))
                 {
                     int? bapYear = null;
 
@@ -746,7 +746,7 @@ namespace FTMContextNet.Data
 
 
 
-            if (personCache.TryGetValue(personId, out PersonSubset person))
+            if (PersonCache.TryGetValue(personId, out PersonSubset person))
             {
                 int? deathYear = null;
 
@@ -782,21 +782,21 @@ namespace FTMContextNet.Data
             //                            || w.Person2Id == personId).ToList();
 
             //is this guy part of any parental relationships
-            if (!personMapRelationshipDictionary.ContainsKey(personId)) return list;
+            if (!_personMapRelationshipDictionary.ContainsKey(personId)) return list;
 
-            foreach (var relationshipId in personMapRelationshipDictionary[personId])
+            foreach (var relationshipId in _personMapRelationshipDictionary[personId])
             {
                 //RelationshipId
 
                 List<int> children = new List<int>();
 
-                if (childRelationshipIndex.TryGetValue(relationshipId, out int index))
+                if (_childRelationshipIndex.TryGetValue(relationshipId, out int index))
                 {
 
-                    while (index < childRelationshipCache.Count()
-                        && childRelationshipCache[index].RelationshipId == relationshipId)
+                    while (index < _childRelationshipCache.Count()
+                        && _childRelationshipCache[index].RelationshipId == relationshipId)
                     {
-                        children.Add(childRelationshipCache[index].PersonId);
+                        children.Add(_childRelationshipCache[index].PersonId);
                         index++;
                     }
 
@@ -808,7 +808,7 @@ namespace FTMContextNet.Data
 
                     int? year = null;
 
-                    if (personCache.TryGetValue(childId, out PersonSubset person))
+                    if (PersonCache.TryGetValue(childId, out PersonSubset person))
                     {
                         if (uint.TryParse(person.BirthDate, out uint birthDate))
                         {
@@ -829,7 +829,7 @@ namespace FTMContextNet.Data
 
                     //get baptisms from fact table
 
-                    if (baptismFactCache.TryGetValue(childId, out FactSubset bap))
+                    if (_baptismFactCache.TryGetValue(childId, out FactSubset bap))
                     {
                         year = null;
 
@@ -881,18 +881,18 @@ namespace FTMContextNet.Data
 
             List<int> siblingList = new List<int>();
 
-            if (childRelationshipPersonIndex.TryGetValue(personId, out int index))
+            if (_childRelationshipPersonIndex.TryGetValue(personId, out int index))
             {
-                var startIdx = childRelationshipCache[index].StartIndex;
-                var relationshipId = childRelationshipCache[startIdx].RelationshipId;
-                var currentRelationshipId = childRelationshipCache[startIdx].RelationshipId;
+                var startIdx = _childRelationshipCache[index].StartIndex;
+                var relationshipId = _childRelationshipCache[startIdx].RelationshipId;
+                var currentRelationshipId = _childRelationshipCache[startIdx].RelationshipId;
 
-                while (relationshipId == currentRelationshipId && startIdx < childRelationshipCache.Count)
+                while (relationshipId == currentRelationshipId && startIdx < _childRelationshipCache.Count)
                 {
 
-                    currentRelationshipId = childRelationshipCache[startIdx].RelationshipId;
+                    currentRelationshipId = _childRelationshipCache[startIdx].RelationshipId;
 
-                    siblingList.Add(childRelationshipCache[startIdx].PersonId);
+                    siblingList.Add(_childRelationshipCache[startIdx].PersonId);
                     startIdx++;
                 }
             }
@@ -938,15 +938,15 @@ namespace FTMContextNet.Data
             int fatherId = 0;
             int motherId = 0;
 
-            if (childRelationshipPersonIndex.TryGetValue(personId, out int index))
+            if (_childRelationshipPersonIndex.TryGetValue(personId, out int index))
             {
                 //the RelationshipId should ALWAYS be in this dictionary but but but 
-                if (relationshipDictionary.TryGetValue(childRelationshipCache[index].RelationshipId, out RelationSubSet r))
+                if (RelationshipDictionary.TryGetValue(_childRelationshipCache[index].RelationshipId, out RelationSubSet r))
                 {
                     var p1 = r.Person1Id;
                     if (p1 != null)
                     {
-                        if (personCache.TryGetValue(p1.Value, out PersonSubset person1))
+                        if (PersonCache.TryGetValue(p1.Value, out PersonSubset person1))
                         {
                             if (person1.Sex == "0")
                                 motherId = p1.Value;
@@ -960,7 +960,7 @@ namespace FTMContextNet.Data
                     if (p2 != null)
                     {
                         //var person2 = personCache.FirstOrDefault(p => p.Id == p2);
-                        if (personCache.TryGetValue(p2.Value, out PersonSubset person2))
+                        if (PersonCache.TryGetValue(p2.Value, out PersonSubset person2))
                         {
                             if (person2.Sex == "0")
                                 motherId = p2.Value;
@@ -984,16 +984,16 @@ namespace FTMContextNet.Data
             //   var crs = childRelationshipCache.Where(w => w.PersonId == personId).ToList();
             List<DupeLocInfo> list = new List<DupeLocInfo>();
 
-            if (childRelationshipPersonIndex.TryGetValue(personId, out int index))
+            if (_childRelationshipPersonIndex.TryGetValue(personId, out int index))
             {
                 //the RelationshipId should ALWAYS be in this dictionary but but but 
-                if (relationshipDictionary.TryGetValue(childRelationshipCache[index].RelationshipId, out RelationSubSet r))
+                if (RelationshipDictionary.TryGetValue(_childRelationshipCache[index].RelationshipId, out RelationSubSet r))
                 {
                     var p1 = r.Person1Id;
                     if (p1 != null)
                     {
 
-                        if (personCache.TryGetValue(p1.Value, out PersonSubset person1))
+                        if (PersonCache.TryGetValue(p1.Value, out PersonSubset person1))
                             list.AddRange(GetPersonsLocDetails(r.Person1Id.Value, false, person1.Sex == "0", person1.Sex == "1"));
                     }
 
@@ -1002,7 +1002,7 @@ namespace FTMContextNet.Data
                     {
                         //var person2 = personCache.FirstOrDefault(p => p.Id == p2);
 
-                        if (personCache.TryGetValue(p2.Value, out PersonSubset person2))
+                        if (PersonCache.TryGetValue(p2.Value, out PersonSubset person2))
                             list.AddRange(GetPersonsLocDetails(r.Person2Id.Value, false, person2.Sex == "0", person2.Sex == "1"));
                     }
                 }
@@ -1050,7 +1050,7 @@ namespace FTMContextNet.Data
             {
                 //var cachedPlace = fTMPlaceCaches.FirstOrDefault(fpc => fpc.FTMPlaceId == place.PlaceID);
 
-                if (fTMPlaceCaches.TryGetValue(place.PlaceID, out FTMPlaceCacheSubset cachedPlace))
+                if (_fTmPlaceCaches.TryGetValue(place.PlaceID, out FTMPlaceCacheSubset cachedPlace))
                 {
 
                     if (place.Type == DupeLocInfoTypes.BirthBapLoc)

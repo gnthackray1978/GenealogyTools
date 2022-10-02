@@ -18,6 +18,28 @@ namespace FTMContext
 
         public string PlaceName { get; set; }
 
+        public bool MatchEither(int groupId)
+        {
+            if (Person1Id.GetValueOrDefault() == groupId || Person2Id.GetValueOrDefault() == groupId)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public int GetOtherSide(int groupId)
+        {
+            var potentialId = Person2Id.GetValueOrDefault();
+
+            if (Person2Id == groupId)
+            {
+                potentialId = Person1Id.GetValueOrDefault();
+            }
+
+            return potentialId;
+        }
+
         public static bool ValidYear(Date date)
         {
             if (date == null) return false;

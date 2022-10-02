@@ -6,5 +6,7 @@
         public int PersonId { get; set; }
         public string Origin { get; set; }
 
+        public bool DirectAncestor { get; set; }
+
     }
 }

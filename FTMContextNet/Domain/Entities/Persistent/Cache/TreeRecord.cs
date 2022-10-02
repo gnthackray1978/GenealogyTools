@@ -10,5 +10,6 @@
 
         public bool Located { get; set; }
 
+
     }
 }

@@ -87,6 +87,10 @@ namespace AzureContext.Models
 
         public virtual DbSet<TreeRecord> TreeRecord { get; set; }
 
+        public virtual DbSet<TreeGroups> TreeGroups { get; set; }
+
+        public virtual DbSet<TreeRecordMapGroup> TreeRecordMapGroup { get; set; }
+
         public virtual DbSet<Relationships> Relationships { get; set; }
 
         private string ConString = "";
@@ -691,15 +695,24 @@ namespace AzureContext.Models
             modelBuilder.Entity<TreeRecord>(entity =>
             {
                 entity.ToTable("TreeRecord", "DNA");
-
                 entity.Property(e => e.Id).ValueGeneratedNever();
-
                 entity.Property(e => e.Name);
-
                 entity.Property(e => e.Origin).HasMaxLength(250);
+            });
 
+            modelBuilder.Entity<TreeGroups>(entity =>
+            {
+                entity.ToTable("TreeGroups", "DNA");
+                entity.Property(e => e.Id).ValueGeneratedNever();
+                entity.Property(e => e.GroupName).HasMaxLength(500);
+            });
 
-
+            modelBuilder.Entity<TreeRecordMapGroup>(entity =>
+            {
+                entity.ToTable("TreeRecordMapGroup", "DNA");
+                entity.Property(e => e.Id).ValueGeneratedNever();
+                entity.Property(e => e.GroupName).HasMaxLength(500);
+                entity.Property(e => e.TreeName).HasMaxLength(500);
             });
 
             modelBuilder.Entity<PersonsOfInterest>(entity =>
@@ -1290,7 +1303,8 @@ namespace AzureContext.Models
                     MotherId = 0,
                     Origin = "x",
                     PersonId = 0,
-                    Surname = "x"
+                    Surname = "x",
+                    DirectAncestor = false
                 });
 
                 executor.SaveChanges();
@@ -1316,7 +1330,7 @@ namespace AzureContext.Models
                     row.BirthLat, 
                     row.BirthLong, 
                     row.AltLocationDesc, 
-                    row.AltLocation, row.AltLat, row.AltLong, row.Origin, row.PersonId, row.FatherId, row.MotherId);
+                    row.AltLocation, row.AltLat, row.AltLong, row.Origin, row.PersonId, row.FatherId, row.MotherId,row.DirectAncestor);
  
                 idx++;
             }
@@ -1344,7 +1358,7 @@ namespace AzureContext.Models
                 copy.ColumnMappings.Add("PersonID", "PersonID");
                 copy.ColumnMappings.Add("FatherId", "FatherId");
                 copy.ColumnMappings.Add("MotherId", "MotherId");
-
+                copy.ColumnMappings.Add("DirectAncestor", "DirectAncestor");
                 copy.WriteToServer(dt);
             }
         }

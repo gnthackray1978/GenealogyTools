@@ -25,5 +25,6 @@
         public int? FatherId { get; set; }
 
         public int? MotherId { get; set; }
+        public bool? DirectAncestor { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace FTMContext
+﻿namespace FTMContextNet.Domain.Entities.NonPersistent.Locations
 {
     public class PlaceLookup
     {
@@ -8,6 +8,5 @@
         public string results { get; set; }
     }
 
-    
+
 }
- 

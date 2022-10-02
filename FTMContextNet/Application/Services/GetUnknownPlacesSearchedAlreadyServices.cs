@@ -4,7 +4,7 @@ using FTMContextNet.Data.Repositories;
 using AutoMapper;
 using System.Linq;
 using System.Collections.Generic;
-using FTMContext;
+using FTMContextNet.Domain.Entities.NonPersistent.Locations;
 
 namespace FTMContextNet.Application.Services
 {

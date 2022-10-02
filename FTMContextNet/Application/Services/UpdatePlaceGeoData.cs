@@ -2,6 +2,8 @@
 using FTMContextNet.Application.Models.Read;
 using FTMContextNet.Data.Repositories;
 using AutoMapper;
+using FTMContextNet.Application.Models.Write;
+using FTMContextNet.Domain.Entities.NonPersistent.Locations;
 
 namespace FTMContextNet.Application.Services
 {
@@ -18,11 +20,13 @@ namespace FTMContextNet.Application.Services
             _iMapper = iMapper;
         }
 
-        public InfoModel Execute()
+        public ServiceResult Execute(GeoCodeResultModel data)
         {
             _iLog.WriteLine("Executing UpdatePlaceGeoData");
 
-            return _iMapper.Map<InfoModel>(_persistedCacheRepository.GetInfo());
+            _persistedCacheRepository.SetPlaceGeoData(data.placeid,data.results);
+
+            return ServiceResult.Success;
         }
     }
 }

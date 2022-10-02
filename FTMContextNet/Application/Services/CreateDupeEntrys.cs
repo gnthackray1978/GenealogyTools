@@ -4,6 +4,7 @@ using LoggingLib;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using FTMContextNet.Domain.Entities.NonPersistent.Matches;
 
 namespace FTMContextNet.Application.Services
 {
@@ -22,6 +23,7 @@ namespace FTMContextNet.Application.Services
 
         public void Execute()
         {
+            _persistedCacheRepository.DeleteDupes();
 
             _ilog.WriteLine("Executing Create Dupe Entries");
 

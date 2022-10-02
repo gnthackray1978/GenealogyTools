@@ -1,5 +1,6 @@
 ﻿using FTMContext;
 using System.Collections.Generic;
+using FTMContextNet.Domain.Entities.NonPersistent.Person;
 
 namespace FTMContextNet.Domain.Entities.Persistent.Cache
 {
@@ -8,8 +9,8 @@ namespace FTMContextNet.Domain.Entities.Persistent.Cache
         public static FTMPersonView Create(int idCounter,int personId, string foreName, string surname,
                                     ProcessDateReturnType processDateReturn, 
                                     ProcessLocationReturnType associatedLocationData, 
-                                    List<int> parents, string origin) {
-            var fTMPersonView = new FTMPersonView()
+                                    List<int> parents, PersonOrigin origin) {
+            var fTmPersonView = new FTMPersonView
             {
                 Id = idCounter,
                 PersonId = personId,
@@ -24,13 +25,15 @@ namespace FTMContextNet.Domain.Entities.Persistent.Cache
                 BirthLong = associatedLocationData.BirthLocationLong,
                 FirstName = foreName,
                 Surname = surname,
-                Origin = origin,
+                Origin = origin.Origin,
+                DirectAncestor = origin.DirectAncestor,
                 LinkedLocations = associatedLocationData.LocationString,
                 FatherId = parents[0],
-                MotherId = parents[1]
+                MotherId = parents[1],
+                
             };
 
-            return fTMPersonView;
+            return fTmPersonView;
         }
 
         public int Id { get; set; }
@@ -51,6 +54,8 @@ namespace FTMContextNet.Domain.Entities.Persistent.Cache
         public double AltLong { get; set; }
 
         public string Origin { get; set; }
+
+        public bool DirectAncestor { get; set; }
 
         public int PersonId { get; set; }
 

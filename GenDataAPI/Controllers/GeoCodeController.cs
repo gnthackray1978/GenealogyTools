@@ -1,15 +1,16 @@
 ﻿using System.Collections.Generic;
 using ConfigHelper;
-using FTMContext;
 using FTMContextNet;
 using FTMContextNet.Application.Models.Read;
+using FTMContextNet.Application.Models.Write;
+using FTMContextNet.Domain.Entities.NonPersistent.Locations;
 using GenDataAPI.Hub;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 
 namespace GenDataAPI.Controllers
 {
- 
+
 
     [ApiController]
     [Route("[controller]")]
@@ -40,7 +41,7 @@ namespace GenDataAPI.Controllers
         }
         // POST api/values
         [HttpPost]
-        public void Post(PlaceLookup value)
+        public void Post(GeoCodeResultModel value)
         {
             _facade.UpdatePlaceGeoData(value);
         }

@@ -15,7 +15,7 @@ namespace FTMContextNet.Application.Services
         private FTMMakerRepository _fTMMakerRepository;
         private Ilog _ilog;
 
-        public List<int> AddedPersons = new List<int>();
+        public Dictionary<int,bool> AddedPersons = new Dictionary<int,bool>();
         public List<int> SpouseList = new List<int>();
 
         public List<int> RelList = new List<int>();
@@ -52,7 +52,7 @@ namespace FTMContextNet.Application.Services
         {
             ChildRelationshipSubsets = _fTMMakerRepository.GetChildrenByPersonId();
             
-            GroupPersonIds = _fTMMakerRepository.GetListOfGroupIds();
+          //  GroupPersonIds = _fTMMakerRepository.GetListOfTreeIds();
 
             RelationsDictionary = _fTMMakerRepository.GetRelationships();
 
@@ -63,7 +63,7 @@ namespace FTMContextNet.Application.Services
             _persistedCacheRepository.DeleteOrigins();
 
 
-            var rootPeople = _fTMMakerRepository.GetRootPeople();
+            var rootPeople = _fTMMakerRepository.GetTreeRootPeople();
 
             int nextId = _persistedCacheRepository.OriginPersonCount();
 
@@ -74,7 +74,7 @@ namespace FTMContextNet.Application.Services
             {
                 //  _consoleWrapper.WriteLine("Assigning ancestors for : " + rootPerson.Surname);
 
-                AddedPersons = new List<int>();
+                AddedPersons = new Dictionary<int, bool>();
                 SpouseList = new List<int>();
                 RelList = new List<int>();
                 ChildList = new List<int>();
@@ -97,7 +97,7 @@ namespace FTMContextNet.Application.Services
 
                     while (spouseListIdx < SpouseList.Count)
                     {
-                        LookupAncestors(SpouseList[spouseListIdx]);
+                        LookupAncestors(SpouseList[spouseListIdx],false);
 
                         spouseListIdx++;
                     }
@@ -132,10 +132,10 @@ namespace FTMContextNet.Application.Services
             RelList.Add(relId);
 
             //ADD SPOUSE
-            if (!AddedPersons.Contains(spouseId) && !GroupPersonIds.Contains(spouseId))
+            if (!AddedPersons.ContainsKey(spouseId) && !GroupPersonIds.Contains(spouseId))
             {
                 SpouseList.Add(spouseId);
-                AddedPersons.Add(spouseId);
+                AddedPersons.Add(spouseId,false);
             }
 
             //  foreach (var pr in RelationsDictionary)
@@ -184,9 +184,9 @@ namespace FTMContextNet.Application.Services
 
             //ChildList.Add(child.Id);
 
-            if (!AddedPersons.Contains(child))
+            if (!AddedPersons.ContainsKey(child))
             {
-                AddedPersons.Add(child);
+                AddedPersons.Add(child,false);
 
              //   var cPerson = _fTMMakerRepository.GetPersonById(child);
 
@@ -204,16 +204,16 @@ namespace FTMContextNet.Application.Services
     }
 
 
-        private void LookupAncestors(int personId)
+        private void LookupAncestors(int personId, bool directAncestor =true)
         {
             if (personId == 0)
                 return;
 
             //var person = _fTMMakerRepository.GetPersonById(personId,true);
 
-            if (!AddedPersons.Contains(personId))
+            if (!AddedPersons.ContainsKey(personId))
             {
-                AddedPersons.Add(personId);
+                AddedPersons.Add(personId,directAncestor);
             }
             else
             {
@@ -239,11 +239,11 @@ namespace FTMContextNet.Application.Services
                 {
                     var p1 = r.Person1Id;
                     if (p1 != null)
-                        LookupAncestors(p1.Value);
+                        LookupAncestors(p1.Value, directAncestor);
 
                     var p2 = r.Person2Id;
                     if (p2 != null)
-                        LookupAncestors(p2.Value);
+                        LookupAncestors(p2.Value, directAncestor);
                 }
             }
         }

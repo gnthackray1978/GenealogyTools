@@ -7,6 +7,8 @@ using System.Text.RegularExpressions;
 using FTM.Dates;
 using FTMContext;
 using FTMContextNet.Domain.Entities.NonPersistent;
+using FTMContextNet.Domain.Entities.NonPersistent.Locations;
+using FTMContextNet.Domain.Entities.NonPersistent.Person;
 using FTMContextNet.Domain.Entities.Persistent.Cache;
 using FTMContextNet.Domain.Entities.Source;
 using FTMContextNet.Domain.Transient;
@@ -83,18 +85,8 @@ namespace FTMContextNet.Data.Repositories
         {
             try
             {
-                var cachedPlace = _persistedCacheContext.FTMPlaceCache.FirstOrDefault(f => f.FTMPlaceId == placeId);
-
-                if (cachedPlace != null)
-                {
-                    cachedPlace.JSONResult = results;
-                    cachedPlace.Country = "";
-                    cachedPlace.County = "";
-                    cachedPlace.Searched = true;
-                    cachedPlace.BadData = false;
-                }
-
-                _persistedCacheContext.SaveChanges();
+                _persistedCacheContext.UpdateFTMPlaceCache(placeId,results);
+            
                 Debug.WriteLine("ID : " + placeId);
             }
             catch (Exception e)
@@ -152,6 +144,16 @@ namespace FTMContextNet.Data.Repositories
         public void DeleteMarriages()
         {
             _persistedCacheContext.DeleteMarriages();
+        }
+
+        public void DeleteTreeGroups()
+        {
+            _persistedCacheContext.DeleteTreeGroups();
+        }
+
+        public void DeleteRecordMapGroups()
+        {
+            _persistedCacheContext.DeleteRecordMapGroups();
         }
 
         #endregion
@@ -562,16 +564,26 @@ namespace FTMContextNet.Data.Repositories
 
 
 
-        public int SaveFtmPersonOrigins(int nextId, List<int> addedPersons, string origin) {
+        public int SaveFtmPersonOrigins(int nextId, Dictionary<int,bool> addedPersons, string origin) {
 
             
             return _persistedCacheContext.BulkInsertFTMPersonOrigins(nextId, addedPersons, origin);
         }
-        
+
+        public int SaveTreeGroups(int nextId, string treeGroup)
+        {
+            return _persistedCacheContext.InsertGroups(nextId, treeGroup);
+        }
+
+        public int SaveTreeRecordMapGroup(int nextId, string treeGroup, string treeName)
+        {
+            return _persistedCacheContext.InsertRecordMapGroup(nextId, treeGroup, treeName);
+        }
+
         public void SavePersons(PersonSubset personSubset,
                         ProcessDateReturnType processDateReturn,
                         ProcessLocationReturnType associatedLocationData,
-                        List<int> parents, string origin)
+                        List<int> parents, PersonOrigin origin)
         {
 
             if (_counter == 0)

@@ -1,11 +1,7 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using AutoMapper;
 using AzureContext;
 using ConfigHelper;
-using FTMContext;
 using FTMContextNet;
-using FTMContextNet.Application.Mapping;
 using FTMContextNet.Application.Models.Read;
 using GenDataAPI.Hub;
 using Microsoft.AspNetCore.Mvc;
@@ -88,6 +84,24 @@ namespace GenDataAPI.Controllers
         public IActionResult AddTrees()
         {
             _facade.CreateTreeRecord();
+
+            return Ok(true);
+        }
+
+        [HttpPost]
+        [Route("/data/treegroups")]
+        public IActionResult AddTreeGroups()
+        {
+            _facade.CreateTreeGroups();
+
+            return Ok(true);
+        }
+
+        [HttpPost]
+        [Route("/data/treegroupmappings")]
+        public IActionResult AddTreeGroupMappings()
+        {
+            _facade.CreateTreeGroupMappings();
 
             return Ok(true);
         }

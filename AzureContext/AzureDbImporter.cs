@@ -34,6 +34,8 @@ namespace AzureContext
 
             using (var executor = new AzureDBContext(_imsgConfigHelper.MSGGenDB01))
             {
+                executor.ExecuteCommand("TRUNCATE TABLE DNA.TreeGroups");
+                executor.ExecuteCommand("TRUNCATE TABLE DNA.TreeRecordMapGroup");
                 executor.ExecuteCommand("TRUNCATE TABLE DNA.TreeRecord");
                 executor.ExecuteCommand("TRUNCATE TABLE DNA.FTMPersonView");
                 executor.ExecuteCommand("TRUNCATE TABLE DNA.DupeEntries");
@@ -88,7 +90,8 @@ namespace AzureContext
                     BirthLat = d.BirthLat,
                     BirthLocation = d.BirthLocation,
                     BirthLong = d.BirthLong,
-                    BirthTo = d.BirthTo
+                    BirthTo = d.BirthTo,
+                    DirectAncestor = d.DirectAncestor
                 });
                 
             }
@@ -106,14 +109,12 @@ namespace AzureContext
                     CM = d.CM,
                     Name = d.Name,
                     PersonCount = d.PersonCount,
-                    Located = d.Located,
-                    GroupNumber = 0
+                    Located = d.Located
                 });
 
             }
 
-            destination.SaveChanges();
-            //  destination.BulkInsert(destination.TreeRecord.ToList());
+            destination.SaveChanges(); 
 
             _console.WriteCounter("Adding new marriages");
 
@@ -135,6 +136,36 @@ namespace AzureContext
             }
 
             destination.SaveChanges();
+
+            _console.WriteCounter("Adding new tree group records");
+
+            foreach (var d in a.TreeGroups)
+            {
+                destination.TreeGroups.Add(new Models.TreeGroups()
+                {
+                    Id = d.Id,
+                    GroupName = d.GroupName
+                });
+
+            }
+
+            destination.SaveChanges();
+
+            _console.WriteCounter("Adding new tree records map groups");
+
+            foreach (var d in a.TreeRecordMapGroup)
+            {
+                destination.TreeRecordMapGroup.Add(new Models.TreeRecordMapGroup()
+                {
+                    Id = d.Id,
+                    GroupName = d.GroupName,
+                    TreeName = d.TreeName
+                });
+
+            }
+
+            destination.SaveChanges();
+
         }
 
          
