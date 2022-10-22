@@ -20,8 +20,7 @@ namespace FTMContextNet.Application.Services
             _ilog.WriteLine("Executing Creating Tree Records");
 
             _persistedCacheRepository.DeleteTreeRecords();
-
-            _ftmMakerRepository.GetGroups();
+             
 
             _persistedCacheRepository.PopulateTreeRecordsFromCache();
         }

@@ -28,7 +28,7 @@ namespace AzureContext
 
             var a = PersistedCacheContext.Create(_imsgConfigHelper);
 
-            
+            var originDictionary = a.TreeRecords.ToDictionary(p => p.Name, p => p.Id);
 
             _console.WriteCounter("Emptying TreeRecord FTMPersonView and DupeEntries");
 
@@ -73,10 +73,15 @@ namespace AzureContext
 
             foreach (var d in a.FTMPersonView)
             {
+                var id = 0;
+
+                if (!string.IsNullOrEmpty(d.Origin) && originDictionary.ContainsKey(d.Origin))
+                    id = originDictionary[d.Origin];
+
                 ftmPersonViews.Add(new FTMPersonView()
                 {
                     Id = d.Id,
-                    Origin = d.Origin??"".Replace(" ",""),
+                    Origin = id,
                     Surname = d.Surname,
                     FirstName = d.FirstName,
                     PersonId = d.PersonId,
@@ -104,8 +109,8 @@ namespace AzureContext
             {
                 destination.TreeRecord.Add(new Models.TreeRecord()
                 {
-                    Id = d.Id,
-                    Origin = d.Origin??"".Replace(" ", ""),
+                    ID = d.Id,
+                    Origin = d.Origin??"",
                     CM = d.CM,
                     Name = d.Name,
                     PersonCount = d.PersonCount,
@@ -141,10 +146,16 @@ namespace AzureContext
 
             foreach (var d in a.TreeGroups)
             {
+                var id = 0;
+
+                if (!string.IsNullOrEmpty(d.GroupName) && originDictionary.ContainsKey(d.GroupName))
+                    id = originDictionary[d.GroupName];
+
                 destination.TreeGroups.Add(new Models.TreeGroups()
                 {
                     Id = d.Id,
-                    GroupName = d.GroupName
+                    GroupName = d.GroupName,
+                    GroupId = id
                 });
 
             }
@@ -155,11 +166,21 @@ namespace AzureContext
 
             foreach (var d in a.TreeRecordMapGroup)
             {
+                var groupId = 0;
+
+                if (!string.IsNullOrEmpty(d.GroupName) && originDictionary.ContainsKey(d.GroupName))
+                    groupId = originDictionary[d.GroupName];
+
+                var treeId = 0;
+
+                if (!string.IsNullOrEmpty(d.TreeName) && originDictionary.ContainsKey(d.TreeName))
+                    treeId = originDictionary[d.TreeName];
+
                 destination.TreeRecordMapGroup.Add(new Models.TreeRecordMapGroup()
                 {
-                    Id = d.Id,
-                    GroupName = d.GroupName,
-                    TreeName = d.TreeName
+                    Id = d.Id, 
+                    GroupId = groupId,
+                    TreeId = treeId
                 });
 
             }

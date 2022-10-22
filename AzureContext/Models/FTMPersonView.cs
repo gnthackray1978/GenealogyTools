@@ -19,7 +19,7 @@
         public double? AltLat { get; set; }
         public double? AltLong { get; set; }
 
-        public string Origin { get; set; }
+        public int Origin { get; set; }
         public int? PersonId { get; set; }
 
         public int? FatherId { get; set; }

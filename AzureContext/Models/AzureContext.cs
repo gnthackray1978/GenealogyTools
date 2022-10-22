@@ -695,7 +695,7 @@ namespace AzureContext.Models
             modelBuilder.Entity<TreeRecord>(entity =>
             {
                 entity.ToTable("TreeRecord", "DNA");
-                entity.Property(e => e.Id).ValueGeneratedNever();
+                entity.Property(e => e.ID).ValueGeneratedNever();
                 entity.Property(e => e.Name);
                 entity.Property(e => e.Origin).HasMaxLength(250);
             });
@@ -711,8 +711,6 @@ namespace AzureContext.Models
             {
                 entity.ToTable("TreeRecordMapGroup", "DNA");
                 entity.Property(e => e.Id).ValueGeneratedNever();
-                entity.Property(e => e.GroupName).HasMaxLength(500);
-                entity.Property(e => e.TreeName).HasMaxLength(500);
             });
 
             modelBuilder.Entity<PersonsOfInterest>(entity =>
@@ -1301,7 +1299,7 @@ namespace AzureContext.Models
                     FatherId = 0,
                     Id = 0,
                     MotherId = 0,
-                    Origin = "x",
+                    Origin = 0,
                     PersonId = 0,
                     Surname = "x",
                     DirectAncestor = false

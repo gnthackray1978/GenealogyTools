@@ -78,7 +78,7 @@ namespace FTMContextNet.Data
             
         }
 
-        public int BulkInsertFTMPersonOrigins(int nextId, Dictionary<int, bool> addedPersons, string origin)
+        public int BulkInsertFTMPersonOrigins(int nextId, Dictionary<int, bool> addedPersons, string origin, string fullName ="")
         {
 
             var connectionString = this.Database.GetDbConnection().ConnectionString;
@@ -106,7 +106,7 @@ namespace FTMContextNet.Data
             {
                 command.Parameters["$Id"].Value = idx;
                 command.Parameters["$PersonId"].Value = row.Key;
-                command.Parameters["$Origin"].Value = origin;
+                command.Parameters["$Origin"].Value = fullName.ToLower().Contains("group") ? fullName : origin;
                 command.Parameters["$DirectAncestor"].Value = row.Value;
                 command.ExecuteNonQuery();
                 idx++;

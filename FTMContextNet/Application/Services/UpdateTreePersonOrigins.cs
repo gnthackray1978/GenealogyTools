@@ -29,6 +29,7 @@ namespace FTMContextNet.Application.Services
         public Dictionary<int, int[]> RelationsDictionary = new Dictionary<int, int[]>();
 
         public Dictionary<int, HashSet<int>> ChildWithRelationship = new Dictionary<int, HashSet<int>>();
+        private HashSet<int> _exceptions;
 
         public UpdateTreePersonOrigins(FTMMakerRepository context,
             PersistedCacheRepository persistedCacheRepository,
@@ -63,7 +64,12 @@ namespace FTMContextNet.Application.Services
             _persistedCacheRepository.DeleteOrigins();
 
 
+
             var rootPeople = _fTMMakerRepository.GetTreeRootPeople();
+            var groups = _fTMMakerRepository.GetGroupPerson();
+            _exceptions = groups.Select(s => s.Id).ToHashSet();
+            if(!_exceptions.Contains(0))
+                _exceptions.Add(0);
 
             int nextId = _persistedCacheRepository.OriginPersonCount();
 
@@ -72,7 +78,7 @@ namespace FTMContextNet.Application.Services
 
             foreach (var rootPerson in rootPeople)
             {
-                //  _consoleWrapper.WriteLine("Assigning ancestors for : " + rootPerson.Surname);
+               
 
                 AddedPersons = new Dictionary<int, bool>();
                 SpouseList = new List<int>();
@@ -103,10 +109,21 @@ namespace FTMContextNet.Application.Services
                     }
                 }
 
-                nextId = _persistedCacheRepository.SaveFtmPersonOrigins(nextId, AddedPersons, rootPerson.FamilyName);
+                foreach (var exception in _exceptions)
+                {
+                    AddedPersons.Remove(exception);
+                }
+                
+                if(AddedPersons.Count > 0)
+                    nextId = _persistedCacheRepository.SaveFtmPersonOrigins(nextId, AddedPersons, rootPerson.FamilyName, rootPerson.FullName);
+               
                 counter ++;
 
             }
+
+
+            nextId = groups.Aggregate(nextId, (current, group) => _persistedCacheRepository.SaveFtmPersonOrigins(current, new Dictionary<int, bool> { { group.Id, false } }, group.FamilyName, group.FullName));
+
 
             _ilog.WriteLine("Finished ");
         }
@@ -132,76 +149,32 @@ namespace FTMContextNet.Application.Services
             RelList.Add(relId);
 
             //ADD SPOUSE
-            if (!AddedPersons.ContainsKey(spouseId) && !GroupPersonIds.Contains(spouseId))
+            if (!AddedPersons.ContainsKey(spouseId) && !_exceptions.Contains(spouseId))
             {
                 SpouseList.Add(spouseId);
+
                 AddedPersons.Add(spouseId,false);
             }
+            
 
-            //  foreach (var pr in RelationsDictionary)
-            //  {
-            //if (RelList.Contains(pr.Value[0]) || pr.Value[0] == 12619)
-            //    continue;
+            if (!ChildWithRelationship.ContainsKey(relId))
+                return;
 
-            //RelList.Add(pr.Value[0]);
-
-
-            //var spouseId = pr.Person1Id;
-            //if (pr.Person1Id == personId)
-            //{
-            //    spouseId = pr.Person2Id;
-            //}
-
-            //if (spouseId != null)
-            //{
-            //    //ADD SPOUSE
-            //    if (!AddedPersons.Contains(spouseId.Value))
-            //    {
-            //        var p = _fTMMakerRepository.GetPersonBySpouseId(spouseId.Value);
-
-            //        if (p != null && !SpouseList.Contains(p.Id))
-            //        {
-            //            SpouseList.Add(p.Id);                            
-            //            AddedPersons.Add(p.Id);
-            //        }
-            //    }
-        
-
-
-
-        // var relationshipId = pr.Id;
-        //GetChildren
-
-        // var otherChildren = _fTMMakerRepository.GetChildren(relationshipId);
-
-        if (!ChildWithRelationship.ContainsKey(relId))
-            return;
-
-        foreach (var child in ChildWithRelationship[relId])
-        {
-            //if (ChildList.Contains(child.Id))
-            //    continue;
-
-            //ChildList.Add(child.Id);
-
-            if (!AddedPersons.ContainsKey(child))
+            foreach (var child in ChildWithRelationship[relId])
             {
-                AddedPersons.Add(child,false);
-
-             //   var cPerson = _fTMMakerRepository.GetPersonById(child);
-
-                if (!GroupPersonIds.Contains(child))
+                if (!AddedPersons.ContainsKey(child))
                 {
-                    LookupDescendants(child);
+                    AddedPersons.Add(child,false);
+
+                    if (!GroupPersonIds.Contains(child))
+                    {
+                        LookupDescendants(child);
+                    }
+
                 }
-
             }
-
-
+             
         }
-
-        //}
-    }
 
 
         private void LookupAncestors(int personId, bool directAncestor =true)
@@ -209,17 +182,10 @@ namespace FTMContextNet.Application.Services
             if (personId == 0)
                 return;
 
-            //var person = _fTMMakerRepository.GetPersonById(personId,true);
-
             if (!AddedPersons.ContainsKey(personId))
             {
                 AddedPersons.Add(personId,directAncestor);
             }
-            else
-            {
-                //  Debug.WriteLine(p.Id + " " + p.FullName + " already added");
-            }
-
             //child relationship joins a person to a relationship i.e. their parents relationship
 
             var crs = ChildRelationshipSubsets.Where(w => w.PersonId == personId);

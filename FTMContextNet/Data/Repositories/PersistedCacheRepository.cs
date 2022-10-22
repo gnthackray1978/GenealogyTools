@@ -499,6 +499,8 @@ namespace FTMContextNet.Data.Repositories
 
             // var rootPeople = _context.Person.Where(w => w.Surname.StartsWith("_"));
 
+            List<TreeRecord> newRecords = new List<TreeRecord>();
+
             foreach (var family in _persistedCacheContext.FTMPersonView.ToList().GroupBy(g => g.Origin))
             {
 
@@ -544,7 +546,7 @@ namespace FTMContextNet.Data.Repositories
 
                 m = re.Match(familyName);
 
-                _persistedCacheContext.TreeRecords.Add(new TreeRecord()
+                newRecords.Add(new TreeRecord()
                 {
                     Id = idx,
                     PersonCount = family.Count(),
@@ -557,6 +559,8 @@ namespace FTMContextNet.Data.Repositories
                 idx++;
             }
 
+            if(newRecords.Count > 0)
+                _persistedCacheContext.TreeRecords.AddRange(newRecords);
 
 
             _persistedCacheContext.SaveChanges();
@@ -564,10 +568,10 @@ namespace FTMContextNet.Data.Repositories
 
 
 
-        public int SaveFtmPersonOrigins(int nextId, Dictionary<int,bool> addedPersons, string origin) {
+        public int SaveFtmPersonOrigins(int nextId, Dictionary<int,bool> addedPersons, string origin, string firstName) {
 
             
-            return _persistedCacheContext.BulkInsertFTMPersonOrigins(nextId, addedPersons, origin);
+            return _persistedCacheContext.BulkInsertFTMPersonOrigins(nextId, addedPersons, origin, firstName);
         }
 
         public int SaveTreeGroups(int nextId, string treeGroup)

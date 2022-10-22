@@ -1,6 +1,7 @@
 ﻿using FTMContextNet.Domain.Entities.Source;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using FTMContext;
 
 namespace FTMContextNet.Data.Repositories
@@ -100,12 +101,30 @@ namespace FTMContextNet.Data.Repositories
             return nameDictionary;
         }
 
-        private IQueryable<Person> GetTreeRootPersons()
+        private List<Person> GetTreeRootPersons()
         {
             int personId = GetMyId();
 
-            return this._ftMakerContext.Person.Where(p =>
-                p != null && (!p.FullName.ToLower().Contains("group") && p.FullName.ToLower().Contains("_") || p.Id == personId));
+            Regex r = new Regex(@"_[1-9]\d*(\.\d+)?_");
+
+
+            var result = this._ftMakerContext.Person.Where(p =>
+                p != null && (!p.FullName.ToLower().Contains("group") 
+                    && p.FullName.ToLower().Contains("_") || p.Id == personId));
+
+            List<Person> persons = new List<Person>();
+
+            //this should only be a small number of records so the performance hit
+            //ought to not be noticeable
+            foreach (var person in result)
+            {
+                if (r.IsMatch(person.FullName))
+                {
+                    persons.Add(person);
+                }
+            }
+
+            return persons;
         }
 
         //get a list of trees 
