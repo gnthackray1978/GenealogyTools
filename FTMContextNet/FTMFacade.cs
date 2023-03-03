@@ -17,10 +17,7 @@ namespace FTMContextNet
 
     public class FTMFacade
     {
-      //  private  PersistedCacheRepository persistedCacheRepository;
-    //    private  PlacesRepository _placesRepository;
-       // private  FTMMakerRepository _ftMakerRepository;
-      //  private  InMemoryCacheRepository _inMemoryCacheRepository;
+
         private  Ilog _outputHandler;
         private  IMapper _mapper;
         private IMSGConfigHelper _iMSGConfigHelper;
@@ -35,20 +32,14 @@ namespace FTMContextNet
             {
                 cfg.AddProfile(new AutoMapperConfiguration());
             });
-
-          
-
-           
-     
             
-
             _mapper = config.CreateMapper();
 
             _iMSGConfigHelper = iMSGConfigHelper;
 
              _outputHandler = iLog;
 
-            _outputHandler.WriteLine("Service Cache Created");
+            //_outputHandler.WriteLine("Service Cache Created");
         }
         public IEnumerable<PlaceModel> GetUnknownPlaces(int count)
         {
@@ -71,6 +62,9 @@ namespace FTMContextNet
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Updates place entry in cacheData.FTMPlaceCache with result we got back from google geocode.
+        /// </summary>
         public void UpdatePlaceGeoData(GeoCodeResultModel value)
         {
             var persistedCacheRepository = new PersistedCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper), _outputHandler);
@@ -107,6 +101,9 @@ namespace FTMContextNet
             service.Execute();
         }
 
+
+        #region tree data
+
         public void AssignTreeNamesToPersons()
         {
             var persistedCacheRepository = new PersistedCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper), _outputHandler);
@@ -121,8 +118,6 @@ namespace FTMContextNet
 
             _outputHandler.WriteLine("Finished Setting Origin Person");
         }
-
-
 
         public void ImportPersons()
         {
@@ -192,6 +187,9 @@ namespace FTMContextNet
             ctr.Execute();
 
         }
+
+        #endregion
+
 
         public InfoModel GetInfo() {
                    

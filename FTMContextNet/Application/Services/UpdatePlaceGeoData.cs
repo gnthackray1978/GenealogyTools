@@ -20,9 +20,13 @@ namespace FTMContextNet.Application.Services
             _iMapper = iMapper;
         }
 
+        /// <summary>
+        /// Updates place entry in cacheData.FTMPlaceCache with result we got back from google geocode.
+        /// </summary>
+        /// <returns></returns>
         public ServiceResult Execute(GeoCodeResultModel data)
         {
-            _iLog.WriteLine("Executing UpdatePlaceGeoData");
+            _iLog.WriteLine("Updating cacheData.FTMPlaceCache with geocode result");
 
             _persistedCacheRepository.SetPlaceGeoData(data.placeid,data.results);
 

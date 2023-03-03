@@ -221,9 +221,7 @@ namespace FTMContextNet.Data.Repositories
             CheckForUpdates(PersistedCacheContext context, List<Place> sourcePlaces, Ilog iLog, bool showInfo = false)
         {
             iLog.WriteLine("Finding missing and updated places");
-            //ExtractFTMDB();
-
-         //   var placeDictionary = new Dictionary<int, string>();
+             
             var cacheDictionary = new Dictionary<int, string>();
 
             // for performance reasons create a place cache of the existing records
@@ -343,6 +341,14 @@ namespace FTMContextNet.Data.Repositories
             return idx;
         }
 
+        /// <summary>
+        /// Looks through the cacheData.ftmplacecache table and if location is not in it
+        /// then add it.
+        /// Also looks to see if place has changed.
+        /// The ids in the ftmplacecache.FTMPlaceId and dna_match_file place table should be aligned. If
+        /// the place changes then it needs updating.
+        /// </summary>
+        /// <param name="sourcePlaces">list of all places from the dna_match_file DB</param>
         public void AddMissingPlaces(List<Place> sourcePlaces)
         {
             (List<Place> missingPlaces, List<Place> updatedPlaces) data = CheckForUpdates(this._persistedCacheContext, sourcePlaces, this._iLog);
