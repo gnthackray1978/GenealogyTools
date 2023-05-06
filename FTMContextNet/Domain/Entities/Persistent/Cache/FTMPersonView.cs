@@ -1,7 +1,4 @@
-﻿using FTMContext;
-using System.Collections.Generic;
-using FTMContextNet.Domain.Entities.NonPersistent.Person;
-using QuickGed.Types;
+﻿using QuickGed.Types;
 
 namespace FTMContextNet.Domain.Entities.Persistent.Cache
 {

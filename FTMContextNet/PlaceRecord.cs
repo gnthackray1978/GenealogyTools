@@ -8,6 +8,7 @@ using LoggingLib;
 using PlaceLib;
 using PlaceLibNet;
 using PlaceLibNet.Data.Repositories;
+using PlaceLibNet.Domain;
 using PlaceLibNet.Model;
 
 namespace FTMContextNet;

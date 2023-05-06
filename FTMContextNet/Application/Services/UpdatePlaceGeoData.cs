@@ -4,6 +4,7 @@ using FTMContextNet.Data.Repositories;
 using AutoMapper;
 using FTMContextNet.Application.Models.Write;
 using PlaceLibNet;
+using PlaceLibNet.Data.Repositories;
 
 namespace FTMContextNet.Application.Services
 {

@@ -4,6 +4,8 @@ using AutoMapper;
 using System.Linq;
 using System.Collections.Generic;
 using PlaceLibNet;
+using PlaceLibNet.Data.Repositories;
+using PlaceLibNet.Domain;
 using PlaceLibNet.Model;
 
 namespace FTMContextNet.Application.Services

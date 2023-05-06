@@ -2,6 +2,7 @@
 using FTMContextNet.Application.Models.Read;
 using FTMContextNet.Domain.Entities.NonPersistent;
 using System.Collections.Generic;
+using PlaceLibNet.Domain;
 using PlaceLibNet.Model;
 
 namespace FTMContextNet.Application.Mapping

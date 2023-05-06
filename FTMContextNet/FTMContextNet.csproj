@@ -32,6 +32,7 @@
 
   <ItemGroup>
     <Folder Include="Data\Configuration\" />
+    <Folder Include="Data\Interfaces\" />
     <Folder Include="Domain\Enumerations\" />
     <Folder Include="Domain\Transient\" />
   </ItemGroup>

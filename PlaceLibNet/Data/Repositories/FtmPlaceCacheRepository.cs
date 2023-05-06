@@ -9,7 +9,7 @@ using PlaceLibNet.Data.Contexts;
 using PlaceLibNet.Domain;
 using PlaceLibNet.Model;
 
-namespace PlaceLibNet
+namespace PlaceLibNet.Data.Repositories
 {
     public class FtmPlaceCacheRepository
     {

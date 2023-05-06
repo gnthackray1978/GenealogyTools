@@ -4,39 +4,34 @@ using FTMContextNet;
 using LoggingLib;
 
 namespace FTMConsole2
-{
-    
+{ 
     class Program
     {
         static void Main()
         {
-            IMSGConfigHelper imsgConfigHelper = new MSGConfigHelper();
-
            
-            var facade = new FTMFacade(imsgConfigHelper, new Log());
+            var facade = new FTMFacade(new MSGConfigHelper(), new Log());
+             
+            Console.WriteLine("1. Import Persons");
 
+            Console.WriteLine("2. Create Tree Records");
 
-            Console.WriteLine("1. Add Unknown Places");
+            Console.WriteLine("3. Create Tree Groups");
 
-            Console.WriteLine("2. Update Places");
+            Console.WriteLine("4. Create Tree Group Mappings");
 
-            Console.WriteLine("3. Import Persons");
+            Console.WriteLine("5. Create Dupes");
 
-            Console.WriteLine("4. Create Tree Records");
+            Console.WriteLine("6. Add Unknown Places");
 
-            Console.WriteLine("5. Create Tree Groups");
-
-            Console.WriteLine("6. Create Tree Group Mappings");
-
-            Console.WriteLine("7. Create Dupes");
+            Console.WriteLine("7. Update Places");
 
             Console.WriteLine("8. Debug Option");
             
             Console.WriteLine("9. Quit");
             
             while (true)
-            {
-
+            { 
                 var input = Console.ReadKey();
                 Console.WriteLine("");
                 if (!int.TryParse(input.KeyChar.ToString(),out int sin))
@@ -56,40 +51,40 @@ namespace FTMConsole2
 
         private static void Actions(int sin, FTMFacade facade)
         {
+           
             if (sin == 1)
-            {
-                facade.AddUnknownPlaces();
-            }
-
-            if (sin == 2)
-            {
-                facade.UpdatePlaceMetaData();
-            }
-
-
-            if (sin == 3)
             {
                 facade.ImportPersons();
             }
 
-            if (sin == 4)
+            if (sin == 2)
             {
                 facade.CreateTreeRecord();
             }
 
-            if (sin == 5)
+            if (sin == 3)
             {
                 facade.CreateTreeGroups();
             }
 
-            if (sin == 6)
+            if (sin == 4)
             {
                 facade.CreateTreeGroupMappings();
             }
 
-            if (sin == 7)
+            if (sin == 5)
             {
                 facade.CreateDupeView();
+            }
+
+            if (sin == 6)
+            {
+                facade.AddUnknownPlaces();
+            }
+
+            if (sin == 7)
+            {
+                facade.UpdatePlaceMetaData();
             }
 
             if (sin == 8)

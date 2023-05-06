@@ -1,4 +1,4 @@
-﻿namespace PlaceLib;
+﻿namespace PlaceLibNet;
 
 public class PlaceDto
 {

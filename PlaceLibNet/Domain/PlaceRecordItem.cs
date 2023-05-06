@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Security.AccessControl;
-using System.Text;
-using System.Threading.Tasks;
 
-
-namespace PlaceLibNet.Model
+namespace PlaceLibNet.Domain
 {
     public class PlaceRecordItem : IComparable<PlaceRecordItem>
     {

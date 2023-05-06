@@ -5,6 +5,7 @@ using AutoMapper;
 using System.Collections.Generic;
 using System.Linq;
 using PlaceLibNet;
+using PlaceLibNet.Data.Repositories;
 
 namespace FTMContextNet.Application.Services
 {

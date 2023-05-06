@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Data.SQLite;
-using ConfigHelper;
-using FTMContextNet.Data.Interfaces;
+using ConfigHelper; 
 using FTMContextNet.Domain.Entities.Persistent.Cache;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -9,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace FTMContextNet.Data
 {
 
-    public partial class PersistedCacheContext : DbContext//, IPlace
+    public partial class PersistedCacheContext : DbContext
     {
 
         private IMSGConfigHelper _configObj { get; set; }
@@ -20,7 +19,7 @@ namespace FTMContextNet.Data
             _configObj = config;
         }
 
-        public PersistedCacheContext(DbContextOptions<FTMakerContext> options)
+        public PersistedCacheContext(DbContextOptions<PersistedCacheContext> options)
             : base(options)
         {
         }

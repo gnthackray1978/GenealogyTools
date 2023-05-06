@@ -1,4 +1,4 @@
-﻿namespace PlaceLibNet.Model
+﻿namespace PlaceLibNet.Domain
 {
     public class PlaceLookup
     {
