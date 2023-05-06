@@ -16,7 +16,7 @@ namespace LoggingLib
             Console.SetCursorPosition(0, currentLineCursor);
         }
 
-        public void ProgressSearch(double counter, double total, string message, string tailMessage = "")
+        public void ProgressSearch(int counter, int total, string message, string tailMessage = "")
         {
             double percentage = 0.0;
 
@@ -36,27 +36,29 @@ namespace LoggingLib
 
         }
 
-        public void ProgressUpdate(double counter, double total, string message, string tailMessage = "")
+        public void ProgressUpdate(int counter, int total, string message, string tailMessage = "")
         {
-            double percentage = 0.0;
-
-            percentage = counter / total * 100;
-
-            //  Console.SetCursorPosition(0, Console.CursorTop - 1);
-
-            // ClearCurrentConsoleLine();
+            
+            double percentage = ((double)counter / (double)total) * 100;
+             
             if (counter < 1)
             {
                 Console.WriteLine("");
-                Console.WriteLine("UPDATING " + message.Trim() + " " + percentage + " %   of " + total + " " + tailMessage.Trim());
+                Console.WriteLine("UPDATING " + message.Trim() + " " + percentage.ToString("F") + " %   of " + total + " " + tailMessage.Trim());
             }
             else
             {
-                Console.Write("\rUPDATING " + message.Trim() + " " + percentage + " %   of " + total + " " + tailMessage.Trim());
+                if (counter == total)
+                {
+                    Console.Write("\rUPDATING " + message.Trim() + " " + percentage.ToString("F") + " %   of " + total + " " + tailMessage.Trim());
+                    Console.WriteLine("");
+                }
+                else
+                {
+                    Console.Write("\rUPDATING " + message.Trim() + " " + percentage.ToString("F") + " %   of " + total + " " + tailMessage.Trim());
+                }
 
             }
-
-
         }
 
         public void StatusReport(string message, bool forceNewLine, bool pause = false)

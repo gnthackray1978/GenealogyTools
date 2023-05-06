@@ -8,7 +8,6 @@
   <ItemGroup>
     <ProjectReference Include="..\DNAGedLib\DNAGedLib.csproj" />
     <ProjectReference Include="..\GedcomImporter\GedcomImporter.csproj" />
-    <ProjectReference Include="..\PersonDupeLib\PersonDupeLib.csproj" />
   </ItemGroup>
 
 </Project>

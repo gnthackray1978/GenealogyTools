@@ -6,47 +6,54 @@ namespace FTMContextNet.Application.Services
     public class CreatePersonsAndMarriages
     {
         private readonly PersistedCacheRepository _persistedCacheRepository;
-        private readonly InMemoryCacheRepository _inMemoryCacheRepository;
+        private readonly GedRepository _gedRepository;
         private readonly Ilog _ilog;
 
-        public CreatePersonsAndMarriages(PersistedCacheRepository persistedCacheRepository,InMemoryCacheRepository inMemoryCacheRepository, Ilog outputHandler) {
+        public CreatePersonsAndMarriages(PersistedCacheRepository persistedCacheRepository,
+            GedRepository gedRepository, Ilog outputHandler) {
             _persistedCacheRepository = persistedCacheRepository;
-            _inMemoryCacheRepository = inMemoryCacheRepository;
+            _gedRepository = gedRepository;
             _ilog = outputHandler;
         }
 
         public void Execute() {
 
             _ilog.WriteLine("Executing CreatePersonsAndMarriages");
+            
 
-            _persistedCacheRepository.DeletePersons();
 
-            _persistedCacheRepository.DeleteMarriages();
+            _gedRepository.ParseLabelledTree();
 
-            _persistedCacheRepository.BeginSavePersons(_inMemoryCacheRepository.GetPersonCacheSize());
+            var importData = _persistedCacheRepository.AddImportRecord(_gedRepository._GedDb.FileName, _gedRepository._GedDb.FileSize);
 
-            foreach (var personSubset in _inMemoryCacheRepository.GetPersons())
+            
+            _persistedCacheRepository.BeginSavePersons(importData.NextId,_gedRepository._GedDb.Persons.Count);
+
+           
+            foreach (var id in importData.CurrentId)
             {
-                var birthDateRange = _inMemoryCacheRepository.GetPersonBirthDateRange(personSubset.Id);
+                _persistedCacheRepository.DeletePersons(id);
 
-                var associatedLocationData = _inMemoryCacheRepository.GetAllLocationsForPerson(personSubset.Id);
+                _persistedCacheRepository.DeleteMarriages(id);
 
-                var parents = _inMemoryCacheRepository.GetParentIds(personSubset.Id);
+                _persistedCacheRepository.DeleteImport(id);
+            }
+             
 
-                var origin = _inMemoryCacheRepository.GetOrigin(personSubset.Id);
-                
-                _persistedCacheRepository.SavePersons(personSubset, birthDateRange,associatedLocationData, parents, origin);
+            foreach (var personSubset in _gedRepository._GedDb.Persons)
+            {
+                _persistedCacheRepository.SavePersons(personSubset);
             }
 
             _persistedCacheRepository.SaveAll();
 
-            _persistedCacheRepository.BeginSaveMarriages(_inMemoryCacheRepository.GetMarriageCacheSize());
-            
-            foreach (var marriageSubset in _inMemoryCacheRepository.GetMarriages())
+            _persistedCacheRepository.BeginSaveMarriages(importData.NextId,_gedRepository._GedDb.Relationships.Count);
+
+            foreach (var marriageSubset in _gedRepository._GedDb.Relationships)
             {
                 _persistedCacheRepository.SaveMarriages(marriageSubset);
             }
-
+            
             _persistedCacheRepository.SaveAll();
         }
 

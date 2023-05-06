@@ -1,55 +1,79 @@
 ﻿
-using FTM.Dates;
+//using System;
+//using System.Text.RegularExpressions;
+//using FTM.Dates;
+//using FTMContextNet.Domain.Entities.Source;
 
-namespace FTMContext
-{
-    public class RelationSubSet {
-        public int Id { get; set; }
-        public int? Person1Id { get; set; }
-        public int? Person2Id { get; set; }
+//namespace FTMContext
+//{
+//    public class RelationSubSet : IRelationship
+//    {
+//        public int Id { get; set; }
+//        public int? Person1Id { get; set; }
+//        public int? Person2Id { get; set; }
 
-        public int LinkId { get; set; }
+//        public int LinkId { get; set; }
+        
+//        public string DateStr { get; set; }
+//        public Date Date { get; set; }
 
-        public Date Date { get; set; }
-        public int? PlaceId { get; set; }
-        public string Text { get; set; }
+//        public int DateYear { get; set; }
 
-        public string Origin { get; set; }
+//        public int? PlaceId { get; set; }
+//        public string Text { get; set; }
 
-        public string PlaceName { get; set; }
+//        public string Origin { get; set; }
 
-        public bool MatchEither(int groupId)
-        {
-            if (Person1Id.GetValueOrDefault() == groupId || Person2Id.GetValueOrDefault() == groupId)
-            {
-                return true;
-            }
+//        public string PlaceName { get; set; }
 
-            return false;
-        }
+       
 
-        public int GetOtherSide(int groupId)
-        {
-            var potentialId = Person2Id.GetValueOrDefault();
+//        public static RelationSubSet Create(int id, string date, string location, int groom, int bride, int marriageYear)
+//        {
 
-            if (Person2Id == groupId)
-            {
-                potentialId = Person1Id.GetValueOrDefault();
-            }
+//            return new RelationSubSet()
+//            {
+//                Id = id,
+//                Person1Id = groom,
+//                Person2Id = bride,
+//                PlaceName = location,
+//                DateStr = date,
+//                DateYear = marriageYear
+//            };
+//        }
 
-            return potentialId;
-        }
+//        public bool MatchEither(int groupId)
+//        {
+//            if (Person1Id.GetValueOrDefault() == groupId || Person2Id.GetValueOrDefault() == groupId)
+//            {
+//                return true;
+//            }
 
-        public static bool ValidYear(Date date)
-        {
-            if (date == null) return false;
+//            return false;
+//        }
 
-            if (date.Year != null && date.HasYear())
-            {
-                return true;
-            }
+//        public int GetOtherSide(int groupId)
+//        {
+//            var potentialId = Person2Id.GetValueOrDefault();
 
-            return false;
-        }
-    }
-}
+//            if (Person2Id == groupId)
+//            {
+//                potentialId = Person1Id.GetValueOrDefault();
+//            }
+
+//            return potentialId;
+//        }
+
+//        public static bool ValidYear(Date date)
+//        {
+//            if (date == null) return false;
+
+//            if (date.Year != null && date.HasYear())
+//            {
+//                return true;
+//            }
+
+//            return false;
+//        }
+//    }
+//}

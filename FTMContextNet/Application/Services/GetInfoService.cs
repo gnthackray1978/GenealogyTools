@@ -2,6 +2,7 @@
 using FTMContextNet.Application.Models.Read;
 using FTMContextNet.Data.Repositories;
 using AutoMapper;
+using PlaceLibNet;
 
 namespace FTMContextNet.Application.Services
 {
@@ -9,12 +10,14 @@ namespace FTMContextNet.Application.Services
     {
         private readonly Ilog _iLog;
         private readonly PersistedCacheRepository _persistedCacheRepository;
+        private readonly FtmPlaceCacheRepository _ftmMakerRepository;
         private readonly IMapper _iMapper;
 
-        public GetInfoService(PersistedCacheRepository persistedCacheRepository, Ilog outputHandlerp, IMapper iMapper)
+        public GetInfoService(PersistedCacheRepository persistedCacheRepository, FtmPlaceCacheRepository ftmMakerRepository, Ilog outputHandlerp, IMapper iMapper)
         {
             _iLog = outputHandlerp;
             _persistedCacheRepository = persistedCacheRepository;
+            _ftmMakerRepository = ftmMakerRepository;
             _iMapper = iMapper;
         }
 
@@ -22,7 +25,12 @@ namespace FTMContextNet.Application.Services
         {
             _iLog.WriteLine("Executing GetInfoService");
 
-            return _iMapper.Map<InfoModel>(_persistedCacheRepository.GetInfo());
+            var infoModal = _iMapper.Map<InfoModel>(_persistedCacheRepository.GetInfo());
+
+            infoModal.Unsearched = _ftmMakerRepository.GetUnsearchedCount();
+            infoModal.PlacesCount = _ftmMakerRepository.GetGeoCodeCacheSize();
+
+            return infoModal;
         }
     }
 }

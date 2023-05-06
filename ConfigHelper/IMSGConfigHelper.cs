@@ -2,6 +2,7 @@
 {
     public interface IMSGConfigHelper
     {
+        string GedPath { get; set; }
         string MSGGenDB01 { get; set; }
 
         string MSGGenDB01Local { get; set; }

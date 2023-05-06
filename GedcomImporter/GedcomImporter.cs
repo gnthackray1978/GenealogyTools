@@ -1,16 +1,12 @@
 ﻿using GedcomParser.Services;
 using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.Linq;
-using System.Text.RegularExpressions;
 using DNAGedLib;
-using Microsoft.EntityFrameworkCore;
-using GenDBContext.Models;
 using DNAGedLib.Models;
 using GedcomParser.Entities;
+using GenDBContextNET.Contexts;
 using LoggingLib;
-using Microsoft.Data.Sqlite;
 
 namespace GedcomImporter
 {

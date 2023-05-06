@@ -13,13 +13,11 @@ namespace FTMContextNet.Application.Services
     {
         private static readonly SemaphoreSlim RateLimit = new SemaphoreSlim(1,1);
         private readonly PersistedCacheRepository _persistedCacheRepository;
-        private readonly FTMMakerRepository _ftmMakerRepository;
         private readonly Ilog _ilog;
 
-        public CreateTreeGroupMappings(PersistedCacheRepository persistedCacheRepository, FTMMakerRepository ftmMakerRepository, Ilog outputHandler)
+        public CreateTreeGroupMappings(PersistedCacheRepository persistedCacheRepository, Ilog outputHandler)
         {
             _persistedCacheRepository = persistedCacheRepository;
-            _ftmMakerRepository = ftmMakerRepository;
             _ilog = outputHandler;
         }
 
@@ -27,13 +25,14 @@ namespace FTMContextNet.Application.Services
         {
             await RateLimit.WaitAsync();
 
+
             try
             {
                 _ilog.WriteLine("Executing Create Tree Group Mappings");
 
                 _persistedCacheRepository.DeleteRecordMapGroups();
 
-                var tp = _ftmMakerRepository.GetGroups();
+                var tp = _persistedCacheRepository.GetGroups();
 
                 //
                 var idx = 0;

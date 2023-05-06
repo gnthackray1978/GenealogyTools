@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
 using FTMContextNet.Application.Models.Read;
 using FTMContextNet.Domain.Entities.NonPersistent;
-using FTMContextNet.Domain.Entities.NonPersistent.Locations;
 using System.Collections.Generic;
+using PlaceLibNet.Model;
 
 namespace FTMContextNet.Application.Mapping
 {

@@ -10,6 +10,6 @@
 
         public bool Located { get; set; }
 
-
+        public int ImportId { get; set; }
     }
 }

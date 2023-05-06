@@ -1,22 +1,24 @@
-﻿using LoggingLib;
-using FTMContextNet.Data.Repositories;
+﻿
+using LoggingLib;
 using AutoMapper;
 using GoogleMapsHelpers;
 using System.Linq;
+using PlaceLibNet;
+using PlaceLibNet.Data.Repositories;
 
 namespace FTMContextNet.Application.Services
 {
     public class UpdatePlaceMetaData
     {
         private readonly Ilog _iLog;
-        private readonly PersistedCacheRepository _persistedCacheRepository;
+        private readonly FtmPlaceCacheRepository _persistedCacheCacheRepository;
         private readonly PlacesRepository _placesRepository;
         private readonly IMapper _iMapper;
 
-        public UpdatePlaceMetaData(PersistedCacheRepository persistedCacheRepository, PlacesRepository placesRepository, Ilog iLog, IMapper iMapper)
+        public UpdatePlaceMetaData(FtmPlaceCacheRepository persistedCacheCacheRepository, PlacesRepository placesRepository, Ilog iLog, IMapper iMapper)
         {
             _iLog = iLog;
-            _persistedCacheRepository = persistedCacheRepository;
+            _persistedCacheCacheRepository = persistedCacheCacheRepository;
             _placesRepository = placesRepository;
             _iMapper = iMapper;
         }
@@ -25,7 +27,7 @@ namespace FTMContextNet.Application.Services
         {
             _iLog.WriteLine("Executing UpdatePlaceMetaData");
 
-            var unset = _persistedCacheRepository.GetUnsetCountiesAndCountrys();
+            var unset = _persistedCacheCacheRepository.GetUnsetCountiesAndCountrys();
             
             _iLog.WriteLine("FTMPlaceCache Updating");
 
@@ -33,7 +35,7 @@ namespace FTMContextNet.Application.Services
 
             _iLog.WriteLine("FTMPlaceCache Setting");
 
-            var unsetCounties = _persistedCacheRepository.GetUnsetUkCounties();
+            var unsetCounties = _persistedCacheCacheRepository.GetUnsetUkCounties();
 
             int foreignCountrysCount = unsetCounties.Count(w => !w.LocationInfo.IsUK());
 
@@ -58,11 +60,11 @@ namespace FTMContextNet.Application.Services
                 }
             }
 
-            _persistedCacheRepository.SavePersons();
+            _persistedCacheCacheRepository.SaveChanges();
 
-            var unsetCountyCount = _persistedCacheRepository.GetUnsetUkCountiesCount();
+            var unsetCountyCount = _persistedCacheCacheRepository.GetUnsetUkCountiesCount();
 
-            var unsetCountyCountJSONResult = _persistedCacheRepository.GetUnsetJsonResultCount();
+            var unsetCountyCountJSONResult = _persistedCacheCacheRepository.GetUnsetJsonResultCount();
 
             _iLog.WriteLine("FTMPlaceCache has ~" + unsetCountyCount + " records with no county or country");
 

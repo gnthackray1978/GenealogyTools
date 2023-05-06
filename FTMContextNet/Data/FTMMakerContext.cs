@@ -5,6 +5,7 @@ using System.Linq;
 using ConfigHelper;
 using FTMContextNet.Domain.Entities.Source;
 using Microsoft.EntityFrameworkCore;
+using PlaceLibNet.Model;
 
 namespace FTMContextNet.Data
 {

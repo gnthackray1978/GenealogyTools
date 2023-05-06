@@ -3,6 +3,8 @@ using PersonDupeLib;
 using PlaceLib;
 using System;
 using System.Collections.Generic;
+using GenDBContextNET.Application;
+
 //
 namespace GenealogyTools
 {

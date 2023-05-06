@@ -33,12 +33,12 @@ namespace GenDataAPI.Controllers
            
         }
 
-        public void ProgressSearch(double counter, double total, string message, string tailMessage = "")
+        public void ProgressSearch(int counter, int total, string message, string tailMessage = "")
         {
             
         }
 
-        public void ProgressUpdate(double counter, double total, string message, string tailMessage = "")
+        public void ProgressUpdate(int counter, int total, string message, string tailMessage = "")
         {
           
 

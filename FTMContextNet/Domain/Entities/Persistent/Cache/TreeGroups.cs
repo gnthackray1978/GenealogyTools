@@ -12,5 +12,7 @@ namespace FTMContextNet.Domain.Entities.Persistent.Cache
 
         public string GroupName { get; set; }
 
+        public int ImportId { get; set; }
+
     }
 }

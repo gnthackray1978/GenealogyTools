@@ -5,13 +5,11 @@ namespace FTMContextNet.Application.Services
 {
     public class CreateTreeRecords
     {
-        private readonly PersistedCacheRepository _persistedCacheRepository;
-        private readonly FTMMakerRepository _ftmMakerRepository;
+        private readonly PersistedCacheRepository _persistedCacheRepository; 
         private readonly Ilog _ilog;
 
-        public CreateTreeRecords(PersistedCacheRepository persistedCacheRepository, FTMMakerRepository ftmMakerRepository, Ilog outputHandler) {
-            _persistedCacheRepository = persistedCacheRepository;
-            _ftmMakerRepository = ftmMakerRepository;
+        public CreateTreeRecords(PersistedCacheRepository persistedCacheRepository,  Ilog outputHandler) {
+            _persistedCacheRepository = persistedCacheRepository; 
             _ilog = outputHandler;
         }
 
@@ -20,7 +18,6 @@ namespace FTMContextNet.Application.Services
             _ilog.WriteLine("Executing Creating Tree Records");
 
             _persistedCacheRepository.DeleteTreeRecords();
-             
 
             _persistedCacheRepository.PopulateTreeRecordsFromCache();
         }

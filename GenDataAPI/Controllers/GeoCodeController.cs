@@ -3,7 +3,6 @@ using ConfigHelper;
 using FTMContextNet;
 using FTMContextNet.Application.Models.Read;
 using FTMContextNet.Application.Models.Write;
-using FTMContextNet.Domain.Entities.NonPersistent.Locations;
 using GenDataAPI.Hub;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;

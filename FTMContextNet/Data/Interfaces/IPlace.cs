@@ -1,5 +1,6 @@
 ﻿using FTMContextNet.Domain.Entities.Persistent.Cache;
 using Microsoft.EntityFrameworkCore;
+using PlaceLib.Model;
 
 namespace FTMContextNet.Data.Interfaces
 {

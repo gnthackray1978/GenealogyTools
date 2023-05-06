@@ -1,7 +1,25 @@
-﻿namespace FTMContextNet.Domain.Entities.Persistent.Cache
+﻿using QuickGed.Types;
+
+namespace FTMContextNet.Domain.Entities.Persistent.Cache
 {
     public partial class FTMMarriage
     {
+        public static FTMMarriage Create(int nextId, int importId, RelationSubSet r)
+        {
+            return new FTMMarriage()
+            {
+                Id = nextId,
+                ImportId = importId,
+                BrideId = r.Person1Id.GetValueOrDefault(),
+                GroomId = r.Person2Id.GetValueOrDefault(),
+                MarriageDateStr = r.DateStr,
+                MarriageYear = r.DateYear,
+                Notes = r.Text,
+                Origin = r.Origin,
+                MarriageLocation = r.PlaceName
+            };
+        }
+
         public int Id { get; set; }
         public int GroomId { get; set; }
 
@@ -17,7 +35,7 @@
 
         public int MarriageYear { get; set; }
 
-        public int MarriageLocationId { get; set; }
+        public int ImportId { get; set; }
 
     }
 }

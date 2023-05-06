@@ -3,20 +3,20 @@ using FTMContextNet.Application.Models.Read;
 using FTMContextNet.Data.Repositories;
 using AutoMapper;
 using FTMContextNet.Application.Models.Write;
-using FTMContextNet.Domain.Entities.NonPersistent.Locations;
+using PlaceLibNet;
 
 namespace FTMContextNet.Application.Services
 {
     public class UpdatePlaceGeoData
     {
         private readonly Ilog _iLog;
-        private readonly PersistedCacheRepository _persistedCacheRepository;
+        private readonly FtmPlaceCacheRepository _persistedCacheCacheRepository;
         private readonly IMapper _iMapper;
 
-        public UpdatePlaceGeoData(PersistedCacheRepository persistedCacheRepository, Ilog iLog, IMapper iMapper)
+        public UpdatePlaceGeoData(FtmPlaceCacheRepository persistedCacheCacheRepository, Ilog iLog, IMapper iMapper)
         {
             _iLog = iLog;
-            _persistedCacheRepository = persistedCacheRepository;
+            _persistedCacheCacheRepository = persistedCacheCacheRepository;
             _iMapper = iMapper;
         }
 
@@ -28,7 +28,7 @@ namespace FTMContextNet.Application.Services
         {
             _iLog.WriteLine("Updating cacheData.FTMPlaceCache with geocode result");
 
-            _persistedCacheRepository.SetPlaceGeoData(data.placeid,data.results);
+            _persistedCacheCacheRepository.SetPlaceGeoData(data.placeid,data.results);
 
             return ServiceResult.Success;
         }

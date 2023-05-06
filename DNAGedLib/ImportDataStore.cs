@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using DNAGedLib.Models;
-using GenDBContext.Models;
+using GenDBContextNET.Contexts;
 
 namespace DNAGedLib
 {

@@ -1,36 +1,34 @@
 ﻿using FTMContext;
 using System.Collections.Generic;
 using FTMContextNet.Domain.Entities.NonPersistent.Person;
+using QuickGed.Types;
 
 namespace FTMContextNet.Domain.Entities.Persistent.Cache
 {
     public partial class FTMPersonView
     {
-        public static FTMPersonView Create(int idCounter,int personId, string foreName, string surname,
-                                    ProcessDateReturnType processDateReturn, 
-                                    ProcessLocationReturnType associatedLocationData, 
-                                    List<int> parents, PersonOrigin origin) {
+        public static FTMPersonView Create(int idCounter, int importId, PersonSubset person) {
             var fTmPersonView = new FTMPersonView
             {
                 Id = idCounter,
-                PersonId = personId,
-                BirthFrom = processDateReturn.YearFrom,
-                BirthTo = processDateReturn.YearTo,
-                AltLat = associatedLocationData.AltLocationLat,
-                AltLocation = associatedLocationData.AltLocation,
-                AltLocationDesc = "n/a",
-                AltLong = associatedLocationData.AltLocationLong,
-                BirthLocation = associatedLocationData.BirthLocation,
-                BirthLat = associatedLocationData.BirthLocationLat,
-                BirthLong = associatedLocationData.BirthLocationLong,
-                FirstName = foreName,
-                Surname = surname,
-                Origin = origin.Origin,
-                DirectAncestor = origin.DirectAncestor,
-                LinkedLocations = associatedLocationData.LocationString,
-                FatherId = parents[0],
-                MotherId = parents[1],
-                
+                PersonId = person.Id,
+                BirthFrom = person.BirthYearFrom,
+                BirthTo = person.BirthYearTo,
+                AltLat = 0.0,
+                AltLocation = !string.IsNullOrEmpty(person.DeathLocation) ? person.DeathLocation : person.Residence,
+                AltLocationDesc = !string.IsNullOrEmpty(person.DeathLocation) ? "Burial" : person.ResidenceDescription,
+                AltLong = 0.0,
+                BirthLocation = person.BirthLocation,
+                BirthLat = 0.0,
+                BirthLong = 0.0,
+                FirstName = person.Forename,
+                Surname = person.FamilyName,
+                Origin = person.Origin,
+                DirectAncestor = person.IsDirectAncestor,
+                LinkedLocations = person.AllLocations(),
+                FatherId = person.FatherId,
+                MotherId = person.MotherId,
+                ImportId = importId
             };
 
             return fTmPersonView;
@@ -64,5 +62,10 @@ namespace FTMContextNet.Domain.Entities.Persistent.Cache
         public int MotherId { get; set; }
 
         public string LinkedLocations { get; set; }
+
+        public int ImportId { get; set; }
+
+        public bool LocationsCached { get; set; }
+
     }
 }

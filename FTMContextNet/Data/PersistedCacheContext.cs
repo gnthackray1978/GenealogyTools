@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 namespace FTMContextNet.Data
 {
 
-    public partial class PersistedCacheContext : DbContext, IPlace
+    public partial class PersistedCacheContext : DbContext//, IPlace
     {
 
         private IMSGConfigHelper _configObj { get; set; }
@@ -45,9 +45,11 @@ namespace FTMContextNet.Data
         public virtual DbSet<DupeEntry> DupeEntries { get; set; }
         public virtual DbSet<FTMPersonView> FTMPersonView { get; set; }
         public virtual DbSet<FTMMarriage> FTMMarriages { get; set; }
-        public virtual DbSet<FtmPlaceCache> FTMPlaceCache { get; set; }
 
-     
+        public virtual DbSet<FTMImport> FTMImport { get; set; }
+
+        public virtual DbSet<IgnoreList> IgnoreList { get; set; }
+
         public void UpdateFTMPlaceCache(int placeId, string results)
         {
 
@@ -191,9 +193,9 @@ namespace FTMContextNet.Data
             RunCommand("DELETE FROM DupeEntries");
         }
 
-        public void DeletePersons()
+        public void DeletePersons(int importId)
         {
-            RunCommand("DELETE FROM FTMPersonView");
+            RunCommand("DELETE FROM FTMPersonView WHERE ImportId = " + importId);
         }
 
         public void DeleteTreeRecords()
@@ -201,12 +203,16 @@ namespace FTMContextNet.Data
             RunCommand("DELETE FROM TreeRecords");
         }
 
-        public void DeleteMarriages()
+        public void DeleteMarriages(int importId)
         {
-            RunCommand("DELETE FROM FTMMarriages");
+            RunCommand("DELETE FROM FTMMarriages WHERE ImportId = " + importId); ;
         }
 
-      
+        public void DeleteImports(int importId)
+        {
+            RunCommand("DELETE FROM FTMImport WHERE Id = " + importId); ;
+        }
+
         public void DeleteTreeGroups()
         {
             RunCommand("DELETE FROM TreeGroups");

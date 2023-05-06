@@ -2,9 +2,9 @@
 using FTMContextNet.Data.Repositories;
 using LoggingLib;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using FTMContextNet.Domain.Entities.NonPersistent.Matches;
+using FTMContextNet.Domain.Entities.Persistent.Cache;
 
 namespace FTMContextNet.Application.Services
 {
@@ -13,12 +13,35 @@ namespace FTMContextNet.Application.Services
         private readonly PersistedCacheRepository _persistedCacheRepository;
         private readonly Ilog _ilog;
 
-
+        
         public CreateDupeEntrys(PersistedCacheRepository persistedCacheRepository, Ilog outputHandler)
         {
             _persistedCacheRepository = persistedCacheRepository;
             _ilog = outputHandler;
 
+        }
+
+        public static bool ContainsPair(List<string> testItem, List<IgnoreList> ignoreList)
+        {
+            foreach (var ignoreItem in ignoreList)
+            {
+                if (ignoreItem.Person1.ToLower().Trim() == testItem[0].ToLower().Trim() && ignoreItem.Person2.ToLower().Trim() == testItem[1].ToLower().Trim())
+                {
+                    return true;
+                }
+            }
+
+            testItem.Reverse();
+
+            foreach (var ignoreItem in ignoreList)
+            {
+                if (ignoreItem.Person1.ToLower().Trim() == testItem[0].ToLower().Trim() && ignoreItem.Person2.ToLower().Trim() == testItem[1].ToLower().Trim())
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public void Execute()
@@ -31,27 +54,33 @@ namespace FTMContextNet.Application.Services
 
             var comparisonPersons = _persistedCacheRepository.GetComparisonPersons();
 
-            _ilog.WriteLine("Records to search: " + comparisonPersons.Count());
+            var ignoreList = _persistedCacheRepository.GetIgnoreList();
+
+            
+
             int idx = 0;
+            int comparisonTotal = comparisonPersons.Count();
+
+            _ilog.WriteLine(comparisonTotal + " records");
 
             foreach (var cp in comparisonPersons)
             {
                 //12707
                 //13124
 
-                if (cp.Id == 8260 || cp.Id == 27621)
-                {
-                    Debug.WriteLine("stop");
-                }
+                //if (cp.Fact.Surname== "Bates" || cp.Fact.Surname == "Briggs")
+                //{
+                //    Debug.WriteLine("stop");
+                //}
 
                 if (idx % 1000 == 0)
-                    _ilog.WriteCounter(idx + " of " + comparisonPersons.Count());
+                    _ilog.ProgressUpdate(idx, comparisonTotal," dupes");
 
                 // if this person is in a existing group
                 // get that group
                 var mg = matchGroups.FindByPersonId(cp.Id) ?? matchGroups.CreateGroup(cp.Id, cp.Fact.Origin, cp.Fact.BirthYearFrom);
 
-                AddIfMatch(comparisonPersons, cp, mg);
+                AddIfMatch(comparisonPersons, cp, mg, ignoreList);
 
                 matchGroups.SaveGroup(mg);
 
@@ -83,7 +112,8 @@ namespace FTMContextNet.Application.Services
             _persistedCacheRepository.AddDupeEntrys(tp);
         }
 
-        private static void AddIfMatch(List<PersonDupeSearchSubset> comparisonPersons, PersonDupeSearchSubset cp, MatchGroup mg)
+        private static void AddIfMatch(List<PersonDupeSearchSubset> comparisonPersons,
+            PersonDupeSearchSubset cp, MatchGroup mg, List<IgnoreList> ignoreList)
         {
             foreach (var p in comparisonPersons
                                 .Where(w => w.FamilyName == cp.FamilyName
@@ -94,14 +124,25 @@ namespace FTMContextNet.Application.Services
             {
 
                 var yearMatch = cp.Fact.MatchBirthYear(p.Fact);
-
+                    
                 var locationMatch = cp.Fact.MatchLocations(p.Fact);
 
                 var originMatch = cp.Fact.Origin == p.Fact.Origin;
 
-                var surnameCheck = cp.Fact.DoubleCheckSurname(p.Fact);
+                //p.FamilyName
+                //cp.FamilyName
 
-                if (surnameCheck && yearMatch && locationMatch && !originMatch)
+                var matchPair = new List<string>
+                {
+                    p.Fact.Surname,
+                    cp.Fact.Surname
+                };
+
+                var surnameCheck = ContainsPair(matchPair, ignoreList);
+
+                // var surnameCheck = cp.Fact.DoubleCheckSurname(p.Fact);
+
+                if (yearMatch && locationMatch && !originMatch && !surnameCheck)
                 {
 
                     mg.AddPerson(p.Id, p.Fact.Origin, p.Fact.BirthYearFrom);

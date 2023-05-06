@@ -56,8 +56,7 @@ namespace GenDataAPI.Controllers
         [Route("/data/origins")]
         public IActionResult AddOrigins()
         {
-            _facade.AssignTreeNamesToPersons();
-
+            //dont need this now as origins added automatically when tree is read.
             return Ok(true);
         }
 

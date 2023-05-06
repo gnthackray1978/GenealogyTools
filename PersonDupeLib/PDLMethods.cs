@@ -6,7 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using DNAGedLib;
 using DNAGedLib.Models;
-using GenDBContext.Models;
+using GenDBContextNET.Contexts;
 using Microsoft.Data.SqlClient;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;

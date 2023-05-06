@@ -11,5 +11,7 @@
         public string Location { get; set; }
         public string ChristianName { get; set; }
         public string Surname { get; set; }
+
+        public int ImportId { get; set; }
     }
 }

@@ -8,4 +8,6 @@ public partial class TreeRecordMapGroup
 
     public string GroupName { get; set; }
 
+    public int ImportId { get; set; }
+
 }

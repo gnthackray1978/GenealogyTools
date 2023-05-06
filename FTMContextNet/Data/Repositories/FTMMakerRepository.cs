@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using FTMContext;
+using PlaceLibNet.Model;
+using QuickGed;
+using QuickGed.Types;
 
 namespace FTMContextNet.Data.Repositories
 {
-    public class FTMMakerRepository
+    public class FTMMakerRepository : IFTMMakerRepository
     {
         protected FTMakerContext _ftMakerContext;
 
@@ -43,14 +46,14 @@ namespace FTMContextNet.Data.Repositories
         /// Returns persons whose family name starts with _. And person who matches my id.
         /// </summary>
         /// <returns></returns>
-        public List<Person> GetTreeRootPeople()
+        public List<IPerson> GetTreeRootPeople()
         {           
             
 
             var rootPeople = GetTreeRootPersons();
 
 
-            return rootPeople.ToList();
+            return new List<IPerson>();
         }
 
         /// <summary>
@@ -131,11 +134,11 @@ namespace FTMContextNet.Data.Repositories
         //look them up in the relationship table
         //make a list of groups.
 
-        public List<Person> GetGroupPerson()
+        public List<IPerson> GetGroupPerson()
         {
             var groups = this._ftMakerContext.Person.Where(p =>  p != null && p.FullName.ToLower().Contains("group"));
 
-            return groups.ToList();
+            return groups.Cast<IPerson>().ToList();
         }
 
 
@@ -212,9 +215,9 @@ namespace FTMContextNet.Data.Repositories
             return result;
         }
 
-        public List<Relationship> GetRelationshipsById(int id)
+        public List<IRelationship> GetRelationshipsById(int id)
         {
-            var rels = this._ftMakerContext.Relationship.Where(w => w.Id == id).ToList();
+            var rels = this._ftMakerContext.Relationship.Where(w => w.Id == id).Cast<IRelationship>().ToList();
 
             return rels;
         }
@@ -253,5 +256,11 @@ namespace FTMContextNet.Data.Repositories
 
             return result;
         }
+
+        public List<PersonSubset> GetPersons()
+        {
+            throw new System.NotImplementedException();
+        }
+
     }
 }

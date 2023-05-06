@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using FTMContextNet.Data.Repositories;
+﻿using FTMContextNet.Data.Repositories;
 using LoggingLib;
 
 namespace FTMContextNet.Application.Services
@@ -11,13 +6,11 @@ namespace FTMContextNet.Application.Services
     public class CreateTreeGroups
     {
         private readonly PersistedCacheRepository _persistedCacheRepository;
-        private readonly FTMMakerRepository _ftmMakerRepository;
         private readonly Ilog _ilog;
 
-        public CreateTreeGroups(PersistedCacheRepository persistedCacheRepository, FTMMakerRepository ftmMakerRepository, Ilog outputHandler)
+        public CreateTreeGroups(PersistedCacheRepository persistedCacheRepository, Ilog outputHandler)
         {
             _persistedCacheRepository = persistedCacheRepository;
-            _ftmMakerRepository = ftmMakerRepository;
             _ilog = outputHandler;
         }
 
@@ -28,9 +21,9 @@ namespace FTMContextNet.Application.Services
 
             _persistedCacheRepository.DeleteTreeGroups();
 
-            foreach (var group in _ftmMakerRepository.GetGroupPerson())
+            foreach (var group in _persistedCacheRepository.GetGroupPerson())
             {
-                _persistedCacheRepository.SaveTreeGroups(group.Id, group.FullName);
+                _persistedCacheRepository.SaveTreeGroups(group.Key, group.Value);
             }
 
             _ilog.WriteLine("Finished Creating Tree Groups");

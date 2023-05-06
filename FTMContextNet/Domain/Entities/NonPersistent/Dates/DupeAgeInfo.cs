@@ -4,6 +4,8 @@
     {
         public int Year { get; set; }
         public int? PlaceID { get; set; }
+
+        public string Location { get; set; }
         public DupeAgeInfoTypes Type { get; set; }
     }
 }

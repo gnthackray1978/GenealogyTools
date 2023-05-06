@@ -7,22 +7,193 @@ using FTMContext;
 using FTMContextNet.Domain.Entities.NonPersistent;
 using FTMContextNet.Domain.Entities.NonPersistent.Person;
 using FTMContextNet.Domain.Entities.Persistent.Cache;
+using FTMContextNet.Domain.Entities.Persistent.Source.Gedcom;
+using GedcomParser.Services;
 using LoggingLib;
 using Microsoft.EntityFrameworkCore;
+using PlaceLib.Model;
+using QuickGed.Types;
+using DupeAgeInfo = FTMContext.DupeAgeInfo;
+using DupeAgeInfoTypes = FTMContext.DupeAgeInfoTypes;
+using ProcessDateReturnType = FTMContext.ProcessDateReturnType;
 
 namespace FTMContextNet.Data
 {
-    public class InMemoryCacheContext
+    public interface IInMemoryCacheContext
     {
-        public Dictionary<int, PersonOrigin> OriginDictionary;
+        ProcessDateReturnType GetPersonBirthDateRange(int personId);
 
-        public Dictionary<int, RelationSubSet> RelationshipDictionary;
+        List<DupeLocInfo> GetPersonsLocDetails(int personId
+            , bool isSibling, bool isFather, bool isMother);
+        
+        List<int> GetParentIds(int personId);
 
-        public Dictionary<int, PersonSubset> PersonCache;
+        ProcessLocationReturnType GetAllLocationsForPerson(int personId);
+
+        Dictionary<int, PersonOrigin> OriginDictionary { get; set; }
+
+        Dictionary<int, RelationSubSet> RelationshipDictionary { get; set; }
+
+        Dictionary<int, PersonSubset> PersonCache { get; set; }
+    }
+
+    public class InMemoryGedCacheContext : IInMemoryCacheContext
+    {
+        public static DateObj GetDateObj(DatePlace birthPlace, DatePlace baptismPlace)
+        {
+            var returnObj = new DateObj()
+            {
+                Place = "",
+                DateStr = "",
+                YearInt = 0
+            };
+
+            if (birthPlace != null)
+            {
+                if (!string.IsNullOrEmpty(birthPlace.Date))
+                {
+                    returnObj.YearInt = MatchTreeHelpers.ExtractInt(birthPlace.Date);
+                    returnObj.DateStr = birthPlace.Date;
+                }
+
+                if (!string.IsNullOrEmpty(birthPlace.Place))
+                {
+                    returnObj.Place = birthPlace.Place;
+                }
+            }
+
+            if (baptismPlace != null)
+            {
+                if (!string.IsNullOrEmpty(baptismPlace.Date))
+                {
+                    int bapInt = MatchTreeHelpers.ExtractInt(baptismPlace.Date);
+                    string bapStr = baptismPlace.Date;
+
+                    if (returnObj.YearInt == 0)
+                    {
+                        returnObj.YearInt = bapInt;
+                        returnObj.DateStr = bapStr;
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(baptismPlace.Place))
+                {
+                    if (returnObj.Place == "")
+                    {
+                        returnObj.Place = baptismPlace.Place;
+                    }
+                }
+            }
+
+            return returnObj;
+        }
+
+
+        public Dictionary<int, PersonOrigin> OriginDictionary { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public Dictionary<int, RelationSubSet> RelationshipDictionary { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public Dictionary<int, PersonSubset> PersonCache { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+        public InMemoryGedCacheContext(GedPseudoContext gedContext,
+                           DbSet<FtmPlaceCache> fTmPlaceCache,
+                           DbSet<FTMPersonOrigin> ftmPersonOrigins, int startPerson =0)
+        {
+
+            int total = gedContext.PersonContainer.Persons.Count;
+            Console.WriteLine("Importing " + total + " persons");
+            int countPeople = 0;
+
+            Dictionary<string, int> idDictionary = new Dictionary<string, int>();
+
+            foreach (var p in gedContext.PersonContainer.Persons)
+            {
+                idDictionary.Add(p.StrId,startPerson);
+                startPerson++;
+            }
+
+            foreach (var p in gedContext.PersonContainer.Persons)
+            {
+                // fileParser.PersonContainer.ChildRelations[0].From.Id
+                var parents = gedContext.PersonContainer.ChildRelations.Where(w => w.From.StrId == p.StrId).ToList();
+                string fatherId = "";
+                string motherId = "";
+                //   
+
+                if (parents.Count() == 2)
+                {
+                    fatherId = parents[0].To.StrId;
+                    motherId = parents[1].To.StrId;
+                }
+
+                if (parents.Count() == 1)
+                {
+                    motherId = parents[0].To.StrId;
+                }
+
+
+
+                var birth = GetDateObj(p.Birth, p.Baptized);
+                var death = GetDateObj(p.Death, null);
+
+                
+
+                PersonCache.Add(idDictionary[p.StrId], new PersonSubset()
+                {
+                     
+                });
+
+               // if (countPeople % 50 == 0)
+               //     consoleWrapper.ProgressUpdate(countPeople, total, "");
+
+                countPeople++;
+            }
+
+
+
+        }
+
+        public static InMemoryGedCacheContext Create(GedPseudoContext gedContext,
+                           DbSet<FtmPlaceCache> fTmPlaceCache,
+                           DbSet<FTMPersonOrigin> ftmPersonOrigins,
+                            Ilog ilog)
+        {
+            return new InMemoryGedCacheContext(gedContext, fTmPlaceCache, ftmPersonOrigins);
+        }
+
+        public ProcessLocationReturnType GetAllLocationsForPerson(int personId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<int> GetParentIds(int personId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ProcessDateReturnType GetPersonBirthDateRange(int personId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public List<DupeLocInfo> GetPersonsLocDetails(int personId, bool isSibling, bool isFather, bool isMother)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class InMemoryCacheContext : IInMemoryCacheContext
+    {
+        public Dictionary<int, PersonOrigin> OriginDictionary { get; set; }
+
+        public Dictionary<int, RelationSubSet> RelationshipDictionary { get; set; }
+
+        public Dictionary<int, PersonSubset> PersonCache { get; set; }
 
 
         private Dictionary<int, FactSubset> _baptismFactCache;
-
+        
+        /// <summary>
+        /// marriage fact linked to person ids
+        /// </summary>
         private Dictionary<int, FactSubset> _marriageFactCache;
 
         private Dictionary<int, int> _childRelationshipPersonIndex;
@@ -33,22 +204,15 @@ namespace FTMContextNet.Data
 
         private Dictionary<int, List<int>> _personMapRelationshipDictionary;
         
-        private Dictionary<int, FTMPlaceCacheSubset> _fTmPlaceCaches;
-
-        private List<KeyValuePair<int, string>> _type90Facts;
-
+        private Dictionary<int, FTMPlaceCacheSubset> _currentImportPlaceCache;
 
         public InMemoryCacheContext(FTMakerContext sourceContext,
                            DbSet<FtmPlaceCache> fTmPlaceCache,
                            DbSet<FTMPersonOrigin> ftmPersonOrigins)
         {
             
-            _type90Facts = sourceContext.Fact.Where(w => w.FactTypeId == 90 && w.LinkTableId == 5)
-                    .Select(s => new KeyValuePair<int, string>(s.LinkId, s.Text)).ToList();
-
-
-            _fTmPlaceCaches = new Dictionary<int, FTMPlaceCacheSubset>();
-
+            _currentImportPlaceCache = new Dictionary<int, FTMPlaceCacheSubset>();
+             
             foreach (var f in fTmPlaceCache.Select(s => new FTMPlaceCacheSubset()
             {
                 FTMPlaceId = s.FTMPlaceId,
@@ -60,8 +224,8 @@ namespace FTMContextNet.Data
                 location_long = GoogleMapsHelpers.Location.GetLocation(s.JSONResult).lng
             }))
             {
-                if (!_fTmPlaceCaches.ContainsKey(f.FTMPlaceId))
-                    _fTmPlaceCaches.Add(f.FTMPlaceId, f);
+                if (!_currentImportPlaceCache.ContainsKey(f.FTMPlaceId))
+                    _currentImportPlaceCache.Add(f.FTMPlaceId, f);
             }
 
 
@@ -114,6 +278,7 @@ namespace FTMContextNet.Data
 
             _marriageFactCache = new Dictionary<int, FactSubset>();
 
+            #region populate marriage fact cache
 
             Action<Dictionary<int, FactSubset>, FactSubset, int?> updateDictionary = (marrDict, factsubset, personId) =>
             {
@@ -169,10 +334,9 @@ namespace FTMContextNet.Data
                     origin = OriginDictionary[relation.Person1Id.GetValueOrDefault()].Origin;
 
 
-                relation.Date = f.Date;
+              //  relation.Date = f.Date;
                 relation.Text = f.Text;
-                relation.LinkId = f.LinkId;
-                relation.PlaceId = f.PlaceId.GetValueOrDefault();
+               // relation.PlaceId = f.PlaceId.GetValueOrDefault();
                 relation.Origin = origin;
 
 
@@ -180,6 +344,9 @@ namespace FTMContextNet.Data
 
                 updateDictionary(_marriageFactCache, f, relation.Person2Id);
             }
+
+            #endregion
+
 
             foreach (var r in relationships)
             {
@@ -197,12 +364,12 @@ namespace FTMContextNet.Data
                 r.Origin = origin;
                 //fTMPlaceCaches
 
-                if (r.PlaceId != null && _fTmPlaceCaches.ContainsKey(r.PlaceId.Value))
-                {
-                    var placeName = _fTmPlaceCaches[r.PlaceId.Value];
+                //if (r.PlaceId != null && _currentImportPlaceCache.ContainsKey(r.PlaceId.Value))
+                //{
+                //    var placeName = _currentImportPlaceCache[r.PlaceId.Value];
 
-                    r.PlaceName = placeName.FTMOrginalNameFormatted;
-                }
+                //    r.PlaceName = placeName.FTMOrginalNameFormatted;
+                //}
             }
 
 
@@ -263,20 +430,20 @@ namespace FTMContextNet.Data
 
             PersonCache = new Dictionary<int, PersonSubset>();
 
-            foreach (var p in sourceContext.Person.Select(s => new PersonSubset()
-            {
-                Id = s.Id,
-                Sex = s.Sex,
-                BirthDate = s.BirthDate,
-                BirthPlaceId = s.BirthPlaceId,
-                DeathDate = s.DeathDate,
-                DeathPlaceId = s.DeathPlaceId,
-                Surname = s.FamilyName,
-                Forename = s.GivenName
-            }))
-            {
-                PersonCache.Add(p.Id, p);
-            }
+            //foreach (var p in sourceContext.Person.Select(s => new PersonSubset()
+            //{
+            //    Id = s.Id,
+            //    Sex = s.Sex,
+            //    BirthDate = s.BirthDate,
+            //    BirthPlaceId = s.BirthPlaceId,
+            //    DeathDate = s.DeathDate,
+            //    DeathPlaceId = s.DeathPlaceId,
+            //    FamilyName = s.FamilyName,
+            //    Forename = s.GivenName
+            //}))
+            //{
+            //    PersonCache.Add(p.Id, p);
+            //}
 
             _childRelationshipPersonIndex = new Dictionary<int, int>();
             _childRelationshipIndex = new Dictionary<int, int>();
@@ -362,7 +529,7 @@ namespace FTMContextNet.Data
                     {
                         list.Add(new DupeAgeInfo()
                         {
-                            PlaceID = person.BirthPlaceId,
+                        //    PlaceID = person.BirthPlaceId,
                             Type = DupeAgeInfoTypes.BirthBap,
                             Year = tp.Year.Value
                         });
@@ -378,7 +545,7 @@ namespace FTMContextNet.Data
                     {
                         list.Add(new DupeAgeInfo()
                         {
-                            PlaceID = person.BirthPlaceId,
+                        //    PlaceID = person.BirthPlaceId,
                             Type = DupeAgeInfoTypes.BirthBap,
                             Year = bap.Date.Year.Value
                         });
@@ -449,7 +616,7 @@ namespace FTMContextNet.Data
                             {
                                 childBirth = new DupeAgeInfo()
                                 {
-                                    PlaceID = person.BirthPlaceId,
+                                 //   PlaceID = person.BirthPlaceId,
                                     Type = DupeAgeInfoTypes.FirstChildBirthBap,
                                     Year = tp.Year.Value
                                 };
@@ -469,7 +636,7 @@ namespace FTMContextNet.Data
                             {
                                 childBirth = new DupeAgeInfo()
                                 {
-                                    PlaceID = person.BirthPlaceId,
+                                //    PlaceID = person.BirthPlaceId,
                                     Type = DupeAgeInfoTypes.FirstChildBirthBap,
                                     Year = bap.Date.Year.Value
                                 };
@@ -517,7 +684,7 @@ namespace FTMContextNet.Data
                     {
                         list.Add(new DupeAgeInfo()
                         {
-                            PlaceID = person.DeathPlaceId,
+                        //    PlaceID = person.DeathPlaceId,
                             Type = DupeAgeInfoTypes.Death,
                             Year = tp.Year.Value
                         });
@@ -696,15 +863,15 @@ namespace FTMContextNet.Data
                     }
                 }
 
-                if (person.BirthPlaceId != null && person.BirthPlaceId.HasValue)
-                {
-                    list.Add(new DupeLocInfo()
-                    {
-                        PlaceID = person.BirthPlaceId.Value,
-                        Type = dupeLocInfoTypes,
-                        Year = birthYear
-                    });
-                }
+                //if (person.BirthPlaceId != null && person.BirthPlaceId.HasValue)
+                //{
+                //    list.Add(new DupeLocInfo()
+                //    {
+                //        PlaceID = person.BirthPlaceId.Value,
+                //        Type = dupeLocInfoTypes,
+                //        Year = birthYear
+                //    });
+                //}
 
                 //get baptisms from fact table
 
@@ -717,15 +884,15 @@ namespace FTMContextNet.Data
                         bapYear = bap.Date.Year.Value;
                     }
 
-                    if (person.BirthPlaceId != null && person.BirthPlaceId.HasValue)
-                    {
-                        list.Add(new DupeLocInfo()
-                        {
-                            PlaceID = person.BirthPlaceId.Value,
-                            Type = DupeLocInfoTypes.BirthBapLoc,
-                            Year = bapYear
-                        });
-                    }
+                    //if (person.BirthPlaceId != null && person.BirthPlaceId.HasValue)
+                    //{
+                    //    list.Add(new DupeLocInfo()
+                    //    {
+                    //        PlaceID = person.BirthPlaceId.Value,
+                    //        Type = DupeLocInfoTypes.BirthBapLoc,
+                    //        Year = bapYear
+                    //    });
+                    //}
                 }
             }
 
@@ -760,15 +927,15 @@ namespace FTMContextNet.Data
                     }
                 }
 
-                if (person.DeathPlaceId.HasValue)
-                {
-                    list.Add(new DupeLocInfo()
-                    {
-                        PlaceID = person.DeathPlaceId.Value,
-                        Type = dupeLocInfoTypes,
-                        Year = deathYear
-                    });
-                }
+                //if (person.DeathPlaceId.HasValue)
+                //{
+                //    list.Add(new DupeLocInfo()
+                //    {
+                //        PlaceID = person.DeathPlaceId.Value,
+                //        Type = dupeLocInfoTypes,
+                //        Year = deathYear
+                //    });
+                //}
             }
 
             return list;
@@ -816,15 +983,15 @@ namespace FTMContextNet.Data
                             year = tp.Year != null && tp.HasYear() ? tp.Year : 0;
                         }
 
-                        if (person.BirthPlaceId != null && person.BirthPlaceId.Value != 0)
-                        {
-                            list.Add(new DupeLocInfo()
-                            {
-                                PlaceID = person.BirthPlaceId.Value,
-                                Type = DupeLocInfoTypes.ChildBirthLoc,
-                                Year = year
-                            });
-                        }
+                        //if (person.BirthPlaceId != null && person.BirthPlaceId.Value != 0)
+                        //{
+                        //    list.Add(new DupeLocInfo()
+                        //    {
+                        //        PlaceID = person.BirthPlaceId.Value,
+                        //        Type = DupeLocInfoTypes.ChildBirthLoc,
+                        //        Year = year
+                        //    });
+                        //}
                     }
 
                     //get baptisms from fact table
@@ -1050,7 +1217,7 @@ namespace FTMContextNet.Data
             {
                 //var cachedPlace = fTMPlaceCaches.FirstOrDefault(fpc => fpc.FTMPlaceId == place.PlaceID);
 
-                if (_fTmPlaceCaches.TryGetValue(place.PlaceID, out FTMPlaceCacheSubset cachedPlace))
+                if (_currentImportPlaceCache.TryGetValue(place.PlaceID, out FTMPlaceCacheSubset cachedPlace))
                 {
 
                     if (place.Type == DupeLocInfoTypes.BirthBapLoc)
