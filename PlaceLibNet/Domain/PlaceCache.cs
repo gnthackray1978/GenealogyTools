@@ -1,13 +1,13 @@
-﻿namespace PlaceLib.Model
+﻿namespace PlaceLibNet.Domain
 {
-    public partial class FtmPlaceCache {
+    public partial class PlaceCache {
 
         public int Id { get; set; }
 
-        public int FTMPlaceId { get; set; }
+        public int AltId { get; set; }
 
-        public string FTMOrginalName { get; set; }
-        public string FTMOrginalNameFormatted { get; set; }
+        public string Name { get; set; }
+        public string NameFormatted { get; set; }
         public string JSONResult { get; set; }
         public string County { get; set; }
         public string Country { get; set; }

@@ -5,7 +5,7 @@ namespace PlaceLibNet.Domain
 {
     public class ExtendedPlace
     {
-        public FtmPlaceCache Place { get; set; }
+        public PlaceCache Place { get; set; }
 
         public LocationInfo LocationInfo { get; set; }
 

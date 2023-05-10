@@ -1,9 +1,6 @@
 ﻿using LoggingLib;
-using FTMContextNet.Application.Models.Read;
-using FTMContextNet.Data.Repositories;
 using AutoMapper;
 using FTMContextNet.Application.Models.Write;
-using PlaceLibNet;
 using PlaceLibNet.Data.Repositories;
 
 namespace FTMContextNet.Application.Services
@@ -11,13 +8,13 @@ namespace FTMContextNet.Application.Services
     public class UpdatePlaceGeoData
     {
         private readonly Ilog _iLog;
-        private readonly FtmPlaceCacheRepository _persistedCacheCacheRepository;
+        private readonly PlaceRepository _placeRepository;
         private readonly IMapper _iMapper;
 
-        public UpdatePlaceGeoData(FtmPlaceCacheRepository persistedCacheCacheRepository, Ilog iLog, IMapper iMapper)
+        public UpdatePlaceGeoData(PlaceRepository placeRepository, Ilog iLog, IMapper iMapper)
         {
             _iLog = iLog;
-            _persistedCacheCacheRepository = persistedCacheCacheRepository;
+            _placeRepository = placeRepository;
             _iMapper = iMapper;
         }
 
@@ -29,7 +26,7 @@ namespace FTMContextNet.Application.Services
         {
             _iLog.WriteLine("Updating cacheData.FTMPlaceCache with geocode result");
 
-            _persistedCacheCacheRepository.SetPlaceGeoData(data.placeid,data.results);
+            _placeRepository.SetPlaceGeoData(data.placeid,data.results);
 
             return ServiceResult.Success;
         }

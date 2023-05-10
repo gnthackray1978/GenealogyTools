@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text.RegularExpressions;
+using ConfigHelper;
 using GoogleMapsHelpers;
 using LoggingLib;
+using PlaceLib;
 using PlaceLib.Model;
 using PlaceLibNet.Data.Contexts;
 using PlaceLibNet.Domain;
@@ -11,46 +14,117 @@ using PlaceLibNet.Model;
 
 namespace PlaceLibNet.Data.Repositories
 {
-    public class FtmPlaceCacheRepository
+    public class PlaceRepository
     {
         private readonly PlacesContext _persistedCacheContext;
         private readonly Ilog _iLog;
         
-        public FtmPlaceCacheRepository(PlacesContext persistedCacheContext, Ilog iLog)
+        public PlaceRepository(PlacesContext persistedCacheContext, Ilog iLog)
         {
             _persistedCacheContext = persistedCacheContext;
             _iLog = iLog;
         }
 
+
+        public List<PlaceDto> GetPlaces()
+        {
+            using var placecontext = new PlacesContext(new MSGConfigHelper());
+
+            var places = placecontext.Places.Where(w => w.Ctyhistnm != "").Select(s => new PlaceDto()
+            {
+                County = s.Ctyhistnm.ToLower(),
+                Country = s.Ctry15nm,
+                Place = s.Place15nm.ToLower()
+            }).Distinct().ToList();
+
+            return places;
+        }
+
+        public List<CountyDto> GetCounties(bool originalCase = false)
+        {
+            using var placecontext = new PlacesContext(new MSGConfigHelper());
+
+            var counties = placecontext.Places.Select(s => new CountyDto()
+            {
+                County = originalCase ? s.Ctyhistnm.ToLower() : s.Ctyhistnm,
+                Country = s.Ctry15nm
+
+            }).Distinct().Where(w => w.County.Trim() != "").ToList();
+
+            return counties;
+        }
+
+        public string SearchPlacesDBForCounty(string searchString)
+        {
+            using var placecontext = new PlacesContext(new MSGConfigHelper());
+
+            string county = "";
+
+            var placedbResult = placecontext.Places.FirstOrDefault(w => w.Place15nm == searchString);
+
+            if (placedbResult != null)
+            {
+                county = placedbResult.Ctyhistnm;
+            }
+            else
+            {
+                var stripped = searchString.ToLower();
+                stripped = Regex.Replace(stripped, " ", "");
+
+                placedbResult = placecontext.Places.FirstOrDefault(w => w.Placesort == stripped);
+
+                if (placedbResult != null)
+                {
+                    county = placedbResult.Ctyhistnm;
+                }
+            }
+
+            return county;
+        }
+
+        public Places SearchPlaces(string searchString, string county)
+        {
+            using var placecontext = new PlacesContext(new MSGConfigHelper());
+
+            Debug.WriteLine(searchString + "/" + county);
+            Places placedbResult = placecontext
+                .Places
+                .Where(w => w.Placesort == searchString && w.Ctyhistnm == county)
+                .OrderBy(o => o.Place15cd)
+                .FirstOrDefault();
+
+            return placedbResult;
+        }
+
         public int GetGeoCodeCacheSize()
         { 
-            return _persistedCacheContext.FTMPlaceCache.Count(); 
+            return _persistedCacheContext.PlaceCache.Count(); 
         }
 
         public int GetUnsearchedCount()
         {
-            return _persistedCacheContext.FTMPlaceCache.Count(w => !w.Searched);
+            return _persistedCacheContext.PlaceCache.Count(w => !w.Searched);
         }
 
         public int GetNewId()
         {
             // var placeId = FTMPlaceCache.Max(m => m.FTMPlaceId);
-             var id = _persistedCacheContext.FTMPlaceCache.Max(m => m.Id);
+             var id = _persistedCacheContext.PlaceCache.Max(m => m.Id);
              return id+1;
 
         }
 
         public int GetNewFtmPlaceId()
         { 
-            var placeId = _persistedCacheContext.FTMPlaceCache.Max(m => m.FTMPlaceId);
+            var placeId = _persistedCacheContext.PlaceCache.Max(m => m.AltId);
            
             return placeId + 1;
 
         }
 
         public void InsertFtmPlaceCache(int id, int placeId,
-            string ftmOrginalName,
-            string ftmOrginalNameFormatted,
+            string name,
+            string nameFormatted,
             string jsonResult,
             string country,
             string county,
@@ -60,14 +134,14 @@ namespace PlaceLibNet.Data.Repositories
             string lon,
             string src)
         {
-            _persistedCacheContext.InsertFTMPlaceCache(id,placeId,
-                ftmOrginalName,ftmOrginalNameFormatted,jsonResult,country,county,searched,badData,lat,lon, src);
+            _persistedCacheContext.InsertPlaceCache(id,placeId,
+                name,nameFormatted,jsonResult,country,county,searched,badData,lat,lon, src);
         }
 
-        public List<FtmPlaceCache> GetUnsetCountiesAndCountrys()
+        public List<PlaceCache> GetUnsetCountiesAndCountrys()
         {
 
-            var unsetCountiesCount = _persistedCacheContext.FTMPlaceCache.Where(w => (w.County == "" || w.Country == "") && w.JSONResult != null);
+            var unsetCountiesCount = _persistedCacheContext.PlaceCache.Where(w => (w.County == "" || w.Country == "") && w.JSONResult != null);
 
 
             return unsetCountiesCount.ToList();
@@ -78,7 +152,7 @@ namespace PlaceLibNet.Data.Repositories
         {
             try
             {
-                _persistedCacheContext.UpdateFTMPlaceCache(placeId, results);
+                _persistedCacheContext.UpdateJSONCacheResult(placeId, results);
 
                 Debug.WriteLine("ID : " + placeId);
             }
@@ -91,12 +165,12 @@ namespace PlaceLibNet.Data.Repositories
 
         public void UpdateLatLons()
         {
-            foreach (var fc in _persistedCacheContext.FTMPlaceCache.ToList())
+            foreach (var fc in _persistedCacheContext.PlaceCache.ToList())
             {
                 var locationLat = Location.GetLocation(fc.JSONResult).lat;
                 var locationLong = Location.GetLocation(fc.JSONResult).lng;
 
-                _persistedCacheContext.UpdateFTMPlaceCacheLatLong(fc.FTMPlaceId,locationLat.ToString(),locationLong.ToString());
+                _persistedCacheContext.UpdatePlaceCacheLatLong(fc.AltId,locationLat.ToString(),locationLong.ToString());
             }
         }
 
@@ -108,13 +182,13 @@ namespace PlaceLibNet.Data.Repositories
 
         public int GetUnsetUkCountiesCount()
         {
-            var places = _persistedCacheContext.FTMPlaceCache.Where(w => w.County == "" || w.Country == "").ToList();
+            var places = _persistedCacheContext.PlaceCache.Where(w => w.County == "" || w.Country == "").ToList();
 
             return places.Count;
         }
         public int GetUnsetJsonResultCount()
         {
-            var places = _persistedCacheContext.FTMPlaceCache.Where(w => w.JSONResult == null).ToList();
+            var places = _persistedCacheContext.PlaceCache.Where(w => w.JSONResult == null).ToList();
 
             return places.Count;
         }
@@ -124,7 +198,7 @@ namespace PlaceLibNet.Data.Repositories
         /// </summary>
         public List<ExtendedPlace> GetUnsetUkCounties()
         {
-            List<FtmPlaceCache> places = _persistedCacheContext.FTMPlaceCache.Where(w => w.County == "" || w.Country == "").ToList();
+            List<PlaceCache> places = _persistedCacheContext.PlaceCache.Where(w => w.County == "" || w.Country == "").ToList();
 
             var results = new List<ExtendedPlace>();
 
@@ -164,10 +238,10 @@ namespace PlaceLibNet.Data.Repositories
             var cacheDictionary = new Dictionary<int, string>();
 
             // for performance reasons create a place cache of the existing records
-            foreach (var p in context.FTMPlaceCache)
+            foreach (var p in context.PlaceCache)
             {
-                if (!cacheDictionary.ContainsKey(p.FTMPlaceId))
-                    cacheDictionary.Add(p.FTMPlaceId, p.FTMOrginalName);
+                if (!cacheDictionary.ContainsKey(p.AltId))
+                    cacheDictionary.Add(p.AltId, p.Name);
             }
 
             List<Place> missingPlaces = new List<Place>();
@@ -229,17 +303,17 @@ namespace PlaceLibNet.Data.Repositories
 
             if (data.missingPlaces.Count > 0)
             {
-                int newId = this._persistedCacheContext.FTMPlaceCache.Count() + 1;
+                int newId = this._persistedCacheContext.PlaceCache.Count() + 1;
 
                 foreach (var p in data.missingPlaces)
                 {
-                    this._persistedCacheContext.FTMPlaceCache.Add(new FtmPlaceCache()
+                    this._persistedCacheContext.PlaceCache.Add(new PlaceCache()
                     {
                         Id = newId,
-                        FTMOrginalName = p.Name,
+                        Name = p.Name,
                         JSONResult = null,
-                        FTMOrginalNameFormatted = Location.FormatPlace(p.Name),
-                        FTMPlaceId = p.Id,
+                        NameFormatted = Location.FormatPlace(p.Name),
+                        AltId = p.Id,
                         Searched = false,
                         BadData = false
                     });
@@ -267,15 +341,15 @@ namespace PlaceLibNet.Data.Repositories
             {
                 foreach (var p in data.updatedPlaces)
                 {
-                    var cachedValue = _persistedCacheContext.FTMPlaceCache.FirstOrDefault(f => f.FTMPlaceId == p.Id);
+                    var cachedValue = _persistedCacheContext.PlaceCache.FirstOrDefault(f => f.AltId == p.Id);
 
                     if (cachedValue != null)
                     {
-                        cachedValue.FTMOrginalName = p.Name;
+                        cachedValue.Name = p.Name;
                         cachedValue.JSONResult = null;
                         cachedValue.Country = "";
                         cachedValue.County = "";
-                        cachedValue.FTMOrginalNameFormatted = Location.FormatPlace(p.Name);
+                        cachedValue.NameFormatted = Location.FormatPlace(p.Name);
                         cachedValue.Searched = false;
                     }
 
@@ -293,9 +367,9 @@ namespace PlaceLibNet.Data.Repositories
         /// <returns></returns>
         public List<PlaceLookup> GetCachedPlaces()
         {
-            var places = _persistedCacheContext.FTMPlaceCache
+            var places = _persistedCacheContext.PlaceCache
                 .Where(w => w.BadData == false)
-                .Select(s => new PlaceLookup() { placeid = s.FTMPlaceId, placeformatted = s.FTMOrginalNameFormatted, place = s.FTMOrginalName })
+                .Select(s => new PlaceLookup() { placeid = s.AltId, placeformatted = s.NameFormatted, place = s.Name })
                 .ToList();
 
             foreach (var f in places)
@@ -312,9 +386,9 @@ namespace PlaceLibNet.Data.Repositories
         /// <returns></returns>
         public List<PlaceLookup> GetUnknownPlaces()
         {
-            var places = _persistedCacheContext.FTMPlaceCache
+            var places = _persistedCacheContext.PlaceCache
                 .Where(w => (w.JSONResult == null || w.JSONResult == "null" || w.JSONResult == "[]") && w.BadData == false)
-                .Select(s => new PlaceLookup() { placeid = s.FTMPlaceId, placeformatted = s.FTMOrginalNameFormatted })
+                .Select(s => new PlaceLookup() { placeid = s.AltId, placeformatted = s.NameFormatted })
                 .ToList();
 
             foreach (var f in places)
@@ -327,9 +401,9 @@ namespace PlaceLibNet.Data.Repositories
 
         public List<PlaceLookup> GetUnknownPlacesIgnoreSearchedAlready()
         {
-            var places = _persistedCacheContext.FTMPlaceCache.Where(w => (w.JSONResult == null || w.JSONResult == "null" || w.JSONResult == "[]")
+            var places = _persistedCacheContext.PlaceCache.Where(w => (w.JSONResult == null || w.JSONResult == "null" || w.JSONResult == "[]")
                                                                      && !w.Searched && !w.BadData)
-                .Select(s => new PlaceLookup() { placeid = s.FTMPlaceId, placeformatted = s.FTMOrginalNameFormatted })
+                .Select(s => new PlaceLookup() { placeid = s.AltId, placeformatted = s.NameFormatted })
                 .ToList();
 
             foreach (var f in places)

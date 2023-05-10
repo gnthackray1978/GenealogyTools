@@ -1,26 +1,21 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using FTMContextNet.Data.Repositories;
 using LoggingLib;
 using PlaceLib;
-using PlaceLibNet;
 using PlaceLibNet.Data.Repositories;
 using PlaceLibNet.Domain;
-using PlaceLibNet.Model;
 
 namespace FTMContextNet;
 
 public class PlaceRecord : IEnumerable<PlaceRecordItem>
 {
     private List<CountyDto> _counties;
-    public List<PlaceRecordItem> Places { get; set; }
+    public List<PlaceRecordItem> Places { get; set; } 
 
-    private PlacesRepository _placesRepository;
-
-    private FtmPlaceCacheRepository _ftmPlaceCacheRepository;
+    private PlaceRepository _placeRepository;
 
     private PersistedCacheRepository _persistedCacheRepository;
 
@@ -30,18 +25,15 @@ public class PlaceRecord : IEnumerable<PlaceRecordItem>
 
     private Ilog _logger;
 
-    public PlaceRecord(FtmPlaceCacheRepository ftmPlaceCacheRepository,
-        PlacesRepository placesRepository, PersistedCacheRepository persistedCacheRepository, Ilog logger)
+    public PlaceRecord(PlaceRepository placeRepository, PersistedCacheRepository persistedCacheRepository, Ilog logger)
     {
 
         _persistedCacheRepository = persistedCacheRepository;
 
-        _counties = placesRepository.GetCounties(true);
+        _counties = placeRepository.GetCounties(true);
 
-        _ftmPlaceCacheRepository = ftmPlaceCacheRepository;
-
-        _placesRepository = placesRepository;
-
+        _placeRepository = placeRepository;
+         
         _logger = logger;
     }
 
@@ -63,20 +55,20 @@ public class PlaceRecord : IEnumerable<PlaceRecordItem>
         var timer = new Stopwatch();
         timer.Start();
 
-        var placeId = _ftmPlaceCacheRepository.GetNewFtmPlaceId();
-        var id = _ftmPlaceCacheRepository.GetNewId();
+        var placeId = _placeRepository.GetNewFtmPlaceId();
+        var id = _placeRepository.GetNewId();
 
         PreparePlaceData(_persistedCacheRepository.GetPlaces().ToArray());
 
 
-        var placeCache = _ftmPlaceCacheRepository.GetCachedPlaces();
+        var placeCache = _placeRepository.GetCachedPlaces();
 
         // at this point
         // the places list should be full of valid places
         // i.e. no empties and have 3 component locations
 
         _logger.WriteLine("geocoded place cache: " + placeCache.Count);
-        _logger.WriteLine("ged file places: " + Places.Count);
+        _logger.WriteLine("FTMPerson table places: " + Places.Count);
 
         var placeLibCounter = 0;
 
@@ -115,7 +107,7 @@ public class PlaceRecord : IEnumerable<PlaceRecordItem>
 
                     foreach (var placeName in placeParts)
                     {
-                        var plibplace = _placesRepository.SearchPlaces(placeName, Capitalize(county));
+                        var plibplace = _placeRepository.SearchPlaces(placeName, Capitalize(county));
 
                         if (plibplace!= null && plibplace.Lat != "" && plibplace.Long != "")
                         {
@@ -131,9 +123,10 @@ public class PlaceRecord : IEnumerable<PlaceRecordItem>
                 }
 
            
-                _ftmPlaceCacheRepository.InsertFtmPlaceCache(id,
+                _placeRepository.InsertFtmPlaceCache(id,
                     placeId, place.PlaceRaw, place.Place, "[]",
-                    "", place.County, placeLibEntryFound, false, place.Lat, place.Lon, placeLibEntryFound ? "placelib":"");
+                    "", place.County, placeLibEntryFound, false, 
+                    place.Lat, place.Lon, placeLibEntryFound ? "placelib":"");
                 
             }
 
@@ -141,20 +134,15 @@ public class PlaceRecord : IEnumerable<PlaceRecordItem>
         }
         
         timer.Stop();
-
-        TimeSpan timeTaken = timer.Elapsed;
-
-        string foo = "Time taken: " + timeTaken.ToString(@"m\:ss\.fff");
-
-        var c = Places.Where(w => w.GoogleCacheId != 0).Count();
+         
         
         _logger.WriteLine("places: " + Places.Count);
-        _logger.WriteLine("glocated: " + c);
+        _logger.WriteLine("glocated: " + Places.Count(w => w.GoogleCacheId != 0));
         _logger.WriteLine("plocated: " + placeLibCounter);
         _logger.WriteLine("invalid: " + _invalidPlaces);
         _logger.WriteLine("dupes: " + _duplicateCount);
 
-        _logger.WriteLine(foo);
+        _logger.WriteLine("Time taken: " + timer.Elapsed.ToString(@"m\:ss\.fff"));
 
     }
     

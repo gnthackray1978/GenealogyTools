@@ -90,7 +90,7 @@ namespace FTMContextNet.Data.Repositories
                 BirthYearFrom = person.BirthFrom,
                 BirthYearTo = person.BirthTo,
                 Origin = person.Origin,
-                Location = GoogleMapsHelpers.Location.FormatPlace(person.BirthLocation),
+                Location = Location.FormatPlace(person.BirthLocation),
                 ChristianName = person.FirstName,
                 Surname = person.Surname
             };

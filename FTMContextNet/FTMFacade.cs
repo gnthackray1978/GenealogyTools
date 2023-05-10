@@ -9,7 +9,6 @@ using FTMContextNet.Data.Repositories;
 using FTMContextNet.Application.Mapping;
 using AutoMapper;
 using FTMContextNet.Application.Models.Write;
-using PlaceLibNet;
 using PlaceLibNet.Data.Contexts;
 using PlaceLibNet.Data.Repositories;
 
@@ -49,7 +48,7 @@ namespace FTMContextNet
         {
             //var persistedCacheRepository = new PersistedCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper), _outputHandler);
 
-            var placeRepository = new FtmPlaceCacheRepository(new PlacesContext(_iMSGConfigHelper), _outputHandler);
+            var placeRepository = new PlaceRepository(new PlacesContext(_iMSGConfigHelper), _outputHandler);
 
 
             var service = new GetUnknownPlacesService(placeRepository, _outputHandler, _mapper);
@@ -59,7 +58,7 @@ namespace FTMContextNet
         public IEnumerable<PlaceModel> GetPlaceNotGeocoded(int amount) {
             //var persistedCacheRepository = new PersistedCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper), _outputHandler);
 
-            var placeRepository = new FtmPlaceCacheRepository(new PlacesContext(_iMSGConfigHelper), _outputHandler);
+            var placeRepository = new PlaceRepository(new PlacesContext(_iMSGConfigHelper), _outputHandler);
 
 
             var service = new GetUnknownPlacesSearchedAlreadyServices(placeRepository, _outputHandler, _mapper);
@@ -78,7 +77,7 @@ namespace FTMContextNet
         {
            // var persistedCacheRepository = new PersistedCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper), _outputHandler);
 
-            var placeRepository = new FtmPlaceCacheRepository(new PlacesContext(_iMSGConfigHelper), _outputHandler);
+            var placeRepository = new PlaceRepository(new PlacesContext(_iMSGConfigHelper), _outputHandler);
 
 
             var service = new UpdatePlaceGeoData(placeRepository, _outputHandler, _mapper);
@@ -91,14 +90,12 @@ namespace FTMContextNet
         /// </summary>
         public void AddUnknownPlaces()
         {
-            var ftmPlaceCacheRepository = new FtmPlaceCacheRepository(new PlacesContext(_iMSGConfigHelper), _outputHandler);
-
-            var pr2 = new PlacesRepository(new PlacesContext(_iMSGConfigHelper), _outputHandler);
-        
+            var ftmPlaceCacheRepository = new PlaceRepository(new PlacesContext(_iMSGConfigHelper), _outputHandler);
+ 
             var persistedCacheRepository = new PersistedCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper), _outputHandler);
 
             
-            var pr = new PlaceRecord(ftmPlaceCacheRepository, pr2, persistedCacheRepository, _outputHandler);
+            var pr = new PlaceRecord(ftmPlaceCacheRepository, persistedCacheRepository, _outputHandler);
 
             pr.Process();
 
@@ -106,11 +103,9 @@ namespace FTMContextNet
 
         public void UpdatePlaceMetaData()
         {
-            var placesRepository = new PlacesRepository(new PlacesContext(_iMSGConfigHelper),_outputHandler);
+            var placeRepository = new PlaceRepository(new PlacesContext(_iMSGConfigHelper),_outputHandler);
 
-            var placeRepository = new FtmPlaceCacheRepository(new PlacesContext(_iMSGConfigHelper),_outputHandler);
-
-            var service = new UpdatePlaceMetaData(placeRepository, placesRepository, _outputHandler, _mapper);
+            var service = new UpdatePlaceMetaData(placeRepository, _outputHandler, _mapper);
 
             service.Execute();
         }
@@ -181,7 +176,7 @@ namespace FTMContextNet
                    
             var persistedCacheRepository = new PersistedCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper), _outputHandler);
 
-            var ftmPlaceCacheRepository = new FtmPlaceCacheRepository(new PlacesContext(_iMSGConfigHelper), _outputHandler);
+            var ftmPlaceCacheRepository = new PlaceRepository(new PlacesContext(_iMSGConfigHelper), _outputHandler);
 
             var tp = new GetInfoService(persistedCacheRepository, ftmPlaceCacheRepository, _outputHandler, _mapper);
 

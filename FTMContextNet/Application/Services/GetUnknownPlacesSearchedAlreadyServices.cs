@@ -3,23 +3,21 @@ using FTMContextNet.Application.Models.Read;
 using AutoMapper;
 using System.Linq;
 using System.Collections.Generic;
-using PlaceLibNet;
 using PlaceLibNet.Data.Repositories;
 using PlaceLibNet.Domain;
-using PlaceLibNet.Model;
 
 namespace FTMContextNet.Application.Services
 {
     public class GetUnknownPlacesSearchedAlreadyServices
     {
         private readonly Ilog _iLog;
-        private readonly FtmPlaceCacheRepository _persistedCacheCacheRepository;
+        private readonly PlaceRepository _placeRepository;
         private readonly IMapper _iMapper;
 
-        public GetUnknownPlacesSearchedAlreadyServices(FtmPlaceCacheRepository persistedCacheCacheRepository, Ilog iLog, IMapper iMapper)
+        public GetUnknownPlacesSearchedAlreadyServices(PlaceRepository placeRepository, Ilog iLog, IMapper iMapper)
         {
             _iLog = iLog;
-            _persistedCacheCacheRepository = persistedCacheCacheRepository;
+            _placeRepository = placeRepository;
             _iMapper = iMapper;
         }
 
@@ -28,7 +26,7 @@ namespace FTMContextNet.Application.Services
             _iLog.WriteCounter("Executing GetUnknownPlacesSearchedAlreadyServices");
 
 
-            IEnumerable<PlaceLookup> tp = _persistedCacheCacheRepository.GetUnknownPlacesIgnoreSearchedAlready().Take(amount);
+            IEnumerable<PlaceLookup> tp = _placeRepository.GetUnknownPlacesIgnoreSearchedAlready().Take(amount);
 
 
             return _iMapper.Map<IEnumerable<PlaceModel>>(tp);

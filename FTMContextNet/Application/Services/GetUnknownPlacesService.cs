@@ -1,10 +1,8 @@
 ﻿using LoggingLib;
 using FTMContextNet.Application.Models.Read;
-using FTMContextNet.Data.Repositories;
 using AutoMapper;
 using System.Linq;
 using System.Collections.Generic;
-using PlaceLibNet;
 using PlaceLibNet.Data.Repositories;
 
 namespace FTMContextNet.Application.Services
@@ -12,13 +10,13 @@ namespace FTMContextNet.Application.Services
     public class GetUnknownPlacesService
     {
         private readonly Ilog _iLog;
-        private readonly FtmPlaceCacheRepository _persistedCacheCacheRepository;
+        private readonly PlaceRepository _placeRepository;
         private readonly IMapper _iMapper;
 
-        public GetUnknownPlacesService(FtmPlaceCacheRepository persistedCacheCacheRepository, Ilog iLog, IMapper iMapper)
+        public GetUnknownPlacesService(PlaceRepository placeRepository, Ilog iLog, IMapper iMapper)
         {
             _iLog = iLog;
-            _persistedCacheCacheRepository = persistedCacheCacheRepository;
+            _placeRepository = placeRepository;
             _iMapper = iMapper;
         }
 
@@ -26,7 +24,7 @@ namespace FTMContextNet.Application.Services
         {
             _iLog.WriteCounter("Executing GetUnknownPlacesService");
 
-            return _iMapper.Map<IEnumerable<PlaceModel>>(_persistedCacheCacheRepository.GetUnknownPlaces().Take(amount));
+            return _iMapper.Map<IEnumerable<PlaceModel>>(_placeRepository.GetUnknownPlaces().Take(amount));
         }
     }
 }

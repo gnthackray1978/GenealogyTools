@@ -1,11 +1,8 @@
-﻿using System;
-using System.Linq;
-using System.Text.RegularExpressions;
-using ConfigHelper;
+﻿using ConfigHelper;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
 using PlaceLib.Model;
+using PlaceLibNet.Domain;
 
 namespace PlaceLibNet.Data.Contexts
 {
@@ -24,34 +21,32 @@ namespace PlaceLibNet.Data.Contexts
         }
 
         public virtual DbSet<Places> Places { get; set; }
-        public virtual DbSet<FtmPlaceCache> FTMPlaceCache { get; set; }
+        public virtual DbSet<PlaceCache> PlaceCache { get; set; }
 
-        public void InsertFTMPlaceCache(int id, int placeId,
-            string FTMOrginalName,
-            string FTMOrginalNameFormatted,
-            string JSONResult,
-            string Country,
-            string County,
-            bool Searched,
-            bool BadData,
-            string Lat,
-            string Long,
-            string Src)
+        public void InsertPlaceCache(int id, int placeId,
+            string name,
+            string nameFormatted,
+            string jsonResult,
+            string country,
+            string county,
+            bool searched,
+            bool badData,
+            string lat,
+            string @long,
+            string src)
         {
-
-
-
+            
             var connectionString = Database.GetDbConnection().ConnectionString;
 
 
             using var connection = new SqliteConnection(connectionString);
 
             var command = connection.CreateCommand();
-            command.CommandText = "Insert INTO FTMPlaceCache(Id,FTMPlaceId,FTMOrginalName,FTMOrginalNameFormatted,JSONResult,Country,County,Searched,BadData,Lat,Long,Src) VALUES($Id,$FTMPlaceId,$FTMOrginalName,$FTMOrginalNameFormatted,$JSONResult,$Country,$County,$Searched,$BadData,$Lat,$Lon, $Src)";
+            command.CommandText = "Insert INTO PlaceCache(Id,AltId,Name,NameFormatted,JSONResult,Country,County,Searched,BadData,Lat,Long,Src) VALUES($Id,$FTMPlaceId,$FTMOrginalName,$FTMOrginalNameFormatted,$JSONResult,$Country,$County,$Searched,$BadData,$Lat,$Lon, $Src)";
             command.Parameters.Add("$Id", SqliteType.Integer);
-            command.Parameters.Add("$FTMPlaceId", SqliteType.Integer);
-            command.Parameters.Add("$FTMOrginalName", SqliteType.Text);
-            command.Parameters.Add("$FTMOrginalNameFormatted", SqliteType.Text);
+            command.Parameters.Add("$AltId", SqliteType.Integer);
+            command.Parameters.Add("$Name", SqliteType.Text);
+            command.Parameters.Add("$NameFormatted", SqliteType.Text);
             command.Parameters.Add("$JSONResult", SqliteType.Text);
             command.Parameters.Add("$Country", SqliteType.Text);
             command.Parameters.Add("$County", SqliteType.Text);
@@ -69,17 +64,17 @@ namespace PlaceLibNet.Data.Contexts
             command.Prepare();
 
             command.Parameters["$Id"].Value = id;
-            command.Parameters["$FTMPlaceId"].Value = placeId;
-            command.Parameters["$FTMOrginalName"].Value = FTMOrginalName;
-            command.Parameters["$FTMOrginalNameFormatted"].Value = FTMOrginalNameFormatted;
-            command.Parameters["$JSONResult"].Value = JSONResult;
-            command.Parameters["$Country"].Value = Country;
-            command.Parameters["$County"].Value = County ?? "";
-            command.Parameters["$Searched"].Value = Searched;
-            command.Parameters["$BadData"].Value = BadData;
-            command.Parameters["$Lat"].Value = Lat ?? "";
-            command.Parameters["$Lon"].Value = Long ?? "";
-            command.Parameters["$Src"].Value = Src ?? "";
+            command.Parameters["$AltId"].Value = placeId;
+            command.Parameters["$Name"].Value = name;
+            command.Parameters["$NameFormatted"].Value = nameFormatted;
+            command.Parameters["$JSONResult"].Value = jsonResult;
+            command.Parameters["$Country"].Value = country;
+            command.Parameters["$County"].Value = county ?? "";
+            command.Parameters["$Searched"].Value = searched;
+            command.Parameters["$BadData"].Value = badData;
+            command.Parameters["$Lat"].Value = lat ?? "";
+            command.Parameters["$Lon"].Value = @long ?? "";
+            command.Parameters["$Src"].Value = src ?? "";
 
             command.ExecuteNonQuery();
 
@@ -87,7 +82,7 @@ namespace PlaceLibNet.Data.Contexts
 
         }
 
-        public void UpdateFTMPlaceCacheLatLong(int placeId, string lat, string lon)
+        public void UpdatePlaceCacheLatLong(int placeId, string lat, string lon)
         {
 
             var connectionString = Database.GetDbConnection().ConnectionString;
@@ -96,9 +91,9 @@ namespace PlaceLibNet.Data.Contexts
             using var connection = new SqliteConnection(connectionString);
 
             var command = connection.CreateCommand();
-            command.CommandText = "UPDATE FTMPlaceCache SET Lat = $Lat, Long = $Lon WHERE FTMPlaceId = $FTMPlaceId;";
+            command.CommandText = "UPDATE PlaceCache SET Lat = $Lat, Long = $Lon WHERE AltId = $AltId;";
 
-            command.Parameters.Add("$FTMPlaceId", SqliteType.Integer);
+            command.Parameters.Add("$AltId", SqliteType.Integer);
             command.Parameters.Add("$Lat", SqliteType.Text);
             command.Parameters.Add("$Lon", SqliteType.Text);
 
@@ -109,7 +104,7 @@ namespace PlaceLibNet.Data.Contexts
             command.Transaction = transaction;
             command.Prepare();
 
-            command.Parameters["$FTMPlaceId"].Value = placeId;
+            command.Parameters["$AltId"].Value = placeId;
             command.Parameters["$Lat"].Value = lat;
             command.Parameters["$Lon"].Value = lon;
 
@@ -118,7 +113,7 @@ namespace PlaceLibNet.Data.Contexts
             transaction.Commit();
 
         }
-        public void UpdateFTMPlaceCache(int placeId, string results)
+        public void UpdateJSONCacheResult(int placeId, string results)
         {
 
             var connectionString = Database.GetDbConnection().ConnectionString;
@@ -127,9 +122,9 @@ namespace PlaceLibNet.Data.Contexts
             using var connection = new SqliteConnection(connectionString);
 
             var command = connection.CreateCommand();
-            command.CommandText = "UPDATE FTMPlaceCache SET JSONResult = $JSONResult, Country = '', County = '', Searched = 1, BadData = 1 WHERE FTMPlaceId = $FTMPlaceId;";
+            command.CommandText = "UPDATE PlaceCache SET JSONResult = $JSONResult, Country = '', County = '', Searched = 1, BadData = 1 WHERE AltId = $AltId;";
 
-            command.Parameters.Add("$FTMPlaceId", SqliteType.Integer);
+            command.Parameters.Add("$AltId", SqliteType.Integer);
             command.Parameters.Add("$JSONResult", SqliteType.Text);
 
             connection.Open();
@@ -139,7 +134,7 @@ namespace PlaceLibNet.Data.Contexts
             command.Transaction = transaction;
             command.Prepare();
 
-            command.Parameters["$FTMPlaceId"].Value = placeId;
+            command.Parameters["$AltId"].Value = placeId;
             command.Parameters["$JSONResult"].Value = results;
 
             command.ExecuteNonQuery();

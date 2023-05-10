@@ -1,8 +1,6 @@
 ﻿using LoggingLib;
-using FTMContextNet.Data.Repositories;
 using AutoMapper;
-using System.Collections.Generic; 
-using PlaceLibNet;
+using System.Collections.Generic;
 using PlaceLibNet.Data.Repositories;
 using PlaceLibNet.Model;
 
@@ -12,13 +10,13 @@ namespace FTMContextNet.Application.Services
     public class UpdatePlaceCache
     {
         private readonly Ilog _iLog;
-        private readonly FtmPlaceCacheRepository _persistedCacheCacheRepository;
+        private readonly PlaceRepository _placeRepository;
         private readonly IMapper _iMapper;
 
-        public UpdatePlaceCache(FtmPlaceCacheRepository persistedCacheCacheRepository, Ilog iLog, IMapper iMapper)
+        public UpdatePlaceCache(PlaceRepository placeRepository, Ilog iLog, IMapper iMapper)
         {
             _iLog = iLog;
-            _persistedCacheCacheRepository = persistedCacheCacheRepository;
+            _placeRepository = placeRepository;
             _iMapper = iMapper;
         }
 
@@ -28,11 +26,11 @@ namespace FTMContextNet.Application.Services
 
             _iLog.WriteLine("Adding missing places to persisted cache");
 
-            _persistedCacheCacheRepository.AddMissingPlaces(sourcePlaces);
+            _placeRepository.AddMissingPlaces(sourcePlaces);
 
             _iLog.WriteLine("Reset persisted cache entries where place has changed");
 
-            _persistedCacheCacheRepository.ResetUpdatedPlaces(sourcePlaces);
+            _placeRepository.ResetUpdatedPlaces(sourcePlaces);
 
             _iLog.WriteLine("Finished Adding and Updating Places");
         }
