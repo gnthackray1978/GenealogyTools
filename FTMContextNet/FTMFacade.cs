@@ -86,16 +86,16 @@ namespace FTMContextNet
         }
          
         /// <summary>
-        /// look in GED add any places to the cache that aren't already in there.
+        /// look in person table add any places to the cache that aren't already in there.
         /// </summary>
         public void AddUnknownPlaces()
         {
-            var ftmPlaceCacheRepository = new PlaceRepository(new PlacesContext(_iMSGConfigHelper), _outputHandler);
+            var placeRepository = new PlaceRepository(new PlacesContext(_iMSGConfigHelper), _outputHandler);
  
             var persistedCacheRepository = new PersistedCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper), _outputHandler);
 
             
-            var pr = new PlaceRecord(ftmPlaceCacheRepository, persistedCacheRepository, _outputHandler);
+            var pr = new PlaceRecord(placeRepository, persistedCacheRepository, _outputHandler);
 
             pr.Process();
 
