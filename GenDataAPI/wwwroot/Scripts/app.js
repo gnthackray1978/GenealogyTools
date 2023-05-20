@@ -277,7 +277,8 @@ PlaceObj.prototype = {
         return true;
     },
 
-    start: function() {
+    start: function () {
+        //https://www.geoapify.com/exceeding-google-geocoding-api-rate-limit-with-over_query_limit-status
         var sh = this;
         sh.count = 0; 
         var printOutputLine = this.console.printOutputLine;

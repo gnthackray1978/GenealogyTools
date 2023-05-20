@@ -1,4 +1,6 @@
-﻿namespace PlaceLibNet.Domain
+﻿using System;
+
+namespace PlaceLibNet.Domain
 {
     public partial class PlaceCache {
 
@@ -19,6 +21,8 @@
         public string Long { get; set; }
 
         public string Src { get; set; }
+
+        public DateTime DateCreated { get; set; }
     }
 }
 

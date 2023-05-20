@@ -4,10 +4,10 @@ namespace FTMContextNet.Domain.Entities.Persistent.Cache
 {
     public partial class FTMPersonView
     {
-        public static FTMPersonView Create(int idCounter, int importId, PersonSubset person) {
+        public static FTMPersonView Create(Person person) {
             var fTmPersonView = new FTMPersonView
             {
-                Id = idCounter,
+               // Id = idCounter,
                 PersonId = person.Id,
                 BirthFrom = person.BirthYearFrom,
                 BirthTo = person.BirthYearTo,
@@ -20,12 +20,13 @@ namespace FTMContextNet.Domain.Entities.Persistent.Cache
                 BirthLong = 0.0,
                 FirstName = person.Forename,
                 Surname = person.FamilyName,
-                Origin = person.Origin,
+                Origin = person.Origin?? "",
                 DirectAncestor = person.IsDirectAncestor,
                 LinkedLocations = person.AllLocations(),
                 FatherId = person.FatherId,
                 MotherId = person.MotherId,
-                ImportId = importId
+                LinkNode = person.IsLinkNode,
+                RootPerson = person.IsRootPerson
             };
 
             return fTmPersonView;
@@ -64,5 +65,8 @@ namespace FTMContextNet.Domain.Entities.Persistent.Cache
 
         public bool LocationsCached { get; set; }
 
+        public bool RootPerson { get; set; }
+
+        public bool LinkNode { get; set; }
     }
 }

@@ -8,5 +8,7 @@
 
         public bool DirectAncestor { get; set; }
 
+        public int ImportId { get; set; }
+
     }
 }

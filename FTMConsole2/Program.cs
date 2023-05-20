@@ -14,81 +14,89 @@ namespace FTMConsole2
              
             Console.WriteLine("1. Import Persons");
 
-            Console.WriteLine("2. Create Tree Records");
+            Console.WriteLine("2. Create Tree Origins");
 
-            Console.WriteLine("3. Create Tree Groups");
+            Console.WriteLine("3. Create Tree Records");
 
-            Console.WriteLine("4. Create Tree Group Mappings");
-
-            Console.WriteLine("5. Create Dupes");
-
-            Console.WriteLine("6. Add Unknown Places");
-
-            Console.WriteLine("7. Update Places");
-
-            Console.WriteLine("8. Debug Option");
+            Console.WriteLine("4. Create Tree Groups");
             
-            Console.WriteLine("9. Quit");
+            Console.WriteLine("5. Create Tree Group Mappings");
+
+            Console.WriteLine("6. Create Dupes");
+
+            Console.WriteLine("7. Add Unknown Places");
+
+            Console.WriteLine("8. Update Places");
+
+            Console.WriteLine("9. Debug Option");
+            
+            Console.WriteLine("q. Quit");
             
             while (true)
             { 
                 var input = Console.ReadKey();
                 Console.WriteLine("");
-                if (!int.TryParse(input.KeyChar.ToString(),out int sin))
+                if ((input.KeyChar <49 || input.KeyChar > 57) && input.KeyChar!='q')
                 {
                     Console.WriteLine("Not a valid Selection");
                     continue;
                 }
 
-                Actions(sin, facade);
+                Actions(input.KeyChar, facade);
 
-                if (sin > 8 || sin == 0)
+                if (input.KeyChar == 'q')
                     break;
             }
 
             
         }
 
-        private static void Actions(int sin, FTMFacade facade)
+        private static void Actions(char sin, FTMFacade facade)
         {
            
-            if (sin == 1)
+            if (sin == '1')
             {
                 facade.ImportPersons();
             }
 
-            if (sin == 2)
+            if (sin == '2')
+            {
+                facade.CreatePersonOrigins();
+            }
+
+            if (sin == '3')
             {
                 facade.CreateTreeRecord();
             }
 
-            if (sin == 3)
+            if (sin == '4')
             {
                 facade.CreateTreeGroups();
             }
 
-            if (sin == 4)
+            if (sin == '5')
             {
                 facade.CreateTreeGroupMappings();
             }
 
-            if (sin == 5)
+            if (sin == '6')
             {
                 facade.CreateDupeView();
             }
 
-            if (sin == 6)
+            if (sin == '7')
             {
-                facade.AddUnknownPlaces();
+                facade.CreateMissingPersonLocations();
             }
 
-            if (sin == 7)
+            if (sin == '8')
             {
                 facade.UpdatePlaceMetaData();
             }
 
-            if (sin == 8)
+            if (sin == '9')
             {
+                facade.FormatNames();
                 Console.WriteLine("Debug test");
             }
         }

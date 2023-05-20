@@ -16,12 +16,12 @@ namespace PlaceLibNet.Data.Repositories
 {
     public class PlaceRepository
     {
-        private readonly PlacesContext _persistedCacheContext;
+        private readonly PlacesContext _placesContext;
         private readonly Ilog _iLog;
         
-        public PlaceRepository(PlacesContext persistedCacheContext, Ilog iLog)
+        public PlaceRepository(PlacesContext placesContext, Ilog iLog)
         {
-            _persistedCacheContext = persistedCacheContext;
+            _placesContext = placesContext;
             _iLog = iLog;
         }
 
@@ -82,47 +82,71 @@ namespace PlaceLibNet.Data.Repositories
             return county;
         }
 
-        public Places SearchPlaces(string searchString, string county)
-        {
-            using var placecontext = new PlacesContext(new MSGConfigHelper());
+        //public Places SearchPlaces(string searchString, string county)
+        //{
+        //    using var placecontext = new PlacesContext(new MSGConfigHelper());
 
-            Debug.WriteLine(searchString + "/" + county);
-            Places placedbResult = placecontext
+        //    Debug.WriteLine(searchString + "/" + county);
+        //    Places placedbResult = placecontext
+        //        .Places
+        //        .Where(w => w.Placesort == searchString && w.Ctyhistnm == county)
+        //        .OrderBy(o => o.Place15cd)
+        //        .FirstOrDefault();
+
+        //    return placedbResult;
+        //}
+
+        public Places SearchPlaces(string searchString, string county, bool requiredValidLatLong = false)
+        {
+        //    using var placecontext = new PlacesContext(new MSGConfigHelper());
+
+
+
+           // Debug.WriteLine(searchString + "/" + county);
+            Places placedbResult = _placesContext
                 .Places
                 .Where(w => w.Placesort == searchString && w.Ctyhistnm == county)
                 .OrderBy(o => o.Place15cd)
                 .FirstOrDefault();
+            
+            if(!requiredValidLatLong)
+                return placedbResult;
 
-            return placedbResult;
+            if (placedbResult != null && placedbResult.Lat != "" && placedbResult.Long != "")
+            {
+                return placedbResult;
+            }
+
+            return null;
         }
 
         public int GetGeoCodeCacheSize()
         { 
-            return _persistedCacheContext.PlaceCache.Count(); 
+            return _placesContext.PlaceCache.Count(); 
         }
 
         public int GetUnsearchedCount()
         {
-            return _persistedCacheContext.PlaceCache.Count(w => !w.Searched);
+            return _placesContext.PlaceCache.Count(w => !w.Searched);
         }
 
         public int GetNewId()
         {
             // var placeId = FTMPlaceCache.Max(m => m.FTMPlaceId);
-             var id = _persistedCacheContext.PlaceCache.Max(m => m.Id);
+             var id = _placesContext.PlaceCache.Max(m => m.Id);
              return id+1;
 
         }
 
         public int GetNewFtmPlaceId()
         { 
-            var placeId = _persistedCacheContext.PlaceCache.Max(m => m.AltId);
+            var placeId = _placesContext.PlaceCache.Max(m => m.AltId);
            
             return placeId + 1;
 
         }
 
-        public void InsertFtmPlaceCache(int id, int placeId,
+        public void InsertIntoCache(int id, int placeId,
             string name,
             string nameFormatted,
             string jsonResult,
@@ -134,27 +158,27 @@ namespace PlaceLibNet.Data.Repositories
             string lon,
             string src)
         {
-            _persistedCacheContext.InsertPlaceCache(id,placeId,
+            _placesContext.InsertPlaceCache(id,placeId,
                 name,nameFormatted,jsonResult,country,county,searched,badData,lat,lon, src);
         }
 
         public List<PlaceCache> GetUnsetCountiesAndCountrys()
         {
 
-            var unsetCountiesCount = _persistedCacheContext.PlaceCache.Where(w => (w.County == "" || w.Country == "") && w.JSONResult != null);
+            var unsetCountiesCount = _placesContext.PlaceCache.Where(w => (w.County == "" || w.Country == "") && w.JSONResult != null);
 
 
             return unsetCountiesCount.ToList();
         }
 
       
-        public void SetPlaceGeoData(int placeId, string results)
+        public void SetPlaceGeoData(int id, string results)
         {
             try
             {
-                _persistedCacheContext.UpdateJSONCacheResult(placeId, results);
+                _placesContext.UpdateJSONCacheResult(id, results);
 
-                Debug.WriteLine("ID : " + placeId);
+                Debug.WriteLine("ID : " + id);
             }
             catch (Exception e)
             {
@@ -165,30 +189,69 @@ namespace PlaceLibNet.Data.Repositories
 
         public void UpdateLatLons()
         {
-            foreach (var fc in _persistedCacheContext.PlaceCache.ToList())
+            foreach (var fc in _placesContext.PlaceCache.ToList())
             {
                 var locationLat = Location.GetLocation(fc.JSONResult).lat;
                 var locationLong = Location.GetLocation(fc.JSONResult).lng;
 
-                _persistedCacheContext.UpdatePlaceCacheLatLong(fc.AltId,locationLat.ToString(),locationLong.ToString());
+                _placesContext.UpdatePlaceCacheLatLong(fc.AltId,locationLat.ToString(),locationLong.ToString());
             }
+        }
+
+
+        public void FormatNames()
+        {
+            using var placecontext = new PlacesContext(new MSGConfigHelper());
+
+            foreach (var fc in _placesContext.PlaceCache.ToList())
+            {
+                
+                string name = DeleteNonAlphaNumericExceptSlash(fc.NameFormatted);
+
+               // name = name.Replace(',', '/');
+              //  name = name.Replace('|', ' ').Trim();
+
+                name = ReplaceSlashesWithSingleSlash(name);
+                 
+
+                if(fc.NameFormatted!=name)
+                    placecontext.UpdateFormattedName(fc.Id, name);
+            }
+        }
+
+   
+        public static string ReplaceSlashesWithSingleSlash(string input)
+        {
+            // Create a regular expression that matches a single slash or any number of whitespace characters.
+            var regex = new Regex(@"(\s+/\s+|\s+/|/\s+)");
+
+            // Replace all matches of the regular expression with a single slash.
+            return regex.Replace(input, "/");
+        }
+        public static string DeleteNonAlphaNumericExceptSlash(string input)
+        {
+            // Create a regular expression that matches a single slash or any number of whitespace characters.
+            var regex = new Regex(@"[^a-zA-Z\d\s/]");
+
+            // Replace all matches of the regular expression with a single slash.
+            return regex.Replace(input, "");
         }
 
         public void SaveChanges()
         {
-            _persistedCacheContext.SaveChanges();
+            _placesContext.SaveChanges();
         }
 
 
         public int GetUnsetUkCountiesCount()
         {
-            var places = _persistedCacheContext.PlaceCache.Where(w => w.County == "" || w.Country == "").ToList();
+            var places = _placesContext.PlaceCache.Where(w => w.County == "" || w.Country == "").ToList();
 
             return places.Count;
         }
         public int GetUnsetJsonResultCount()
         {
-            var places = _persistedCacheContext.PlaceCache.Where(w => w.JSONResult == null).ToList();
+            var places = _placesContext.PlaceCache.Where(w => w.JSONResult == null).ToList();
 
             return places.Count;
         }
@@ -198,7 +261,7 @@ namespace PlaceLibNet.Data.Repositories
         /// </summary>
         public List<ExtendedPlace> GetUnsetUkCounties()
         {
-            List<PlaceCache> places = _persistedCacheContext.PlaceCache.Where(w => w.County == "" || w.Country == "").ToList();
+            List<PlaceCache> places = _placesContext.PlaceCache.Where(w => w.County == "" || w.Country == "").ToList();
 
             var results = new List<ExtendedPlace>();
 
@@ -297,17 +360,17 @@ namespace PlaceLibNet.Data.Repositories
         /// <param name="sourcePlaces">list of all places from the dna_match_file DB</param>
         public void AddMissingPlaces(List<Place> sourcePlaces)
         {
-            (List<Place> missingPlaces, List<Place> updatedPlaces) data = CheckForUpdates(this._persistedCacheContext, sourcePlaces, this._iLog);
+            (List<Place> missingPlaces, List<Place> updatedPlaces) data = CheckForUpdates(this._placesContext, sourcePlaces, this._iLog);
 
             _iLog.WriteLine("Adding " + data.missingPlaces.Count + " missing places");
 
             if (data.missingPlaces.Count > 0)
             {
-                int newId = this._persistedCacheContext.PlaceCache.Count() + 1;
+                int newId = this._placesContext.PlaceCache.Count() + 1;
 
                 foreach (var p in data.missingPlaces)
                 {
-                    this._persistedCacheContext.PlaceCache.Add(new PlaceCache()
+                    this._placesContext.PlaceCache.Add(new PlaceCache()
                     {
                         Id = newId,
                         Name = p.Name,
@@ -319,7 +382,7 @@ namespace PlaceLibNet.Data.Repositories
                     });
 
                     newId++;
-                    this._persistedCacheContext.SaveChanges();
+                    this._placesContext.SaveChanges();
                 }
             }
 
@@ -332,7 +395,7 @@ namespace PlaceLibNet.Data.Repositories
         public void ResetUpdatedPlaces(List<Place> sourcePlaces)
         {
 
-            (List<Place> missingPlaces, List<Place> updatedPlaces) data = CheckForUpdates(this._persistedCacheContext, sourcePlaces, this._iLog);
+            (List<Place> missingPlaces, List<Place> updatedPlaces) data = CheckForUpdates(this._placesContext, sourcePlaces, this._iLog);
 
             _iLog.WriteLine(data.updatedPlaces.Count + " updated places ");
 
@@ -341,7 +404,7 @@ namespace PlaceLibNet.Data.Repositories
             {
                 foreach (var p in data.updatedPlaces)
                 {
-                    var cachedValue = _persistedCacheContext.PlaceCache.FirstOrDefault(f => f.AltId == p.Id);
+                    var cachedValue = _placesContext.PlaceCache.FirstOrDefault(f => f.AltId == p.Id);
 
                     if (cachedValue != null)
                     {
@@ -353,7 +416,7 @@ namespace PlaceLibNet.Data.Repositories
                         cachedValue.Searched = false;
                     }
 
-                    _persistedCacheContext.SaveChanges();
+                    _placesContext.SaveChanges();
                 }
             }
 
@@ -367,14 +430,14 @@ namespace PlaceLibNet.Data.Repositories
         /// <returns></returns>
         public List<PlaceLookup> GetCachedPlaces()
         {
-            var places = _persistedCacheContext.PlaceCache
+            var places = _placesContext.PlaceCache
                 .Where(w => w.BadData == false)
-                .Select(s => new PlaceLookup() { placeid = s.AltId, placeformatted = s.NameFormatted, place = s.Name })
+                .Select(s => new PlaceLookup() { PlaceId = s.AltId, PlaceFormatted = s.NameFormatted, Place = s.Name })
                 .ToList();
 
             foreach (var f in places)
             {
-                f.place = f.place.ToLower().Replace(" ", "").Replace(",","/").Replace("//", "/");
+                f.Place = f.Place.ToLower().Replace(" ", "").Replace(",","/").Replace("//", "/");
             }
 
             return places;
@@ -386,29 +449,29 @@ namespace PlaceLibNet.Data.Repositories
         /// <returns></returns>
         public List<PlaceLookup> GetUnknownPlaces()
         {
-            var places = _persistedCacheContext.PlaceCache
+            var places = _placesContext.PlaceCache
                 .Where(w => (w.JSONResult == null || w.JSONResult == "null" || w.JSONResult == "[]") && w.BadData == false)
-                .Select(s => new PlaceLookup() { placeid = s.AltId, placeformatted = s.NameFormatted })
+                .Select(s => new PlaceLookup() { PlaceId = s.Id, PlaceFormatted = s.NameFormatted })
                 .ToList();
 
-            foreach (var f in places)
-            {
-                f.placeformatted = f.placeformatted.Replace("//", "").Replace("|", "");
-            }
+            //foreach (var f in places)
+            //{
+            //    f.PlaceFormatted = f.PlaceFormatted.Replace("//", "").Replace("|", "");
+            //}
 
             return places;
         }
 
         public List<PlaceLookup> GetUnknownPlacesIgnoreSearchedAlready()
         {
-            var places = _persistedCacheContext.PlaceCache.Where(w => (w.JSONResult == null || w.JSONResult == "null" || w.JSONResult == "[]")
+            var places = _placesContext.PlaceCache.Where(w => (w.JSONResult == null || w.JSONResult == "null" || w.JSONResult == "[]")
                                                                      && !w.Searched && !w.BadData)
-                .Select(s => new PlaceLookup() { placeid = s.AltId, placeformatted = s.NameFormatted })
+                .Select(s => new PlaceLookup() { PlaceId = s.AltId, PlaceFormatted = s.NameFormatted })
                 .ToList();
 
             foreach (var f in places)
             {
-                f.placeformatted = f.placeformatted.Replace("//", "").Replace("|", "");
+                f.PlaceFormatted = f.PlaceFormatted.Replace("//", "").Replace("|", "");
             }
 
             return places;

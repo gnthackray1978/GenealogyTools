@@ -19,7 +19,7 @@ namespace FTMContextNet.Application.Services
         }
 
         /// <summary>
-        /// Updates place entry in cacheData.FTMPlaceCache with result we got back from google geocode.
+        /// Updates place entry in cacheData.PlaceCache with result we got back from google geocode.
         /// </summary>
         /// <returns></returns>
         public ServiceResult Execute(GeoCodeResultModel data)

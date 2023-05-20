@@ -4,7 +4,7 @@ namespace QuickGed.Services;
 
 public class AgeRangeCalculator
 {
-    private static DupeAgeInfo GetFirstChildBirth(PersonSubset person)
+    private static DupeAgeInfo GetFirstChildBirth(Person person)
     {
         var list = new List<DupeAgeInfo>();
 
@@ -12,7 +12,7 @@ public class AgeRangeCalculator
 
         var children = person
             .Children
-            .Cast<PersonSubset>()
+            .Cast<Person>()
             .Where(w => w.BirthYearFrom > 0)
             .MinBy(o => o.BirthYearFrom);
 
@@ -30,7 +30,7 @@ public class AgeRangeCalculator
         return list.Count > 0 ? list.MinBy(o => o.Year) : null;
     }
 
-    private static DupeAgeInfo GetDeathDate(PersonSubset person)
+    private static DupeAgeInfo GetDeathDate(Person person)
     {
         List<DupeAgeInfo> list = new List<DupeAgeInfo>();
 
@@ -56,7 +56,7 @@ public class AgeRangeCalculator
         }
     }
 
-    public static ProcessDateReturnType GetPersonBirthDateRange(PersonSubset person)
+    public static ProcessDateReturnType GetPersonBirthDateRange(Person person)
     {
         var processDateReturnType = new ProcessDateReturnType();
 

@@ -5,7 +5,7 @@ namespace QuickGed.Services;
 public static class TreeLabeller
 {
     public static void LabelAncestors(Dictionary<int, List<Node>> parentsDictionary,
-        HashSet<Node> spouseList, List<Node> siblingList, Node startNode, string label, bool isDirectAncestor =true)
+        HashSet<Node> parentsToLookup, List<Node> siblingList, Node startNode, string label, bool isDirectAncestor =true)
     {
         var stack = new Stack<Node>();
         stack.Push(startNode);
@@ -13,14 +13,21 @@ public static class TreeLabeller
         while (stack.Count > 0)
         {
             var current = stack.Pop();
-
-            //if (current.Name == "Missy")
+            //if (current.FullName.Contains("Estelle A Belcher"))
             //{
             //    Console.WriteLine("z");
-            //}d
+            //}
+
+
             current.Origin = label;
             current.IsDirectAncestor = isDirectAncestor;
-            spouseList.UnionWith(current.Spouses.Where(w => !w.IsParent));
+
+            if (!current.IsLinkNode && !current.IsRootPerson)
+            {
+                parentsToLookup.UnionWith(current.Spouses.Where(w => !w.IsLinkNode));
+                parentsToLookup.Add(current); //for single parents - this does lead to so redundancy down
+            }
+
 
             if (parentsDictionary.ContainsKey(current.Id))
             {
@@ -62,28 +69,42 @@ public static class TreeLabeller
                 spouse.Origin = label;
                 spouse.IsDirectAncestor = isDirectAncestor;
             }
-
-            foreach (var child in current.Children)
+            
+            //we need a better algorithm for calculating origins of descendants 
+            //this is because the same child can be added twice.
+            //the algorithm has a flaw so that when a ancestors descendants are calculated
+            //it uses the a ancestors spouses to work out who their children are.
+            //if the ancestor has children where the spouse is unknown there is no spouse
+            //so in order to get those children, the ancestor him/herself is added
+            //into the spouse list. 
+            //this in turn means that iterating over the spouse list to get children
+            //sometimes means that the same child will be added twice because
+            //they are in there from the spouse and from the ancestor.
+            foreach (var child in current.Children.Where(w=>w.Origin==""))
                 stack.Push(child);
 
         }
     }
 
 
-    public static void LabelTree(Dictionary<int, List<Node>> parents, Node startNode, string label)
+    public static void LabelTree(Dictionary<int, List<Node>> parentsCache, Node startNode, string label)
     {
         var siblings = new List<Node>();
-        var spouses = new HashSet<Node>();
+        var parentsToLookup = new HashSet<Node>();
 
-        LabelAncestors(parents, spouses, siblings, startNode, label);
+        LabelAncestors(parentsCache, parentsToLookup, siblings, startNode, label);
 
         LabelDescendants(siblings, label,false);
 
-        LabelDescendants(spouses, label,false);
+        LabelDescendants(parentsToLookup, label,false);
 
-        foreach (var spouse in spouses.ToList())
+        foreach (var spouse in parentsToLookup.ToList())
         {
-            LabelAncestors(parents, spouses, siblings, spouse, label,false);
+            LabelAncestors(parentsCache, parentsToLookup, siblings, spouse, label,false);
+
+            LabelDescendants(siblings, label, false);
+
+            LabelDescendants(parentsToLookup, label, false);
         }
 
 

@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Data.SQLite;
+using System.Reflection.Metadata;
 using ConfigHelper; 
 using FTMContextNet.Domain.Entities.Persistent.Cache;
+using LoggingLib;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,9 +16,12 @@ namespace FTMContextNet.Data
         private IMSGConfigHelper _configObj { get; set; }
         private SQLiteConnection _sqlConnection { get; set; }
 
-        public PersistedCacheContext(IMSGConfigHelper config)
+        private Ilog _logger { get; set; }
+
+        public PersistedCacheContext(IMSGConfigHelper config, Ilog ilog)
         {
             _configObj = config;
+            _logger = ilog;
         }
 
         public PersistedCacheContext(DbContextOptions<PersistedCacheContext> options)
@@ -24,7 +29,7 @@ namespace FTMContextNet.Data
         {
         }
 
-        public static PersistedCacheContext Create(IMSGConfigHelper imsgConfigHelper)
+        public static PersistedCacheContext Create(IMSGConfigHelper imsgConfigHelper, Ilog logger)
         {
             //var a = new FTMakerCacheContext(new ConfigObj
             //{
@@ -34,7 +39,7 @@ namespace FTMContextNet.Data
             //});
 
 
-            return new PersistedCacheContext(imsgConfigHelper);
+            return new PersistedCacheContext(imsgConfigHelper,logger);
         }
 
         public virtual DbSet<FTMPersonOrigin> FTMPersonOrigins { get; set; }
@@ -49,52 +54,28 @@ namespace FTMContextNet.Data
 
         public virtual DbSet<IgnoreList> IgnoreList { get; set; }
 
-        public void UpdateFTMPlaceCache(int placeId, string results)
+        public int BulkInsertMarriages(int nextId, int importId, List<FTMMarriage> marriages)
         {
-
             var connectionString = this.Database.GetDbConnection().ConnectionString;
 
 
             using var connection = new SqliteConnection(connectionString);
 
             var command = connection.CreateCommand();
-            command.CommandText = "UPDATE FTMPlaceCache SET JSONResult = $JSONResult, Country = '', County = '', Searched = 1, BadData = 1 WHERE FTMPlaceId = $FTMPlaceId;";
-
-            command.Parameters.Add("$FTMPlaceId", SqliteType.Integer);
-            command.Parameters.Add("$JSONResult", SqliteType.Text);
-
-            connection.Open();
-
-            using var transaction = connection.BeginTransaction();
-
-            command.Transaction = transaction;
-            command.Prepare();
-          
-            command.Parameters["$FTMPlaceId"].Value = placeId;
-            command.Parameters["$JSONResult"].Value = results; 
+            command.CommandText = "INSERT INTO FTMMarriages(Id, MarriageLocation, Origin, GroomId, BrideId, Notes, MarriageDateStr, MarriageYear, ImportId)" +
+                                  " VALUES ($Id, $MarriageLocation, $Origin, $GroomId, $BrideId, $Notes, $MarriageDateStr, $MarriageYear, $ImportId);";
             
-            command.ExecuteNonQuery();
-          
-            transaction.Commit();
-            
-        }
-
-        public int BulkInsertFTMPersonOrigins(int nextId, Dictionary<int, bool> addedPersons, string origin, string fullName ="")
-        {
-
-            var connectionString = this.Database.GetDbConnection().ConnectionString;
-
-
-            using var connection = new SqliteConnection(connectionString);
-
-            var command = connection.CreateCommand();
-            command.CommandText = "INSERT INTO FTMPersonOrigins(Id, PersonId,Origin, DirectAncestor)" +
-                                  " VALUES ($Id,$PersonId,$Origin, $DirectAncestor);";
 
             command.Parameters.Add("$Id", SqliteType.Integer);
-            command.Parameters.Add("$PersonId", SqliteType.Integer);
+            command.Parameters.Add("$MarriageLocation", SqliteType.Text);
             command.Parameters.Add("$Origin", SqliteType.Text);
-            command.Parameters.Add("$DirectAncestor", SqliteType.Integer);
+            command.Parameters.Add("$GroomId", SqliteType.Integer);
+            command.Parameters.Add("$BrideId", SqliteType.Integer);
+            command.Parameters.Add("$Notes", SqliteType.Text);
+            command.Parameters.Add("$MarriageDateStr", SqliteType.Text);
+            command.Parameters.Add("$MarriageYear", SqliteType.Integer);
+            command.Parameters.Add("$ImportId", SqliteType.Integer);
+
 
             connection.Open();
 
@@ -103,12 +84,149 @@ namespace FTMContextNet.Data
             command.Transaction = transaction;
             command.Prepare();
             var idx = nextId;
-            foreach (var row in addedPersons)
+
+            var total = marriages.Count;
+            var counter = 1;
+
+            foreach (var row in marriages)
             {
                 command.Parameters["$Id"].Value = idx;
-                command.Parameters["$PersonId"].Value = row.Key;
-                command.Parameters["$Origin"].Value = fullName.ToLower().Contains("group") ? fullName : origin;
-                command.Parameters["$DirectAncestor"].Value = row.Value;
+                command.Parameters["$MarriageLocation"].Value = row.MarriageLocation;
+                command.Parameters["$Origin"].Value = row.Origin??"";
+                command.Parameters["$GroomId"].Value = row.GroomId;
+                command.Parameters["$BrideId"].Value = row.BrideId;
+                command.Parameters["$Notes"].Value = row.Notes??"";
+                command.Parameters["$MarriageDateStr"].Value = row.MarriageDateStr;
+                command.Parameters["$MarriageYear"].Value = row.MarriageYear;
+                command.Parameters["$ImportId"].Value = importId;
+                command.ExecuteNonQuery();
+
+                if (counter % 500 == 0)
+                    _logger.ProgressUpdate(counter, total, "Inserting Marriage");
+
+                idx++;
+            }
+
+            transaction.Commit();
+
+            return idx;
+        }
+
+        public int BulkInsertFTMPersonView(int nextId, int importId, List<FTMPersonView> ftmPersonViews)
+        {
+
+            var connectionString = this.Database.GetDbConnection().ConnectionString;
+
+
+            using var connection = new SqliteConnection(connectionString);
+
+            var command = connection.CreateCommand();
+            command.CommandText = "INSERT INTO FTMPersonView(Id, FirstName, Surname, BirthFrom, BirthTo, BirthLocation, BirthLat, BirthLong, AltLocationDesc, AltLocation, AltLat, AltLong, Origin, PersonId, LinkedLocations, FatherId, MotherId, LocationsCached, ImportId, DirectAncestor, RootPerson,LinkNode)" +
+                                  " VALUES ($Id, $FirstName, $Surname, $BirthFrom, $BirthTo, $BirthLocation, $BirthLat, $BirthLong, $AltLocationDesc, $AltLocation, $AltLat, $AltLong, $Origin, $PersonId, $LinkedLocations, $FatherId, $MotherId, $LocationsCached, $ImportId, $DirectAncestor, $RootPerson,$LinkNode);";
+
+            command.Parameters.Add("$Id", SqliteType.Integer);
+            command.Parameters.Add("$FirstName",SqliteType.Text);
+            command.Parameters.Add("$Surname",SqliteType.Text);
+            command.Parameters.Add("$BirthFrom",SqliteType.Text);
+            command.Parameters.Add("$BirthTo",SqliteType.Text);
+            command.Parameters.Add("$BirthLocation",SqliteType.Text);
+            command.Parameters.Add("$BirthLat",SqliteType.Text);
+            command.Parameters.Add("$BirthLong",SqliteType.Text);
+            command.Parameters.Add("$AltLocationDesc",SqliteType.Text);
+            command.Parameters.Add("$AltLocation",SqliteType.Text);
+            command.Parameters.Add("$AltLat",SqliteType.Text);
+            command.Parameters.Add("$AltLong",SqliteType.Text);
+            command.Parameters.Add("$Origin",SqliteType.Text);
+            command.Parameters.Add("$PersonId",SqliteType.Integer);
+            command.Parameters.Add("$LinkedLocations",SqliteType.Text);
+            command.Parameters.Add("$FatherId",SqliteType.Integer);
+            command.Parameters.Add("$MotherId",SqliteType.Integer);
+            command.Parameters.Add("$LocationsCached",SqliteType.Integer);
+            command.Parameters.Add("$ImportId",SqliteType.Integer);
+            command.Parameters.Add("$DirectAncestor",SqliteType.Integer);
+            command.Parameters.Add("$RootPerson", SqliteType.Integer);
+            command.Parameters.Add("$LinkNode", SqliteType.Integer);
+
+            connection.Open();
+
+            using var transaction = connection.BeginTransaction();
+
+            command.Transaction = transaction;
+            command.Prepare();
+            var idx = nextId;
+
+            var total = ftmPersonViews.Count;
+            var counter = 1;
+
+            foreach (var row in ftmPersonViews)
+            {
+                command.Parameters["$Id"].Value = idx;
+                command.Parameters["$FirstName"].Value = row.FirstName;
+                command.Parameters["$Surname"].Value = row.Surname;
+                command.Parameters["$BirthFrom"].Value = row.BirthFrom;
+                command.Parameters["$BirthTo"].Value = row.BirthTo;
+                command.Parameters["$BirthLocation"].Value = row.BirthLocation;
+                command.Parameters["$BirthLat"].Value = row.BirthLat;
+                command.Parameters["$BirthLong"].Value = row.BirthLong;
+                command.Parameters["$AltLocationDesc"].Value = row.AltLocationDesc;
+                command.Parameters["$AltLocation"].Value = row.AltLocation;
+                command.Parameters["$AltLat"].Value = row.AltLat;
+                command.Parameters["$AltLong"].Value = row.AltLong;
+                command.Parameters["$Origin"].Value = row.Origin;
+                command.Parameters["$PersonId"].Value = row.PersonId;
+                command.Parameters["$LinkedLocations"].Value = row.LinkedLocations;
+                command.Parameters["$FatherId"].Value = row.FatherId;
+                command.Parameters["$MotherId"].Value = row.MotherId;
+                command.Parameters["$LocationsCached"].Value = row.LocationsCached;
+                command.Parameters["$ImportId"].Value = importId;
+                command.Parameters["$DirectAncestor"].Value = row.DirectAncestor;
+                command.Parameters["$RootPerson"].Value = row.RootPerson;
+                command.Parameters["$LinkNode"].Value = row.LinkNode;
+                command.ExecuteNonQuery();
+
+                if(counter % 500 == 0)
+                    _logger.ProgressUpdate(counter, total,"Inserting Persons");
+
+                idx++;
+            }
+
+            transaction.Commit();
+
+            return idx;
+        }
+
+        public int BulkInsertFTMPersonOrigins(int nextId,int importId, List<FTMPersonOrigin> origins)
+        {
+
+            var connectionString = this.Database.GetDbConnection().ConnectionString;
+
+
+            using var connection = new SqliteConnection(connectionString);
+
+            var command = connection.CreateCommand();
+            command.CommandText = "INSERT INTO FTMPersonOrigins(Id, PersonId,Origin, DirectAncestor,ImportId)" +
+                                  " VALUES ($Id,$PersonId,$Origin, $DirectAncestor,$ImportId);";
+
+            command.Parameters.Add("$Id", SqliteType.Integer);
+            command.Parameters.Add("$PersonId", SqliteType.Integer);
+            command.Parameters.Add("$Origin", SqliteType.Text);
+            command.Parameters.Add("$ImportId", SqliteType.Integer);
+            command.Parameters.Add("$DirectAncestor", SqliteType.Integer);
+            
+            connection.Open();
+
+            using var transaction = connection.BeginTransaction();
+
+            command.Transaction = transaction;
+            command.Prepare();
+            var idx = nextId;
+            foreach (var row in origins)
+            {
+                command.Parameters["$Id"].Value = idx;
+                command.Parameters["$PersonId"].Value = row.PersonId;
+                command.Parameters["$Origin"].Value = row.Origin;
+                command.Parameters["$ImportId"].Value = row.ImportId;
+                command.Parameters["$DirectAncestor"].Value = row.DirectAncestor;
                 command.ExecuteNonQuery();
                 idx++;
             }

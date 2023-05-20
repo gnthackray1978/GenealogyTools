@@ -27,10 +27,10 @@ namespace FTMContextNet.Application.Mapping
             {
                 tp.Add(new PlaceModel()
                 {
-                    place = item.place,
-                    placeformatted = item.placeformatted,
-                    placeid = item.placeid,
-                    results = item.results
+                    place = item.Place,
+                    placeformatted = item.PlaceFormatted,
+                    placeid = item.PlaceId,
+                    results = item.Results
                 });
             }
 

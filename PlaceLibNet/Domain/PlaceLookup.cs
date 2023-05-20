@@ -2,10 +2,10 @@
 {
     public class PlaceLookup
     {
-        public int placeid { get; set; }
-        public string place { get; set; }
-        public string placeformatted { get; set; }
-        public string results { get; set; }
+        public int PlaceId { get; set; }
+        public string Place { get; set; }
+        public string PlaceFormatted { get; set; }
+        public string Results { get; set; }
     }
 
 

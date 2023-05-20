@@ -20,16 +20,10 @@ namespace FTMContextNet.Application.Services
 
             _ilog.WriteLine("Executing CreatePersonsAndMarriages");
             
+            var gedDb =_gedRepository.ParseLabelledTree();
 
-
-            _gedRepository.ParseLabelledTree();
-
-            var importData = _persistedCacheRepository.AddImportRecord(_gedRepository._GedDb.FileName, _gedRepository._GedDb.FileSize);
-
+            var importData = _persistedCacheRepository.AddImportRecord(gedDb.FileName, gedDb.FileSize);
             
-            _persistedCacheRepository.BeginSavePersons(importData.NextId,_gedRepository._GedDb.Persons.Count);
-
-           
             foreach (var id in importData.CurrentId)
             {
                 _persistedCacheRepository.DeletePersons(id);
@@ -39,22 +33,10 @@ namespace FTMContextNet.Application.Services
                 _persistedCacheRepository.DeleteImport(id);
             }
              
-
-            foreach (var personSubset in _gedRepository._GedDb.Persons)
-            {
-                _persistedCacheRepository.SavePersons(personSubset);
-            }
-
-            _persistedCacheRepository.SaveAll();
-
-            _persistedCacheRepository.BeginSaveMarriages(importData.NextId,_gedRepository._GedDb.Relationships.Count);
-
-            foreach (var marriageSubset in _gedRepository._GedDb.Relationships)
-            {
-                _persistedCacheRepository.SaveMarriages(marriageSubset);
-            }
+            _persistedCacheRepository.SavePersons(importData.NextId, gedDb.Persons);
             
-            _persistedCacheRepository.SaveAll();
+            _persistedCacheRepository.SaveMarriages(importData.NextId, gedDb.Relationships);
+             
         }
 
     }

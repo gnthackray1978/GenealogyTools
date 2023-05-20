@@ -1,19 +1,36 @@
-﻿using System.Diagnostics;
+﻿using System.Data;
+using System.Diagnostics;
+using QuickGed.Domain;
 using QuickGed.Types;
 
 namespace QuickGed.Services;
 
 public class GedParser
 {
+    private readonly INodeTypeCalculator _nodeTypeCalculator;
+    private readonly string _gedPath;
 
-    public static GedDb Parse(string gedPath)
+    public GedParser(INodeTypeCalculator nodeTypeCalculator, string gedPath)
+    {
+        _nodeTypeCalculator = nodeTypeCalculator;
+        _gedPath = gedPath;
+    }
+
+    public GedDb Parse()
     {
         var db = GedDb.Create();
+
+        db.FileName = Path.GetFileName(this._gedPath);
+
+        var fi = new FileInfo(_gedPath);
+
+        db.FileSize = fi.Length;
+
 
         var timer = new Stopwatch();
         timer.Start();
 
-        var gedcomLines = File.ReadAllLines(gedPath).Select(GedcomLine.Parse);
+        var gedcomLines = File.ReadAllLines(_gedPath).Select(GedcomLine.Parse);
 
        
 
@@ -21,8 +38,8 @@ public class GedParser
 
 
         var childList = new List<Node>();
-        int personiId = 1;
-        PersonSubset currentPerson = null;
+      //  int personiId = 1;
+        Person currentPerson = null;
         var currentLevelOneType = "";
         var currentDate = "";
         var currentPlace = "";
@@ -45,28 +62,22 @@ public class GedParser
             
             if (line.Type == "INDI")
             {
-                personiId++;
-                
-                if (currentPerson != null)
-                {
-                    db.Persons.Add(currentPerson);
-                    db.PersonDictionary.Add(currentPerson.Id, currentPerson);
-                }
+                //remember this will be the previous one that's being inserted 
+                //if its null it wont get inserted into the collection
+                db.Insert(currentPerson);
+
                 currentPlace = "";
                 currentDate = "";
-                currentPerson = new PersonSubset
-                {
-                    Id = personiId,
-                    StrId = line.Id
-                };
 
-                idLookupDictionary.Add(line.Id, personiId);
+                currentPerson = new Person(db.NewId(), _nodeTypeCalculator);
+
+                idLookupDictionary.Add(line.Id, currentPerson.Id);
             }
             
             if (line.Type == "FAM" && currentPerson != null)// we have moved on to the families tidy up the last entry in the persons list
             {
-                db.Persons.Add(currentPerson);
-                db.PersonDictionary.Add(currentPerson.Id, currentPerson);
+                db.Insert(currentPerson);
+
                 currentPerson = null; //todo tidy this logic up
                 currentPlace = "";
                 currentDate = "";
@@ -105,8 +116,8 @@ public class GedParser
                             db.Relationships.Add(RelationSubSet.Create(relationshipId, currentDate
                                 , currentPlace, currentHusband, currentWife, marriageYear));
 
-                            PersonSubset husband = null;
-                            PersonSubset wife = null;
+                            Person husband = null;
+                            Person wife = null;
 
                             if (db.PersonDictionary.ContainsKey(currentHusband))
                             {
@@ -252,7 +263,7 @@ public class GedParser
         return db;
     }
 
-    private static bool FindLocation(PersonSubset person, out string location)
+    private static bool FindLocation(Person person, out string location)
     {
         location = "";
 
@@ -262,7 +273,7 @@ public class GedParser
             !string.IsNullOrEmpty(person.DeathLocation) ||
             !string.IsNullOrEmpty(person.Residence)) return false;
 
-        foreach (var c in person.Children.Cast<PersonSubset?>().Where(c => !string.IsNullOrEmpty(c.BirthLocation)))
+        foreach (var c in person.Children.Cast<Person?>().Where(c => !string.IsNullOrEmpty(c.BirthLocation)))
         {
             location = c.BirthLocation;
             return true;
@@ -272,7 +283,7 @@ public class GedParser
         
     }
 
-    private static void ProcessIndividuals(GedcomLine line, ref PersonSubset currentPerson, string currentLevelOneType)
+    private static void ProcessIndividuals(GedcomLine line, ref Person currentPerson, string currentLevelOneType)
     {
         switch (currentLevelOneType)
         {
@@ -327,7 +338,7 @@ public class GedParser
 
     }
 
-    private static void PopulateBirth(GedcomLine line, PersonSubset datePlace, bool isBaptism)
+    private static void PopulateBirth(GedcomLine line, Person datePlace, bool isBaptism)
     {
         if (line.Type == "DATE")
         {
@@ -362,7 +373,7 @@ public class GedParser
 
     }
 
-    private static void PopulateResidence(GedcomLine line, PersonSubset datePlace)
+    private static void PopulateResidence(GedcomLine line, Person datePlace)
     {
         if (line.Type == "DATE")
         {
@@ -379,7 +390,7 @@ public class GedParser
 
     }
 
-    private static void PopulateDeath(GedcomLine line, PersonSubset datePlace, bool isDeath)
+    private static void PopulateDeath(GedcomLine line, Person datePlace, bool isDeath)
     {
         if (line.Type == "DATE")
         {

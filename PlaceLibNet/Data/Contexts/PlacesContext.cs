@@ -1,4 +1,5 @@
-﻿using ConfigHelper;
+﻿using System;
+using ConfigHelper;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using PlaceLib.Model;
@@ -42,7 +43,7 @@ namespace PlaceLibNet.Data.Contexts
             using var connection = new SqliteConnection(connectionString);
 
             var command = connection.CreateCommand();
-            command.CommandText = "Insert INTO PlaceCache(Id,AltId,Name,NameFormatted,JSONResult,Country,County,Searched,BadData,Lat,Long,Src) VALUES($Id,$FTMPlaceId,$FTMOrginalName,$FTMOrginalNameFormatted,$JSONResult,$Country,$County,$Searched,$BadData,$Lat,$Lon, $Src)";
+            command.CommandText = "Insert INTO PlaceCache(Id,AltId,Name,NameFormatted,JSONResult,Country,County,Searched,BadData,Lat,Long,Src,DateCreated) VALUES($Id,$AltId,$Name,$NameFormatted,$JSONResult,$Country,$County,$Searched,$BadData,$Lat,$Lon, $Src, $DateCreated)";
             command.Parameters.Add("$Id", SqliteType.Integer);
             command.Parameters.Add("$AltId", SqliteType.Integer);
             command.Parameters.Add("$Name", SqliteType.Text);
@@ -55,6 +56,7 @@ namespace PlaceLibNet.Data.Contexts
             command.Parameters.Add("$Lat", SqliteType.Text);
             command.Parameters.Add("$Lon", SqliteType.Text);
             command.Parameters.Add("$Src", SqliteType.Text);
+            command.Parameters.Add("$DateCreated", SqliteType.Text);
 
             connection.Open();
 
@@ -75,18 +77,43 @@ namespace PlaceLibNet.Data.Contexts
             command.Parameters["$Lat"].Value = lat ?? "";
             command.Parameters["$Lon"].Value = @long ?? "";
             command.Parameters["$Src"].Value = src ?? "";
+            command.Parameters["$DateCreated"].Value = DateTime.Now.ToString("dd MMMM yyyy HH:mm:ss");
 
             command.ExecuteNonQuery();
 
             transaction.Commit();
 
         }
+        public void UpdateFormattedName(int id, string name)
+        {
+            var connectionString = Database.GetDbConnection().ConnectionString;
+
+            using var connection = new SqliteConnection(connectionString);
+
+            var command = connection.CreateCommand();
+            command.CommandText = "UPDATE PlaceCache SET NameFormatted = $NameFormatted WHERE Id = $Id;";
+
+            command.Parameters.Add("$Id", SqliteType.Integer);
+            command.Parameters.Add("$NameFormatted", SqliteType.Text);
+
+            connection.Open();
+
+            using var transaction = connection.BeginTransaction();
+
+            command.Transaction = transaction;
+            command.Prepare();
+
+            command.Parameters["$Id"].Value = id;
+            command.Parameters["$NameFormatted"].Value = name;
+
+            command.ExecuteNonQuery();
+
+            transaction.Commit();
+        }
 
         public void UpdatePlaceCacheLatLong(int placeId, string lat, string lon)
         {
-
             var connectionString = Database.GetDbConnection().ConnectionString;
-
 
             using var connection = new SqliteConnection(connectionString);
 
@@ -111,9 +138,8 @@ namespace PlaceLibNet.Data.Contexts
             command.ExecuteNonQuery();
 
             transaction.Commit();
-
         }
-        public void UpdateJSONCacheResult(int placeId, string results)
+        public void UpdateJSONCacheResult(int id, string results)
         {
 
             var connectionString = Database.GetDbConnection().ConnectionString;
@@ -122,9 +148,9 @@ namespace PlaceLibNet.Data.Contexts
             using var connection = new SqliteConnection(connectionString);
 
             var command = connection.CreateCommand();
-            command.CommandText = "UPDATE PlaceCache SET JSONResult = $JSONResult, Country = '', County = '', Searched = 1, BadData = 1 WHERE AltId = $AltId;";
+            command.CommandText = "UPDATE PlaceCache SET JSONResult = $JSONResult, Country = '', County = '', Searched = 1, BadData = 1 WHERE Id = $Id;";
 
-            command.Parameters.Add("$AltId", SqliteType.Integer);
+            command.Parameters.Add("$Id", SqliteType.Integer);
             command.Parameters.Add("$JSONResult", SqliteType.Text);
 
             connection.Open();
@@ -134,7 +160,7 @@ namespace PlaceLibNet.Data.Contexts
             command.Transaction = transaction;
             command.Prepare();
 
-            command.Parameters["$AltId"].Value = placeId;
+            command.Parameters["$Id"].Value = id;
             command.Parameters["$JSONResult"].Value = results;
 
             command.ExecuteNonQuery();

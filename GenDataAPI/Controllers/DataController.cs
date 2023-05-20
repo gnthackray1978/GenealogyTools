@@ -38,7 +38,7 @@ namespace GenDataAPI.Controllers
         [Route("/data/places")]
         public IActionResult AddToCache()
         {
-            _facade.AddUnknownPlaces();
+            _facade.CreateMissingPersonLocations();
 
             return Ok(true);
         }
