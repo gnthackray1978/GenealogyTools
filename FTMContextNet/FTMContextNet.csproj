@@ -19,7 +19,7 @@
     <PackageReference Include="MSG.FTMTools" Version="1.0.0" />
     <PackageReference Include="MSG.GoogleMapsHelpers" Version="1.0.5" />
     <PackageReference Include="MSG.MIisc" Version="1.0.2" />
-    <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
     <PackageReference Include="System.Data.SQLite" Version="1.0.116" />
   </ItemGroup>
 
