@@ -5,6 +5,7 @@ using FTMContextNet.Application.Models.Read;
 using GenDataAPI.Hub;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using PlaceLibNet.Application.Models.Read;
 
 namespace GenDataAPI.Controllers
 {
@@ -23,12 +24,18 @@ namespace GenDataAPI.Controllers
             _facade = new FTMFacade(_iMSGConfigHelper, new OutputHandler(hubContext));
         }
 
-        public InfoModel Get(string infoType)
-        {       
-        //    _hubContext.Clients.All.SendAsync("Notify", "Fetching record counts");
-            
+        [HttpGet]
+        [Route("/info/people")]
+        public InfoModel GetPeopleInfo()
+        {
             return _facade.GetInfo();
+        }
 
+        [HttpGet]
+        [Route("/info/places")]
+        public PlaceInfoModel GetPlaceInfo()
+        {
+            return _facade.GetPlaceInfo();
         }
     }
 }

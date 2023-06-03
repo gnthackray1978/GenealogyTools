@@ -56,7 +56,8 @@
 
         $(function () {
             tabs.run();
-            p.displayStats();
+            p.displayPlaceStats();
+            p.displayPeopleStats();
         });
 
     </script>
@@ -106,8 +107,9 @@
         </div>
 
         <div class="row">
-            <div class="col"><a href="#Foo" onclick="p.setOriginPerson();">1. Assign Tree Names To Persons</a></div>
-            <div class="col"><a href="#Foo" onclick="p.importPersons();">2. Import Persons and Marriages</a></div>
+            <div class="col"><a href="#Foo" onclick="p.importPersons();">1. Import Persons and Marriages</a></div>
+            <div class="col"><a href="#Foo" onclick="p.setOriginPerson();">2. Assign Tree Names To Persons</a></div>
+
             <div class="col"><a href="#Foo" onclick="p.createDupeView();">3. Create Possible Dupe List</a></div>
 
         </div>

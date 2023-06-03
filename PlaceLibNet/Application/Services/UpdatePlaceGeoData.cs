@@ -1,9 +1,10 @@
-﻿using LoggingLib;
-using AutoMapper;
-using FTMContextNet.Application.Models.Write;
+﻿using AutoMapper;
+using FTMContextNet.Application.Services;
+using LoggingLib;
+using PlaceLibNet.Application.Models.Write;
 using PlaceLibNet.Data.Repositories;
 
-namespace FTMContextNet.Application.Services
+namespace PlaceLibNet.Application.Services
 {
     public class UpdatePlaceGeoData
     {

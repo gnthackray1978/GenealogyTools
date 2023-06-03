@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Data.SQLite;
+using System.Linq;
 using System.Reflection.Metadata;
 using ConfigHelper; 
 using FTMContextNet.Domain.Entities.Persistent.Cache;
@@ -9,8 +10,37 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FTMContextNet.Data
 {
+    public interface IPersistedCacheContext
+    {
+        DbSet<FTMPersonOrigin> FTMPersonOrigins { get; set; }
+        DbSet<TreeRecord> TreeRecords { get; set; }
+        DbSet<TreeGroups> TreeGroups { get; set; }
+        DbSet<TreeRecordMapGroup> TreeRecordMapGroup { get; set; }
+        DbSet<DupeEntry> DupeEntries { get; set; }
+        DbSet<FTMPersonView> FTMPersonView { get; set; }
+        DbSet<FTMMarriage> FTMMarriages { get; set; }
+        DbSet<FTMImport> FTMImport { get; set; }
+        DbSet<IgnoreList> IgnoreList { get; set; }
+        int BulkInsertMarriages(int nextId, int importId, List<FTMMarriage> marriages);
+        int BulkInsertFTMPersonView(int nextId, int importId, List<FTMPersonView> ftmPersonViews);
+        int BulkInsertFTMPersonOrigins(int nextId,int importId, List<FTMPersonOrigin> origins);
 
-    public partial class PersistedCacheContext : DbContext
+        int BulkInsertTreeRecords(List<TreeRecord> treeRecords);
+        int InsertGroups(int nextId, string groupName);
+        int InsertRecordMapGroup(int nextId, string groupName, string treeName);
+        void DeleteOrigins();
+        void DeleteDupes();
+        void DeletePersons(int importId);
+        void DeleteTreeRecords();
+        void DeleteMarriages(int importId);
+        void DeleteImports(int importId);
+        void DeleteTreeGroups();
+        void DeleteRecordMapGroups();
+
+        int SaveChanges();
+    }
+
+    public partial class PersistedCacheContext : DbContext, IPersistedCacheContext
     {
 
         private IMSGConfigHelper _configObj { get; set; }
@@ -223,7 +253,7 @@ namespace FTMContextNet.Data
             foreach (var row in origins)
             {
                 command.Parameters["$Id"].Value = idx;
-                command.Parameters["$PersonId"].Value = row.PersonId;
+                command.Parameters["$PersonId"].Value = row.Id;
                 command.Parameters["$Origin"].Value = row.Origin;
                 command.Parameters["$ImportId"].Value = row.ImportId;
                 command.Parameters["$DirectAncestor"].Value = row.DirectAncestor;
@@ -234,6 +264,23 @@ namespace FTMContextNet.Data
             transaction.Commit();
 
             return idx;
+        }
+
+        public int BulkInsertTreeRecords(List<TreeRecord> treeRecords)
+        {
+            if (treeRecords.Count <= 0) return 0;
+            
+            int idx = TreeRecords.Count() + 1;
+            
+            foreach (var tr in treeRecords)
+            {
+                tr.Id = idx;
+                idx++;
+            }
+
+            this.TreeRecords.AddRange(treeRecords);
+            
+            return this.SaveChanges();
         }
 
         public int InsertGroups(int nextId, string groupName)

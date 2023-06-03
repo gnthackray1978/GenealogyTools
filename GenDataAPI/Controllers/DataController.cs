@@ -6,6 +6,7 @@ using FTMContextNet.Application.Models.Read;
 using GenDataAPI.Hub;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using PlaceLibNet.Application.Models.Read;
 
 namespace GenDataAPI.Controllers
 {
@@ -43,14 +44,7 @@ namespace GenDataAPI.Controllers
             return Ok(true);
         }
 
-        [HttpPut]
-        [Route("/data/places")]
-        public IActionResult UpdateMeta()
-        {
-            _facade.UpdatePlaceMetaData();
-
-            return Ok(true);
-        }
+      
 
         [HttpPost]
         [Route("/data/origins")]

@@ -2,10 +2,11 @@
 using ConfigHelper;
 using FTMContextNet;
 using FTMContextNet.Application.Models.Read;
-using FTMContextNet.Application.Models.Write;
 using GenDataAPI.Hub;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using PlaceLibNet.Application.Models.Read;
+using PlaceLibNet.Application.Models.Write;
 
 namespace GenDataAPI.Controllers
 {
@@ -33,7 +34,7 @@ namespace GenDataAPI.Controllers
         {         
             var result = new ResultModel()
             {
-                Results = _facade.GetPlaceNotGeocoded(75)
+                Results = _facade.GetPlaceNotGeocoded(300)
             };
 
             return result;
@@ -45,5 +46,12 @@ namespace GenDataAPI.Controllers
             _facade.UpdatePlaceGeoData(value);
         }
 
+        [HttpPut]
+        public IActionResult Put()
+        {
+            _facade.UpdatePlaceMetaData();
+
+            return Ok(true);
+        }
     }
 }

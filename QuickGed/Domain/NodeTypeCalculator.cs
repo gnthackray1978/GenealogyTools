@@ -8,7 +8,7 @@
 
             if (forename.ToLower().Contains("group") || surname.ToLower().Contains("group")) return false;
 
-            if (forename.ToLower().Contains("chr") || surname.ToLower().Contains("chr")) return false;
+            if ((forename.ToLower().Contains("chr") || surname.ToLower().Contains("chr")) && !surname.ToLower().Contains("christ")) return false;
 
             if (forename.ToLower().Contains("|") || surname.ToLower().Contains("|")) return true;
 

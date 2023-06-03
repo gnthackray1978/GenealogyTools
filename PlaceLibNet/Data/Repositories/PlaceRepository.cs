@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using ConfigHelper;
 using GoogleMapsHelpers;
@@ -81,20 +82,6 @@ namespace PlaceLibNet.Data.Repositories
 
             return county;
         }
-
-        //public Places SearchPlaces(string searchString, string county)
-        //{
-        //    using var placecontext = new PlacesContext(new MSGConfigHelper());
-
-        //    Debug.WriteLine(searchString + "/" + county);
-        //    Places placedbResult = placecontext
-        //        .Places
-        //        .Where(w => w.Placesort == searchString && w.Ctyhistnm == county)
-        //        .OrderBy(o => o.Place15cd)
-        //        .FirstOrDefault();
-
-        //    return placedbResult;
-        //}
 
         public Places SearchPlaces(string searchString, string county, bool requiredValidLatLong = false)
         {
@@ -194,7 +181,7 @@ namespace PlaceLibNet.Data.Repositories
                 var locationLat = Location.GetLocation(fc.JSONResult).lat;
                 var locationLong = Location.GetLocation(fc.JSONResult).lng;
 
-                _placesContext.UpdatePlaceCacheLatLong(fc.AltId,locationLat.ToString(),locationLong.ToString());
+                _placesContext.UpdatePlaceCacheLatLong(fc.Id,locationLat.ToString(),locationLong.ToString());
             }
         }
 
@@ -259,38 +246,72 @@ namespace PlaceLibNet.Data.Repositories
         /// <summary>
         /// sets county and country values in ftmcache. 
         /// </summary>
-        public List<ExtendedPlace> GetUnsetUkCounties()
+        public void SetGeolocatedResult()
         {
-            List<PlaceCache> places = _placesContext.PlaceCache.Where(w => w.County == "" || w.Country == "").ToList();
+            var places = _placesContext
+                .PlaceCache
+                .Where(w => w.Src != "placelib").ToList();
 
-            var results = new List<ExtendedPlace>();
-
+            
             foreach (var place in places)
             {
                 var locationInfo = Location.GetLocationInfo(place.JSONResult);
 
                 if (!locationInfo.IsValid)
+                {
+                    place.BadData = true;
                     continue;
+                }
 
                 place.Country = locationInfo.Country;
-                place.County = "";
 
-                results.Add(new ExtendedPlace()
-                {
-                    Place = place,
-                    LocationInfo = locationInfo
-                });
+                // dont overwrite this , if it has a value
+                if (locationInfo.IsValidCounty && place.County == "")
+                    place.County = locationInfo.County;
+
+                place.Lat = Location.GetLocation(place.JSONResult).lat.ToString();
+                place.Long = Location.GetLocation(place.JSONResult).lng.ToString();
+
+                if (place.Lat == "0" && place.Long == "0")
+                    place.BadData = true;
+
+                place.Src = "google";
             }
 
-            return results;
 
-
-            //_iLog.WriteLine("FTMPlaceCache has ~" + foreignCounties + " foreign records");
-
-            //_iLog.WriteLine("FTMPlaceCache has ~" + unsetCountiesCount + " unset records");
+            _placesContext.SaveChanges();
         }
 
+        public void SetCounties()
+        {
+           
+            var places = _placesContext
+                .PlaceCache
+                .Where(w => w.Src != "placelib" && w.County == "").ToList();
 
+            foreach (var place in places)
+            {
+                var locationInfo = Location.GetLocationInfo(place.JSONResult);
+                    
+                if(locationInfo.PostalTown != "")
+                {
+                    place.County = SearchPlacesDBForCounty(locationInfo.PostalTown);
+                }
+
+                if (place.County == "" && locationInfo.Political != "")
+                {
+                    if (EnglishHistoricCounties.Get.Contains(locationInfo.Political))
+                    {
+                        place.County = locationInfo.Political;
+                    }
+
+                    if (place.County == "")
+                        place.County = SearchPlacesDBForCounty(locationInfo.Political);
+                }
+            }
+            
+            SaveChanges();
+        }
 
 
         private static (List<Place> missingPlaces, List<Place> updatedPlaces)
@@ -450,7 +471,8 @@ namespace PlaceLibNet.Data.Repositories
         public List<PlaceLookup> GetUnknownPlaces()
         {
             var places = _placesContext.PlaceCache
-                .Where(w => (w.JSONResult == null || w.JSONResult == "null" || w.JSONResult == "[]") && w.BadData == false)
+                .Where(w => (string.IsNullOrEmpty(w.Lat)) 
+                            && w.BadData == false)
                 .Select(s => new PlaceLookup() { PlaceId = s.Id, PlaceFormatted = s.NameFormatted })
                 .ToList();
 
@@ -466,7 +488,7 @@ namespace PlaceLibNet.Data.Repositories
         {
             var places = _placesContext.PlaceCache.Where(w => (w.JSONResult == null || w.JSONResult == "null" || w.JSONResult == "[]")
                                                                      && !w.Searched && !w.BadData)
-                .Select(s => new PlaceLookup() { PlaceId = s.AltId, PlaceFormatted = s.NameFormatted })
+                .Select(s => new PlaceLookup() { PlaceId = s.Id, PlaceFormatted = s.NameFormatted })
                 .ToList();
 
             foreach (var f in places)

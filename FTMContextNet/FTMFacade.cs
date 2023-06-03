@@ -8,7 +8,9 @@ using FTMContextNet.Application.Services;
 using FTMContextNet.Data.Repositories;
 using FTMContextNet.Application.Mapping;
 using AutoMapper;
-using FTMContextNet.Application.Models.Write;
+using PlaceLibNet.Application.Models.Read;
+using PlaceLibNet.Application.Models.Write;
+using PlaceLibNet.Application.Services;
 using PlaceLibNet.Data.Contexts;
 using PlaceLibNet.Data.Repositories;
 using QuickGed.Domain;
@@ -195,10 +197,17 @@ namespace FTMContextNet
         public InfoModel GetInfo() {
                    
             var persistedCacheRepository = new PersistedCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
+            
+            var tp = new GetInfoService(persistedCacheRepository, _outputHandler, _mapper);
 
+            return tp.Execute();
+        }
+
+        public PlaceInfoModel GetPlaceInfo()
+        {
             var ftmPlaceCacheRepository = new PlaceRepository(new PlacesContext(_iMSGConfigHelper), _outputHandler);
 
-            var tp = new GetInfoService(persistedCacheRepository, ftmPlaceCacheRepository, _outputHandler, _mapper);
+            var tp = new GetPlaceInfoService(ftmPlaceCacheRepository, _outputHandler);
 
             return tp.Execute();
         }

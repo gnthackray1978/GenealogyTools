@@ -96,8 +96,7 @@ namespace FTMConsole2
 
             if (sin == '9')
             {
-                facade.FormatNames();
-                Console.WriteLine("Debug test");
+                Console.WriteLine(facade.GetInfo().Unsearched);
             }
         }
     }

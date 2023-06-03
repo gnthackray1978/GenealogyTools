@@ -52,17 +52,20 @@ public class CreatePersonLocationsInCache
         var placeId = _placeRepository.GetNewFtmPlaceId();
         var id = _placeRepository.GetNewId();
         var counter = 1;
-
+        var existingRecords = 0;
+        var newRecordsAdded = 0;
         var locations = _persistedCacheRepository.GetPersonLocations();
+        var unencodedPlacesCount = _placeRepository.GetUnknownPlaces().Count;
 
         var placeCache = _placeRepository.GetCachedPlaces();
 
         // at this point
         // the places list should be full of valid places
         // i.e. no empties and have 3 component locations
-
-        _logger.WriteLine("Geocoded place cache: " + placeCache.Count);
-        _logger.WriteLine("Person table places: " + locations.Count);
+        
+        _logger.WriteLine("Place cache size: " + placeCache.Count);
+        _logger.WriteLine("Unencoded places in cache: " + unencodedPlacesCount);
+        _logger.WriteLine("Person table size: " + locations.Count);
 
         var tp = locations.Where(w => w.PlaceFormatted.Contains("wooburn")).ToList();
 
@@ -90,6 +93,7 @@ public class CreatePersonLocationsInCache
             if (match != null)
             {
                 location.GoogleCacheId = match.PlaceId;
+                existingRecords++;
             }
             else
             {
@@ -131,7 +135,7 @@ public class CreatePersonLocationsInCache
                     }
                 }
 
-
+                newRecordsAdded++;
                 _placeRepository.InsertIntoCache(id,
                     placeId, location.Place, location.PlaceFormatted, "[]",
                     "", location.County, placeLibEntryFound, false,
@@ -139,7 +143,7 @@ public class CreatePersonLocationsInCache
 
             }
 
-
+            
             _logger.ProgressUpdate(counter, total, "");
             counter++;
 
@@ -147,12 +151,11 @@ public class CreatePersonLocationsInCache
 
         timer.Stop();
 
+        
+        _logger.WriteLine("found in local place cache: " + placeLibCounter);
 
-        _logger.WriteLine("places: " + locations.Count);
-        _logger.WriteLine("glocated: " + locations.Count(w => w.GoogleCacheId != 0));
-        _logger.WriteLine("plocated: " + placeLibCounter);
-        _logger.WriteLine("invalid: " + locations.InvalidLocationsCount);
-        _logger.WriteLine("dupes: " + locations.DuplicateLocationsCount);
+        _logger.WriteLine("existing records: " + locations.InvalidLocationsCount);
+        _logger.WriteLine("new records added: " + locations.DuplicateLocationsCount);
 
         _logger.WriteLine("Time taken: " + timer.Elapsed.ToString(@"m\:ss\.fff"));
 

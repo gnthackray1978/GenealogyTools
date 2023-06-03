@@ -1,8 +1,8 @@
 ﻿using LoggingLib;
-using FTMContextNet.Application.Models.Read;
 using AutoMapper;
 using System.Collections.Generic;
 using System.Linq;
+using PlaceLibNet.Application.Models.Read;
 using PlaceLibNet.Data.Repositories;
 
 namespace FTMContextNet.Application.Services

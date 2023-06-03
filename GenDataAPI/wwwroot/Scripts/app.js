@@ -9,20 +9,37 @@ function PlaceObj(webConsole) {
 
 PlaceObj.prototype = {
 
-    displayStats: function () {
+    displayPeopleStats: function () {
         var that = this;
 
         $.ajax({
-            url: "./info/",
-            type: "get", //send it through get method
-            data: {
-                infoType: 'unknown_places_count'
-            },
+            url: "./info/people/",
+            type: "get", //send it through get method            
             success: function (result) {
-                that.console.displayStats(result);
+                that.console.displayPeopleStats(result);
             },
             error: function (xhr) {
                 //Do Something to handle error
+                //george mummy and daddy 
+                
+            }
+        });
+
+        return true;
+    },
+    displayPlaceStats: function () {
+        var that = this;
+
+        $.ajax({
+            url: "./info/places/",
+            type: "get", //send it through get method            
+            success: function (result) {
+                that.console.displayPlaceStats(result);
+            },
+            error: function (xhr) {
+                //Do Something to handle error
+                //george mummy and daddy 
+
             }
         });
 
@@ -44,7 +61,7 @@ PlaceObj.prototype = {
             dataType: "json",
             data: JSON.stringify(Upload),
             success: function (response) {
-                that.displayStats();
+                that.displayPlaceStats();
             }
         });
         return true;
@@ -60,12 +77,12 @@ PlaceObj.prototype = {
 
         $.ajax({
             type: "put",
-            url: "/data/places", // "/api/controllerName/methodName"
+            url: "/data/places",
             contentType: "application/json",
             dataType: "json",
             data: JSON.stringify(Upload),
             success: function (response) {
-                that.displayStats();
+                that.displayPlaceStats();
             }
 
         });
@@ -88,7 +105,7 @@ PlaceObj.prototype = {
             dataType: "json",
             data: JSON.stringify(Upload),
             success: function (response) {
-                that.displayStats();
+                that.displayPeopleStats();
             }
 
         });
@@ -108,7 +125,7 @@ PlaceObj.prototype = {
             dataType: "json",
             data: JSON.stringify(Upload),
             success: function (response) {
-                that.displayStats();
+                that.displayPeopleStats();
             }
 
         });
@@ -128,7 +145,7 @@ PlaceObj.prototype = {
             dataType: "json",
             data: JSON.stringify(Upload),
             success: function (response) {
-                that.displayStats();
+                that.displayPeopleStats();
             }
 
         });
@@ -150,7 +167,7 @@ PlaceObj.prototype = {
             dataType: "json",
             data: JSON.stringify(Upload),
             success: function (response) {
-                that.displayStats();
+                that.displayPeopleStats();
             }
 
         });
@@ -172,7 +189,7 @@ PlaceObj.prototype = {
             dataType: "json",
             data: JSON.stringify(Upload),
             success: function (response) {
-                that.displayStats();
+                that.displayPeopleStats();
             }
 
         });
@@ -194,7 +211,7 @@ PlaceObj.prototype = {
             dataType: "json",
             data: JSON.stringify(Upload),
             success: function (response) {
-                that.displayStats();
+                that.displayPeopleStats();
             }
 
         });
@@ -216,7 +233,7 @@ PlaceObj.prototype = {
             dataType: "json",
             data: JSON.stringify(Upload),
             success: function (response) {
-                that.displayStats();
+                that.displayPeopleStats();
             }
 
         });
@@ -245,8 +262,7 @@ PlaceObj.prototype = {
        
         var sh = this;
         var printBasic = this.console.printOutputLine;
-        let displayStats = this.displayStats;
-
+        
         printBasic('GET geocode endpoint for unencoded places');
          
         $.ajax({
@@ -291,8 +307,8 @@ PlaceObj.prototype = {
      
         var searchAddress = () => {
 
-            if (sh.data && (sh.data.length-1) == idx) {
-                sh.displayStats();
+            if (sh.data && sh.data.length == idx) {
+                sh.displayPlaceStats();
                 return;
             }
 
@@ -358,7 +374,7 @@ PlaceObj.prototype = {
                         setTimeout(function () {
                             idx++;
                             searchAddress();
-                        }, 500);
+                        }, 1000);
                 }
                  
             });

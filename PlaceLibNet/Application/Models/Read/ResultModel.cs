@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace FTMContextNet.Application.Models.Read
+namespace PlaceLibNet.Application.Models.Read
 {
     public class ResultModel
     {

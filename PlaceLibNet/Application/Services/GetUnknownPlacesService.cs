@@ -1,11 +1,11 @@
-﻿using LoggingLib;
-using FTMContextNet.Application.Models.Read;
-using AutoMapper;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Collections.Generic;
+using AutoMapper;
+using LoggingLib;
+using PlaceLibNet.Application.Models.Read;
 using PlaceLibNet.Data.Repositories;
 
-namespace FTMContextNet.Application.Services
+namespace PlaceLibNet.Application.Services
 {
     public class GetUnknownPlacesService
     {

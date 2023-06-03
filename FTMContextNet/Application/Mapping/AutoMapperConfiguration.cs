@@ -2,8 +2,8 @@
 using FTMContextNet.Application.Models.Read;
 using FTMContextNet.Domain.Entities.NonPersistent;
 using System.Collections.Generic;
+using PlaceLibNet.Application.Models.Read;
 using PlaceLibNet.Domain;
-using PlaceLibNet.Model;
 
 namespace FTMContextNet.Application.Mapping
 {
@@ -18,7 +18,7 @@ namespace FTMContextNet.Application.Mapping
 
     class Converter: ITypeConverter<IEnumerable<PlaceLookup>, IEnumerable<PlaceModel>>
     {
-
+        
         public IEnumerable<PlaceModel> Convert(IEnumerable<PlaceLookup> source, IEnumerable<PlaceModel> destination, ResolutionContext context)
         {
             var tp = new List<PlaceModel>();

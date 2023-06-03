@@ -63,16 +63,18 @@ WebConsole.prototype = {
         return true;
     },
   
-    displayStats: function (statsObject) {
+    displayPeopleStats: function (statsObject) {
         document.getElementById("dupeCount").innerHTML = 'Dupes:' + statsObject.dupeEntryCount;
         document.getElementById("originCount").innerHTML = 'Origin Mappings:' + statsObject.originMappingCount;
         document.getElementById("personCount").innerHTML = 'Persons: '+statsObject.personViewCount;
         document.getElementById("marriagecount").innerHTML = 'Marriages: ' + statsObject.marriagesCount;
         document.getElementById("treerecordcount").innerHTML = 'Match Trees: ' + statsObject.treeRecordCount;
+    },  
+    displayPlaceStats: function (statsObject) {
         document.getElementById("placesCount").innerHTML = 'Places: ' + statsObject.placesCount;
         document.getElementById("incompleteCount").innerHTML = 'Bad Names: ' + statsObject.badLocationsCount;
-        document.getElementById("unsearchedCount").innerHTML = 'Unsearched: '+statsObject.unsearched;
-        document.getElementById("notfoundCount").innerHTML = 'Not Found: '+ statsObject.notFound;
+        document.getElementById("unsearchedCount").innerHTML = 'Unsearched: ' + statsObject.unsearched;
+        document.getElementById("notfoundCount").innerHTML = 'Not Found: ' + statsObject.notFound;
     },  
 
     printGeoCodeProgressCount: function (number) {  

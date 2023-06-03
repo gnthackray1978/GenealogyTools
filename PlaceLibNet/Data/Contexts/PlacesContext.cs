@@ -118,9 +118,10 @@ namespace PlaceLibNet.Data.Contexts
             using var connection = new SqliteConnection(connectionString);
 
             var command = connection.CreateCommand();
-            command.CommandText = "UPDATE PlaceCache SET Lat = $Lat, Long = $Lon WHERE AltId = $AltId;";
+            command.CommandText = "UPDATE PlaceCache SET Lat = $Lat, Long = $Lon, BadData = $BadData WHERE Id = $Id;";
 
-            command.Parameters.Add("$AltId", SqliteType.Integer);
+            command.Parameters.Add("$Id", SqliteType.Integer);
+            command.Parameters.Add("$BadData", SqliteType.Integer);
             command.Parameters.Add("$Lat", SqliteType.Text);
             command.Parameters.Add("$Lon", SqliteType.Text);
 
@@ -131,9 +132,14 @@ namespace PlaceLibNet.Data.Contexts
             command.Transaction = transaction;
             command.Prepare();
 
-            command.Parameters["$AltId"].Value = placeId;
+            command.Parameters["$Id"].Value = placeId;
             command.Parameters["$Lat"].Value = lat;
             command.Parameters["$Lon"].Value = lon;
+
+            if(string.IsNullOrEmpty(lat) || string.IsNullOrEmpty(lon))
+                command.Parameters["$BadData"].Value = 1;
+            else
+                command.Parameters["$BadData"].Value = 0;
 
             command.ExecuteNonQuery();
 

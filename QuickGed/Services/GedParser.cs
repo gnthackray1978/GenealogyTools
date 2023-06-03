@@ -285,6 +285,14 @@ public class GedParser
 
     private static void ProcessIndividuals(GedcomLine line, ref Person currentPerson, string currentLevelOneType)
     {
+        var validTypes = new List<string>() { "DATE", "PLAC", "NOTE", "GIVN",
+                                            "SURN", "BAPM", "BIRT", "BURI", "DEAT", 
+                                            "FACT", "NAME", "NOTE", "OCCU","RESI","SEX","TITL" };
+
+
+        if (!validTypes.Contains(line.Type))
+            return;
+        
         switch (currentLevelOneType)
         {
             case "BAPM":
@@ -308,6 +316,25 @@ public class GedParser
 
             case "NAME":
                 //currentPerson. = line.Data;
+                if (!string.IsNullOrEmpty(line.Data))
+                {
+                    //if (line.Data.Contains("General Register Office; United Kingdom; Volume: 10a; Page: 1315"))
+                    //{
+                    //    Debug.WriteLine("");
+                    //}
+
+                    var parts = line.Data.Split("/").Where(w=>w!="").Select(s=> s.Replace("/","")).ToList();
+                    
+                    if (parts.Count == 1)
+                    {
+                        currentPerson.FamilyName = parts[0];
+                    }
+                    else
+                    {
+                        currentPerson.Forename = string.Join(' ', parts.Take(parts.Count-1)).Trim();
+                        currentPerson.FamilyName = parts.Last().Trim();
+                    }
+                }
                 if (line.Type == "GIVN") currentPerson.Forename = line.Data;
                 if (line.Type == "SURN") currentPerson.FamilyName = line.Data;
 
