@@ -1,4 +1,4 @@
-﻿using FTMContext;
+﻿using PlaceLibNet.Domain.Entities;
 
 namespace FTMContextNet.Domain.Entities.NonPersistent
 {

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using ConfigHelper;
 using FTMContextNet;
-using FTMContextNet.Application.Models.Read;
 using GenDataAPI.Hub;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -43,7 +42,7 @@ namespace GenDataAPI.Controllers
         [HttpPost]
         public void Post(GeoCodeResultModel value)
         {
-            _facade.UpdatePlaceGeoData(value);
+            _facade.WriteGeoCodedData(value);
         }
 
         [HttpPut]
@@ -53,5 +52,6 @@ namespace GenDataAPI.Controllers
 
             return Ok(true);
         }
+        
     }
 }

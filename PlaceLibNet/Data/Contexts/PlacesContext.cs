@@ -2,8 +2,7 @@
 using ConfigHelper;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using PlaceLib.Model;
-using PlaceLibNet.Domain;
+using PlaceLibNet.Domain.Entities;
 
 namespace PlaceLibNet.Data.Contexts
 {
@@ -24,7 +23,7 @@ namespace PlaceLibNet.Data.Contexts
         public virtual DbSet<Places> Places { get; set; }
         public virtual DbSet<PlaceCache> PlaceCache { get; set; }
 
-        public void InsertPlaceCache(int id, int placeId,
+        public void InsertPlaceCache(int id,
             string name,
             string nameFormatted,
             string jsonResult,
@@ -66,7 +65,7 @@ namespace PlaceLibNet.Data.Contexts
             command.Prepare();
 
             command.Parameters["$Id"].Value = id;
-            command.Parameters["$AltId"].Value = placeId;
+            command.Parameters["$AltId"].Value = id;
             command.Parameters["$Name"].Value = name;
             command.Parameters["$NameFormatted"].Value = nameFormatted;
             command.Parameters["$JSONResult"].Value = jsonResult;
@@ -111,19 +110,22 @@ namespace PlaceLibNet.Data.Contexts
             transaction.Commit();
         }
 
-        public void UpdatePlaceCacheLatLong(int placeId, string lat, string lon)
+        public void UpdatePlaceCacheLatLong(PlaceCache placeCache)
         {
             var connectionString = Database.GetDbConnection().ConnectionString;
 
             using var connection = new SqliteConnection(connectionString);
 
             var command = connection.CreateCommand();
-            command.CommandText = "UPDATE PlaceCache SET Lat = $Lat, Long = $Lon, BadData = $BadData WHERE Id = $Id;";
+            command.CommandText = "UPDATE PlaceCache SET Lat = $Lat, Long = $Lon, BadData = $BadData, County = $County, Country = $Country, Src = $Src WHERE Id = $Id;";
 
             command.Parameters.Add("$Id", SqliteType.Integer);
             command.Parameters.Add("$BadData", SqliteType.Integer);
             command.Parameters.Add("$Lat", SqliteType.Text);
             command.Parameters.Add("$Lon", SqliteType.Text);
+            command.Parameters.Add("$Src", SqliteType.Text);
+            command.Parameters.Add("$County", SqliteType.Text);
+            command.Parameters.Add("$Country", SqliteType.Text);
 
             connection.Open();
 
@@ -132,19 +134,50 @@ namespace PlaceLibNet.Data.Contexts
             command.Transaction = transaction;
             command.Prepare();
 
-            command.Parameters["$Id"].Value = placeId;
-            command.Parameters["$Lat"].Value = lat;
-            command.Parameters["$Lon"].Value = lon;
+            command.Parameters["$Id"].Value = placeCache.Id;
+            command.Parameters["$Lat"].Value = placeCache.Lat;
+            command.Parameters["$Lon"].Value = placeCache.Long;
+            command.Parameters["$BadData"].Value = 0;
+            command.Parameters["$Src"].Value = placeCache.Src;
+            command.Parameters["$County"].Value = placeCache.County;
+            command.Parameters["$Country"].Value = placeCache.Country;
 
-            if(string.IsNullOrEmpty(lat) || string.IsNullOrEmpty(lon))
-                command.Parameters["$BadData"].Value = 1;
-            else
-                command.Parameters["$BadData"].Value = 0;
 
             command.ExecuteNonQuery();
 
             transaction.Commit();
         }
+
+        public void UpdateBadData(int id, bool badData)
+        {
+
+            var connectionString = Database.GetDbConnection().ConnectionString;
+
+
+            using var connection = new SqliteConnection(connectionString);
+
+            var command = connection.CreateCommand();
+            command.CommandText = "UPDATE PlaceCache SET BadData = $BadData WHERE Id = $Id;";
+
+            command.Parameters.Add("$Id", SqliteType.Integer);
+            command.Parameters.Add("$BadData", SqliteType.Text);
+
+            connection.Open();
+
+            using var transaction = connection.BeginTransaction();
+
+            command.Transaction = transaction;
+            command.Prepare();
+
+            command.Parameters["$Id"].Value = id;
+            command.Parameters["$BadData"].Value = badData ? 1 : 0;
+
+            command.ExecuteNonQuery();
+
+            transaction.Commit();
+
+        }
+
         public void UpdateJSONCacheResult(int id, string results)
         {
 
@@ -175,7 +208,35 @@ namespace PlaceLibNet.Data.Contexts
 
         }
 
+        public void UpdateCounty(int id, string county)
+        {
 
+            var connectionString = Database.GetDbConnection().ConnectionString;
+
+
+            using var connection = new SqliteConnection(connectionString);
+
+            var command = connection.CreateCommand();
+            command.CommandText = "UPDATE PlaceCache SET County = $County WHERE Id = $Id;";
+
+            command.Parameters.Add("$Id", SqliteType.Integer);
+            command.Parameters.Add("$County", SqliteType.Text);
+
+            connection.Open();
+
+            using var transaction = connection.BeginTransaction();
+
+            command.Transaction = transaction;
+            command.Prepare();
+
+            command.Parameters["$Id"].Value = id;
+            command.Parameters["$County"].Value = county;
+
+            command.ExecuteNonQuery();
+
+            transaction.Commit();
+
+        }
 
         private string GetCon()
         {

@@ -4,7 +4,7 @@ using AutoMapper;
 using LoggingLib;
 using PlaceLibNet.Application.Models.Read;
 using PlaceLibNet.Data.Repositories;
-using PlaceLibNet.Domain;
+using PlaceLibNet.Domain.Entities;
 
 namespace PlaceLibNet.Application.Services
 {

@@ -1,19 +1,17 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data.Entity.ModelConfiguration.Configuration;
-using System.Diagnostics;
 using System.Linq;
 using PlaceLibNet.Data.Repositories;
 
-namespace PlaceLibNet.Domain
+namespace FTMContextNet.Domain.Entities.NonPersistent
 {
 
-    public class PlaceRecordCollection : IEnumerable<PlaceRecordItem>
+    public class PersonPlaceCache : IEnumerable<PersonPlace>
     {
         private int _duplicateCount = 0;
         private int _invalidPlaces = 0;
-        public List<PlaceRecordItem> Items { get; set; }
+        public List<PersonPlace> Items { get; set; }
 
         public int Count => Items.Count;
 
@@ -21,9 +19,9 @@ namespace PlaceLibNet.Domain
 
         public int DuplicateLocationsCount => _duplicateCount;
 
-        public PlaceRecordCollection(List<string> places)
+        public PersonPlaceCache(List<string> places)
         {
-            this.InsertRange(places);
+            InsertRange(places);
         }
 
         public void InsertRange(List<string> places)
@@ -36,19 +34,13 @@ namespace PlaceLibNet.Domain
 
         public void Insert(string place)
         {
-
-            //if (place.Contains("wooburn"))
-            //{
-            //    Debug.WriteLine("");
-            //}
-
-            Items ??= new List<PlaceRecordItem>();
+            Items ??= new List<PersonPlace>();
 
             string formattedPlace = FormatPlace(place);
 
             if (isValid(formattedPlace))
             {
-                var placeLh = new PlaceRecordItem()
+                var placeLh = new PersonPlace()
                 {
                     Place = place,
                     PlaceFormatted = formattedPlace
@@ -63,25 +55,23 @@ namespace PlaceLibNet.Domain
             {
                 _invalidPlaces++;
             }
-
-
         }
 
         private string FormatPlace(string place)
         {
-            place =  place
+            place = place
                 .ToLower()
                 .Replace(" ", "")
                 .Replace(",", "/")
                 .Replace("//", "/");
-            
+
             place = PlaceRepository.DeleteNonAlphaNumericExceptSlash(place);
 
             place = PlaceRepository.ReplaceSlashesWithSingleSlash(place);
-            
+
             return place;
         }
-      
+
         /// <summary>
         /// Valid when has 3 components AND
         /// is in England or Wales
@@ -100,25 +90,22 @@ namespace PlaceLibNet.Domain
                 }
             }
 
-            
-
-
             return false;
         }
 
-        public IEnumerator<PlaceRecordItem> GetEnumerator()
+        public IEnumerator<PersonPlace> GetEnumerator()
         {
             return Items.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return this.GetEnumerator();
+            return GetEnumerator();
         }
     }
 
 
-    public class PlaceRecordItem : IComparable<PlaceRecordItem>
+    public class PersonPlace : IComparable<PersonPlace>
     {
         public string PlaceFormatted { get; set; }
 
@@ -136,9 +123,16 @@ namespace PlaceLibNet.Domain
 
         public string Lon { get; set; }
 
-        public int CompareTo(PlaceRecordItem obj)
+        public int CompareTo(PersonPlace obj)
         {
-            return this.PlaceFormatted.CompareTo(obj.PlaceFormatted);
+            return PlaceFormatted.CompareTo(obj.PlaceFormatted);
+        }
+
+        public IEnumerable<string> GetComponents()
+        {
+            var placeParts = PlaceFormatted.Split("/").SkipLast(2);
+
+            return placeParts;
         }
 
     }

@@ -1,6 +1,6 @@
 ﻿
-using System.Collections.Generic;
-using PlaceLib;
+using System.Collections.Generic; 
+using PlaceLibNet.Domain.Entities;
 
 namespace PlaceLibNet.Data
 {

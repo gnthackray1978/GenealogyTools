@@ -27,14 +27,9 @@ namespace GenDataAPI.Controllers
             _outputHandler = new OutputHandler(hubContext);
             _facade = new FTMFacade(_iMSGConfigHelper, _outputHandler);
         }
-        
-        
-        // GET api/values
-        public IEnumerable<PlaceModel> Get()
-        {
-            return _facade.GetUnknownPlaces(75);
-        }
 
+      
+        
         [HttpPost]
         [Route("/data/places")]
         public IActionResult AddToCache()
@@ -47,8 +42,8 @@ namespace GenDataAPI.Controllers
       
 
         [HttpPost]
-        [Route("/data/origins")]
-        public IActionResult AddOrigins()
+        [Route("/data/persons/locations")]
+        public IActionResult UpdatePersonLocations()
         {
             //dont need this now as origins added automatically when tree is read.
             return Ok(true);

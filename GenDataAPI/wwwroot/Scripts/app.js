@@ -46,20 +46,16 @@ PlaceObj.prototype = {
         return true;
     },
 
-    addResetMissingPlaces: function () {
+    // add persons locations into places cache
+    addMissingPlaces: function () {
 
         var that = this;
-
-        var Upload = {
-            Value: 'addResetMissingPlaces'
-        };
-
+         
         $.ajax({
             type: "post",
             url: "/data/places",
             contentType: "application/json",
-            dataType: "json",
-            data: JSON.stringify(Upload),
+            dataType: "json", 
             success: function (response) {
                 that.displayPlaceStats();
             }
@@ -67,30 +63,7 @@ PlaceObj.prototype = {
         return true;
     },
 
-    updatePlaceMetadata: function () {
-
-        var that = this;
-
-        var Upload = {
-            Value: 'updatePlaceMetadata'
-        };
-
-        $.ajax({
-            type: "put",
-            url: "/data/places",
-            contentType: "application/json",
-            dataType: "json",
-            data: JSON.stringify(Upload),
-            success: function (response) {
-                that.displayPlaceStats();
-            }
-
-        });
-         
-        return true;
-    },
-
-    setOriginPerson: function () {
+    updateLocations: function () {
 
         var that = this;
 
@@ -100,7 +73,7 @@ PlaceObj.prototype = {
 
         $.ajax({
             type: "post",
-            url: "/data/origins", // "/api/controllerName/methodName"
+            url: "/data/persons/locations", // "/api/controllerName/methodName"
             contentType: "application/json",
             dataType: "json",
             data: JSON.stringify(Upload),
@@ -240,6 +213,7 @@ PlaceObj.prototype = {
         return true;
     },
 
+    //geocode
 
     saveGeoCodedLocationToServer: function (placeLookup) {
         var that = this;
@@ -257,6 +231,28 @@ PlaceObj.prototype = {
 
     },
 
+    updatePlaceMetadata: function () {
+
+        var that = this;
+
+        var Upload = {
+            Value: 'updatePlaceMetadata'
+        };
+
+        $.ajax({
+            type: "put",
+            url: "./geocode",
+            contentType: "application/json",
+            dataType: "json",
+            data: JSON.stringify(Upload),
+            success: function (response) {
+                that.displayPlaceStats();
+            }
+
+        });
+
+        return true;
+    },
 
     getUnEncodedLocationsFromServer: function () {
        

@@ -1,4 +1,4 @@
-﻿namespace PlaceLib;
+﻿namespace PlaceLibNet.Domain.Entities;
 
 public class CountyDto
 {

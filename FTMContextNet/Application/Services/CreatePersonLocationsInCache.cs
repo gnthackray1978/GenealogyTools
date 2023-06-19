@@ -1,164 +1,88 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Linq;
 using FTMContextNet.Data.Repositories;
+using FTMContextNet.Domain.Entities.NonPersistent;
 using LoggingLib;
-using PlaceLib;
 using PlaceLibNet.Data.Repositories;
+using PlaceLibNet.Domain;
+using PlaceLibNet.Domain.Caching;
+using PlaceLibNet.Domain.Entities;
 
 namespace FTMContextNet.Application.Services;
 
 public class CreatePersonLocationsInCache
-{
-    private readonly List<CountyDto> _counties;
-
+{ 
     private readonly PlaceRepository _placeRepository;
 
     private readonly PersistedCacheRepository _persistedCacheRepository;
 
+    private readonly Ilog _logger;
 
-    private Ilog _logger;
-
-    public CreatePersonLocationsInCache(PlaceRepository placeRepository, PersistedCacheRepository persistedCacheRepository, Ilog logger)
+    public CreatePersonLocationsInCache(PlaceRepository placeRepository, 
+        PersistedCacheRepository persistedCacheRepository, Ilog logger)
     {
-
         _persistedCacheRepository = persistedCacheRepository;
-
-        _counties = placeRepository.GetCounties(true);
-
+        
         _placeRepository = placeRepository;
 
         _logger = logger;
     }
 
-    private string Capitalize(string str)
+    public static PlaceCache Convert(PersonPlace pri, PlaceSearchCoordSubset pscs)
     {
+        var placeCache = new PlaceCache()
+        {
+            Name = pri.Place,
+            NameFormatted = pri.PlaceFormatted,
+            JSONResult = "[]",
+            County = pri.County,
+        };
 
-        if (str.Length == 0) return "";
+        if (pscs == null) return placeCache;
+
+        placeCache.Lat = pscs.Lat;
+        placeCache.Long = pscs.Long;
+        placeCache.Src = "placelib";
+        placeCache.BadData = true;
 
 
-        if (str.Length == 1)
-            return str[0].ToString().ToUpper();
-
-
-        return char.ToUpper(str[0]).ToString() + str.Substring(1);
+        return placeCache;
     }
 
     public void Execute()
     {
         var timer = new Stopwatch();
         timer.Start();
-
-        var placeId = _placeRepository.GetNewFtmPlaceId();
-        var id = _placeRepository.GetNewId();
-        var counter = 1;
-        var existingRecords = 0;
-        var newRecordsAdded = 0;
-        var locations = _persistedCacheRepository.GetPersonLocations();
-        var unencodedPlacesCount = _placeRepository.GetUnknownPlaces().Count;
-
-        var placeCache = _placeRepository.GetCachedPlaces();
-
-        // at this point
-        // the places list should be full of valid places
-        // i.e. no empties and have 3 component locations
-        
-        _logger.WriteLine("Place cache size: " + placeCache.Count);
+         
+        var personPlaceCache = _persistedCacheRepository.MakePlaceRecordCache();
+        var unencodedPlacesCount = _placeRepository.GetUnknownPlacesCount();
+        var counties = _placeRepository.GetCounties(true);
+        var placeCache = new PlaceLookupCache(_placeRepository.GetCachedPlaces());
+         
         _logger.WriteLine("Unencoded places in cache: " + unencodedPlacesCount);
-        _logger.WriteLine("Person table size: " + locations.Count);
+        _logger.WriteLine("Person table locations count: " + personPlaceCache.Count);
+         
+        var placesLibCache = new PlaceLibCoordCache(_placeRepository.GetPlaceLibCoords(), counties, new PlaceNameFormatter());
 
-        var tp = locations.Where(w => w.PlaceFormatted.Contains("wooburn")).ToList();
+        //search the persons table place entries to see if they already exist in the place cache
+        //if they don't exist then add a new placecache entry. 
+        //look in the placelib to see if the new cache entry exists in there. if it does
+        //use it to populate the lat and long of the cache entry.
 
-        var tp1 = placeCache.Where(w => w.PlaceFormatted.Contains("wooburn")).ToList();
+        var newCacheEntries = personPlaceCache
+            .Where(w => !placeCache.Exists(w.PlaceFormatted))
+            .Select(personPlace => 
+                Convert(personPlace, placesLibCache.Search(personPlace.GetComponents(), personPlace.County))).ToList();
 
-        //wooburn/buckingham/england
-        //wooburn/buckingham/england
-
-        var placeLibCounter = 0;
-        var total = locations.Count;
-
-        var tp22 = placeCache.FirstOrDefault(p => p.PlaceFormatted.Contains("wooburn/buckingham/england"));
-
-        foreach (var location in locations)
-        {
-
-            if (location.PlaceFormatted.Contains("wooburn/buckingham/england"))
-            {
-                Debug.WriteLine("");
-            }
-
-            //is our place in the geocode cache?
-            var match = placeCache.FirstOrDefault(p => p.PlaceFormatted.Contains(location.PlaceFormatted));
-
-            if (match != null)
-            {
-                location.GoogleCacheId = match.PlaceId;
-                existingRecords++;
-            }
-            else
-            {
-                // we need to look in our other database
-                // but first we need to set a county
-
-                placeId++;
-                id++;
-
-                var placeLibEntryFound = false;
-
-                var county = "";
-
-                foreach (var countyDto in _counties.Where(countyDto => location.PlaceFormatted.Contains(countyDto.County)))
-                {
-                    county = countyDto.County;
-                    break;
-                }
-
-                if (!string.IsNullOrEmpty(county))
-                {
-                    var placeParts = location.PlaceFormatted.Split("/").SkipLast(2);
-
-                    location.County = county;
-
-                    foreach (var placeName in placeParts)
-                    {
-                        var plibplace = _placeRepository.SearchPlaces(placeName, Capitalize(county), true);
-
-                        if (plibplace == null) continue;
-
-                        location.PlaceLibId = plibplace.Id;
-                        location.Lat = plibplace.Lat;
-                        location.Lon = plibplace.Long;
-                        placeLibCounter++;
-                        placeLibEntryFound = true;
-                        break;
-
-                    }
-                }
-
-                newRecordsAdded++;
-                _placeRepository.InsertIntoCache(id,
-                    placeId, location.Place, location.PlaceFormatted, "[]",
-                    "", location.County, placeLibEntryFound, false,
-                    location.Lat, location.Lon, placeLibEntryFound ? "placelib" : "");
-
-            }
-
-            
-            _logger.ProgressUpdate(counter, total, "");
-            counter++;
-
-        }
-
+        _placeRepository.InsertIntoCache(newCacheEntries);
+         
         timer.Stop();
 
-        
-        _logger.WriteLine("found in local place cache: " + placeLibCounter);
-
-        _logger.WriteLine("existing records: " + locations.InvalidLocationsCount);
-        _logger.WriteLine("new records added: " + locations.DuplicateLocationsCount);
+          
+        _logger.WriteLine("new records added: " + newCacheEntries.Count());
 
         _logger.WriteLine("Time taken: " + timer.Elapsed.ToString(@"m\:ss\.fff"));
 
     }
-
+    
 }

@@ -17,8 +17,8 @@
     <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0-preview.7.22375.6" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="7.0.0-preview.7.22375.6" />
     <PackageReference Include="MSG.FTMTools" Version="1.0.0" />
-    <PackageReference Include="MSG.GoogleMapsHelpers" Version="1.0.5" />
-    <PackageReference Include="MSG.MIisc" Version="1.0.2" />
+    <PackageReference Include="MSG.GoogleMapsHelpers" Version="1.1.3" />
+    <PackageReference Include="MSG.MIisc" Version="1.0.4" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
     <PackageReference Include="System.Data.SQLite" Version="1.0.116" />
   </ItemGroup>

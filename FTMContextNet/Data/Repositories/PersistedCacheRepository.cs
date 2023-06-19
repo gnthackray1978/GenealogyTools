@@ -9,7 +9,6 @@ using FTMContextNet.Domain.Entities.Persistent.Cache;
 using GoogleMapsHelpers;
 using LoggingLib;
 using Microsoft.EntityFrameworkCore;
-using PlaceLibNet.Domain;
 using QuickGed;
 using QuickGed.Types;
 
@@ -131,7 +130,7 @@ namespace FTMContextNet.Data.Repositories
 
         #endregion
 
-        public PlaceRecordCollection GetPersonLocations()
+        public PersonPlaceCache MakePlaceRecordCache()
         {
             var comparisonPersons = this._persistedCacheContext
                 .FTMPersonView.Where(w=>!w.LocationsCached && w.BirthLocation!=null).Select(s=>s.BirthLocation).ToList();
@@ -140,7 +139,7 @@ namespace FTMContextNet.Data.Repositories
                 .FTMPersonView.Where(w => !w.LocationsCached && w.AltLocation != null).Select(s => s.AltLocation).ToList());
 
           
-            return new PlaceRecordCollection(comparisonPersons);
+            return new PersonPlaceCache(comparisonPersons);
         }
 
         public void CreatePersonOriginEntries(int importId)
@@ -182,6 +181,26 @@ namespace FTMContextNet.Data.Repositories
 
             return comparisonPersons;
         }
+
+        public List<PersonLocation> GetPersonMapLocations()
+        {
+
+            var comparisonPersons = this
+                ._persistedCacheContext.FTMPersonView.Where(ValidData())
+                .Select(s => new PersonLocation()
+                {
+                    Id = s.PersonId,
+                    Location = s.BirthLocation,
+                    Lat = s.BirthLat.ToString(),
+                    Lng = s.BirthLong.ToString(),
+                    AltLocation = s.AltLocation,
+                    AltLat = s.AltLat.ToString(),
+                    AltLng = s.AltLong.ToString()
+                }).ToList();
+
+            return comparisonPersons;
+        }
+
         public ImportData AddImportRecord(string fileName, long fileSize)
         {
             // if there has been a previous import with this filename 
@@ -252,8 +271,11 @@ namespace FTMContextNet.Data.Repositories
             return idx;
         }
 
+        public void UpdatePersons(int personId, string lat, string lng, string altLat, string altLng)
+        {
+            _persistedCacheContext.UpdatePersonLocations(personId,lng,lat,altLng,altLat);
+        }
 
-        
         #region debug data
 
 

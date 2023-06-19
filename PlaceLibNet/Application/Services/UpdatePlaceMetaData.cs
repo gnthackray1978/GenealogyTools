@@ -19,8 +19,11 @@ namespace PlaceLibNet.Application.Services
             _iLog.WriteLine("Executing UpdatePlaceMetaData");
 
             _placeRepository.SetGeolocatedResult();
-
+            _iLog.WriteLine("Finished - SetGeolocatedResult");
             _placeRepository.SetCounties();
+            _iLog.WriteLine("Finished - SetCounties");
+
+            _iLog.WriteLine("Finished UpdatePlaceMetaData");
         }
     }
 }

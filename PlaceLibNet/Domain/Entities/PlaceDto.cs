@@ -1,4 +1,4 @@
-﻿namespace PlaceLibNet;
+﻿namespace PlaceLibNet.Domain.Entities;
 
 public class PlaceDto
 {

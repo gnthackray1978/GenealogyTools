@@ -1,4 +1,4 @@
-﻿namespace FTMContext
+﻿namespace PlaceLibNet.Domain.Entities
 {
     public class DupeLocInfo
     {

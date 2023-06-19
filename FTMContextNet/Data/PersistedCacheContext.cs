@@ -36,6 +36,7 @@ namespace FTMContextNet.Data
         void DeleteImports(int importId);
         void DeleteTreeGroups();
         void DeleteRecordMapGroups();
+        void UpdatePersonLocations(int personId, string lng, string lat, string altLng, string altLat);
 
         int SaveChanges();
     }
@@ -223,6 +224,41 @@ namespace FTMContextNet.Data
             transaction.Commit();
 
             return idx;
+        }
+
+        public void UpdatePersonLocations(int personId, string lng, string lat, string altLng, string altLat)
+        {
+            var connectionString = this.Database.GetDbConnection().ConnectionString;
+            
+            using var connection = new SqliteConnection(connectionString);
+
+            var command = connection.CreateCommand();
+            command.CommandText = "UPDATE FTMPersonView SET BirthLat = $BirthLat, BirthLong = $BirthLong, AltLat = $AltLat, AltLong = $AltLong WHERE Id = $Id";
+
+            command.Parameters.Add("$Id", SqliteType.Integer);
+            command.Parameters.Add("$BirthLat", SqliteType.Text);
+            command.Parameters.Add("$BirthLong", SqliteType.Text);
+            command.Parameters.Add("$AltLat", SqliteType.Text);
+            command.Parameters.Add("$AltLong", SqliteType.Text);
+
+            connection.Open();
+
+            using var transaction = connection.BeginTransaction();
+
+            command.Transaction = transaction;
+            command.Prepare();
+          
+
+            command.Parameters["$Id"].Value = personId;
+            command.Parameters["$BirthLat"].Value = lat;
+            command.Parameters["$BirthLong"].Value = lng;
+            command.Parameters["$AltLat"].Value = altLat;
+            command.Parameters["$AltLong"].Value = altLng;
+            command.ExecuteNonQuery();
+                
+
+            transaction.Commit();
+             
         }
 
         public int BulkInsertFTMPersonOrigins(int nextId,int importId, List<FTMPersonOrigin> origins)

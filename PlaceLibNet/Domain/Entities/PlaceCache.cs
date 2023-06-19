@@ -1,8 +1,9 @@
 ﻿using System;
 
-namespace PlaceLibNet.Domain
+namespace PlaceLibNet.Domain.Entities
 {
-    public partial class PlaceCache {
+    public partial class PlaceCache
+    {
 
         public int Id { get; set; }
 
@@ -26,4 +27,3 @@ namespace PlaceLibNet.Domain
     }
 }
 
- 

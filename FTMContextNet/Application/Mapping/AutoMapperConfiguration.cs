@@ -3,7 +3,7 @@ using FTMContextNet.Application.Models.Read;
 using FTMContextNet.Domain.Entities.NonPersistent;
 using System.Collections.Generic;
 using PlaceLibNet.Application.Models.Read;
-using PlaceLibNet.Domain;
+using PlaceLibNet.Domain.Entities;
 
 namespace FTMContextNet.Application.Mapping
 {

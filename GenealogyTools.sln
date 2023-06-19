@@ -19,7 +19,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LoggingLib", "LoggingLib\Lo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QuickGed", "QuickGed\QuickGed.csproj", "{E618DA4E-3ED5-41C6-BA73-A0A67C0BCA95}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FTMContextNet.Tests", "FTMContextNet.Tests\FTMContextNet.Tests.csproj", "{41D857F5-1CF5-4849-917D-2CED69CF7516}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FTMContextNet.Tests", "FTMContextNet.Tests\FTMContextNet.Tests.csproj", "{41D857F5-1CF5-4849-917D-2CED69CF7516}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

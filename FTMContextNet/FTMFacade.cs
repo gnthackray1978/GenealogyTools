@@ -18,12 +18,10 @@ using QuickGed.Services;
 
 namespace FTMContextNet
 {
-
     public class FTMFacade
     {
-
-        private Ilog _outputHandler;
-        private IMapper _mapper;
+        private readonly Ilog _outputHandler;
+        private readonly IMapper _mapper;
         private readonly IMSGConfigHelper _iMSGConfigHelper;
 
         public FTMFacade(IMSGConfigHelper iMSGConfigHelper, Ilog iLog)
@@ -47,21 +45,9 @@ namespace FTMContextNet
         }
 
         #region places
-
-        public IEnumerable<PlaceModel> GetUnknownPlaces(int count)
-        {
-            //var persistedCacheRepository = new PersistedCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper), _outputHandler);
-
-            var placeRepository = new PlaceRepository(new PlacesContext(_iMSGConfigHelper), _outputHandler);
-
-
-            var service = new GetUnknownPlacesService(placeRepository, _outputHandler, _mapper);
-
-            return service.Execute(count);
-        }
+        
         public IEnumerable<PlaceModel> GetPlaceNotGeocoded(int amount) {
-            //var persistedCacheRepository = new PersistedCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper), _outputHandler);
-
+            
             var placeRepository = new PlaceRepository(new PlacesContext(_iMSGConfigHelper), _outputHandler);
 
 
@@ -77,7 +63,7 @@ namespace FTMContextNet
         /// <summary>
         /// Updates place entry in cacheData.FTMPlaceCache with result we got back from google geocode.
         /// </summary>
-        public void UpdatePlaceGeoData(GeoCodeResultModel value)
+        public void WriteGeoCodedData(GeoCodeResultModel value)
         {
            // var persistedCacheRepository = new PersistedCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper), _outputHandler);
 
@@ -103,28 +89,18 @@ namespace FTMContextNet
             service.Execute();
 
         }
-
-        public void FormatNames()
-        {
-            var placeRepository = new PlaceRepository(new PlacesContext(_iMSGConfigHelper), _outputHandler);
-
-            placeRepository.FormatNames();
-
-        }
-
-
+        
         public void UpdatePlaceMetaData()
         {
             var placeRepository = new PlaceRepository(new PlacesContext(_iMSGConfigHelper),_outputHandler);
 
-            var service = new UpdatePlaceMetaData(placeRepository, _outputHandler, _mapper);
+            var service = new UpdatePlaceMetaData(placeRepository, _outputHandler);
 
             service.Execute();
         }
 
         #endregion
-
-
+        
         #region tree data
 
         public void ImportPersons()
@@ -192,10 +168,9 @@ namespace FTMContextNet
         }
 
         #endregion
-
-
-        public InfoModel GetInfo() {
-                   
+        
+        public InfoModel GetInfo() 
+        {
             var persistedCacheRepository = new PersistedCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
             
             var tp = new GetInfoService(persistedCacheRepository, _outputHandler, _mapper);
@@ -212,7 +187,4 @@ namespace FTMContextNet
             return tp.Execute();
         }
     }
-
-
 }
-
