@@ -11,6 +11,13 @@ namespace PlaceLibNet.Domain.Caching
         private readonly List<PlacePair> _place15;
         private readonly IPlaceNameFormatter _placeNameFormatter;
         
+        /// <summary>
+        /// Places table caching object
+        /// Used for finding county names
+        /// Searcheable by single place name 
+        /// </summary>
+        /// <param name="countyData">List of place types that contain place mapped to counties</param>
+        /// <param name="placeNameFormatter"></param>
         public CountySearch(List<Places> countyData, IPlaceNameFormatter placeNameFormatter)
         {
             _placeNameFormatter = placeNameFormatter;

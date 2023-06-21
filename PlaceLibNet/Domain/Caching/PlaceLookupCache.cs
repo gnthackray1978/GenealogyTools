@@ -9,7 +9,7 @@ public class PlaceLookupCache
     public List<PlaceLookup> PlaceLookups { get; set; }
 
     /// <summary>
-    /// 
+    /// PlaceCache table caching object.
     /// </summary>
     /// <param name="placeLookups">PLACEFORMATTED should be as the name suggests formatted!</param>
     public PlaceLookupCache(List<PlaceLookup> placeLookups, IPlaceNameFormatter placeNameFormatter)
@@ -23,6 +23,8 @@ public class PlaceLookupCache
 
     public bool Exists(string place)
     {
+        place = _placeNameFormatter.Format(place);
+
         var loc = PlaceLookups.BinarySearch(new PlaceLookup { PlaceFormatted = place }
             , Comparer<PlaceLookup>
                 .Create((s, y) => s.PlaceFormatted.CompareTo(y.PlaceFormatted)));

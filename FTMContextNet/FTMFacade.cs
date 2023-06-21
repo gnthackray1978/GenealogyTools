@@ -74,7 +74,33 @@ namespace FTMContextNet
 
             service.Execute(value);
         }
-         
+
+        /// <summary>
+        /// Updates PlaceFormatting field of the place cache table
+        /// </summary>
+        public void UpdatePlaceCachePlaceFormattingEntry()
+        {
+            var placeRepository = new PlaceRepository(new PlacesContext(_iMSGConfigHelper), _outputHandler);
+            
+            var service = new UpdatePlaceCacheNameFormatting(placeRepository, _outputHandler);
+
+            service.Execute();
+        }
+
+        /// <summary>
+        /// Updates Persons table with lat and longs.
+        /// </summary>
+        public void UpdatePersonLocations()
+        {
+            var placeRepository = new PlaceRepository(new PlacesContext(_iMSGConfigHelper), _outputHandler);
+
+            var persistedCacheRepository = new PersistedCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
+
+            var service = new UpdatePersonLocations(placeRepository, persistedCacheRepository, _outputHandler);
+
+            service.Execute();
+        }
+
         /// <summary>
         /// look in person table add any places to the cache that aren't already in there.
         /// </summary>

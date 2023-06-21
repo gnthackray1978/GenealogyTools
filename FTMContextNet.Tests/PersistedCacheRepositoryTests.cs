@@ -111,17 +111,13 @@ namespace FTMContextNet.Tests
             results.Should().HaveCount(2);
 
             results[0].Should().Be(0);
-            results[0].Should().Be(2);
+            results[1].Should().Be(2);
         }
 
 
         [Fact]
         public void GetRootNameDictionary_ReturnsAllRootNames_WhenSeeded()
         {
-            ////var nameDict = GetRootNameDictionary();
-            //this._mockPersistedCacheRepository
-            //    .Setup(s => s.GetRootNameDictionary())
-            //    .Returns(rootNames);
             var testData = new List<FTMPersonView>
             {
                 new() {Id = 0,FirstName = "",Surname = "_20_Jones", RootPerson = true,LinkNode = false},
@@ -144,6 +140,9 @@ namespace FTMContextNet.Tests
             results.Keys.Contains(1).Should().BeTrue();
 
             results[0].Should().Be("_20_Jones");
+            
+
+            
         }
 
         [Fact]

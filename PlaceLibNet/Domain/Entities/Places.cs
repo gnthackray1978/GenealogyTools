@@ -5,7 +5,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PlaceLibNet.Domain.Entities
 {
-
     public partial class Places
     {
         [Column("id")]

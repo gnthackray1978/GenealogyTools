@@ -1,7 +1,8 @@
 ﻿using System.Diagnostics;
 using System.Linq;
 using FTMContextNet.Data.Repositories;
-using FTMContextNet.Domain.Entities.NonPersistent;
+using FTMContextNet.Domain.Caching;
+using FTMContextNet.Domain.Entities.NonPersistent.Person;
 using LoggingLib;
 using PlaceLibNet.Data.Repositories;
 using PlaceLibNet.Domain;
@@ -54,10 +55,13 @@ public class CreatePersonLocationsInCache
         var timer = new Stopwatch();
         timer.Start();
          
-        var personPlaceCache = _persistedCacheRepository.MakePlaceRecordCache();
+         
+
+         var personPlaceCache = new PersonPlaceCache(_persistedCacheRepository.MakePlaceRecordCache(), new PlaceNameFormatter());
+
         var unencodedPlacesCount = _placeRepository.GetUnknownPlacesCount();
         var counties = _placeRepository.GetCounties(true);
-        var placeCache = new PlaceLookupCache(_placeRepository.GetCachedPlaces());
+        var placeCache = new PlaceLookupCache(_placeRepository.GetCachedPlaces(), new PlaceNameFormatter());
          
         _logger.WriteLine("Unencoded places in cache: " + unencodedPlacesCount);
         _logger.WriteLine("Person table locations count: " + personPlaceCache.Count);
@@ -68,7 +72,7 @@ public class CreatePersonLocationsInCache
         //if they don't exist then add a new placecache entry. 
         //look in the placelib to see if the new cache entry exists in there. if it does
         //use it to populate the lat and long of the cache entry.
-
+        
         var newCacheEntries = personPlaceCache
             .Where(w => !placeCache.Exists(w.PlaceFormatted))
             .Select(personPlace => 

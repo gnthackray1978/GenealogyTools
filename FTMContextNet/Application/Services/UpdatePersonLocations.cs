@@ -4,6 +4,7 @@ using System.Linq;
 using FTMContextNet.Data.Repositories;
 using LoggingLib; 
 using PlaceLibNet.Data.Repositories;
+using PlaceLibNet.Domain;
 using PlaceLibNet.Domain.Caching;
 
 namespace FTMContextNet.Application.Services;
@@ -25,17 +26,25 @@ public class UpdatePersonLocations
 
         _logger = logger;
     }
-    
+    /// <summary>
+    /// Update lat and long fields in the persons table.
+    /// </summary>
     public void Execute()
     {
+        _logger.WriteLine("UpdatePersonLocations started");
+
         var timer = new Stopwatch();
         timer.Start();
          
         var locations = _persistedCacheRepository.GetPersonMapLocations();
        
 
-        var placeCache = new PlaceLookupCache(_placeRepository.GetCachedPlaces());
- 
+        var placeCache = new PlaceLookupCache(_placeRepository.GetCachedPlaces(),new PlaceNameFormatter());
+
+        _logger.WriteLine(locations.Count + " locations");
+
+        int count = 0;
+
         foreach (var location in locations)
         {
             var match = placeCache.Search(location.Location);
@@ -54,9 +63,15 @@ public class UpdatePersonLocations
                 location.AltLng = match.Lng;
             }
 
-            if(location.Lat!= "" || location.AltLat!="")
-                _persistedCacheRepository.UpdatePersons(location.Id,location.Lat,location.Lng,location.AltLat,location.AltLng);
+            if (location.Lat != "" || location.AltLat != "")
+            {
+                count++;
+                _persistedCacheRepository.UpdatePersons(location.Id, location.Lat, location.Lng, location.AltLat,
+                    location.AltLng);
+            }
         }
+
+        _logger.WriteLine("found " + count  + "locations");
 
         timer.Stop(); 
         _logger.WriteLine("Time taken: " + timer.Elapsed.ToString(@"m\:ss\.fff"));

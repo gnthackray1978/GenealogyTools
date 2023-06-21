@@ -96,7 +96,8 @@ namespace FTMConsole2
 
             if (sin == '9')
             {
-                Console.WriteLine(facade.GetInfo().Unsearched);
+                facade.UpdatePersonLocations();
+               // Console.WriteLine(facade.GetInfo().Unsearched);
             }
         }
     }

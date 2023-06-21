@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using FTMContext;
+using FTMContextNet.Domain.Caching;
 using FTMContextNet.Domain.Entities.NonPersistent;
 using FTMContextNet.Domain.Entities.Persistent.Cache;
 using GoogleMapsHelpers;
@@ -130,16 +131,15 @@ namespace FTMContextNet.Data.Repositories
 
         #endregion
 
-        public PersonPlaceCache MakePlaceRecordCache()
+        public List<string> MakePlaceRecordCache()
         {
             var comparisonPersons = this._persistedCacheContext
                 .FTMPersonView.Where(w=>!w.LocationsCached && w.BirthLocation!=null).Select(s=>s.BirthLocation).ToList();
 
-            comparisonPersons.AddRange(this._persistedCacheContext
-                .FTMPersonView.Where(w => !w.LocationsCached && w.AltLocation != null).Select(s => s.AltLocation).ToList());
+            comparisonPersons.AddRange(this._persistedCacheContext.FTMPersonView.Where(w => !w.LocationsCached && w.AltLocation != null).Select(s => s.AltLocation).ToList());
 
           
-            return new PersonPlaceCache(comparisonPersons);
+            return comparisonPersons;
         }
 
         public void CreatePersonOriginEntries(int importId)
@@ -413,7 +413,7 @@ namespace FTMContextNet.Data.Repositories
             var nameDict = this._persistedCacheContext
                 .FTMPersonView
                 .Where(w => w.RootPerson)
-                .ToDictionary(i => i.Id, i => i.FirstName + " " + i.Surname);
+                .ToDictionary(i => i.Id, i => (i.FirstName + " " + i.Surname).Trim());
             return nameDict;
         }
         public List<int> GetTreeIds()

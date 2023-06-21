@@ -85,6 +85,11 @@ namespace PlaceLibNet.Data.Repositories
             
         }
 
+        public void UpdateCacheEntry(int id, string name)
+        {
+            _placesContext.UpdateFormattedName(id,name);
+        }
+
         public void SetPlaceGeoData(int id, string results)
         {
             try
@@ -173,7 +178,7 @@ namespace PlaceLibNet.Data.Repositories
 
             // create a cache object here and then search it.
             
-            var cs = new CountySearch(_placesContext.Places.Where(w => w.Ctry15nm == "England").ToList());
+            var cs = new CountySearch(_placesContext.Places.Where(w => w.Ctry15nm == "England").ToList(), new PlaceNameFormatter() );
             
             foreach (var place in places)
             {
@@ -211,12 +216,7 @@ namespace PlaceLibNet.Data.Repositories
                     Lng = s.Long
                 })
                 .ToList();
-
-            //foreach (var f in places)
-            //{
-            //    f.Place = f.Place.ToLower().Replace(" ", "").Replace(",","/").Replace("//", "/");
-            //}
-
+            
             return places;
         }
 

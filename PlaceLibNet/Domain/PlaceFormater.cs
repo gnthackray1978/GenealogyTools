@@ -1,27 +1,55 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using ConfigHelper;
-using PlaceLibNet.Data.Contexts;
 
 namespace PlaceLibNet.Domain
 {
     public class PlaceNameFormatter : IPlaceNameFormatter
     {
+        /// <summary>
+        /// Replace blocks of white space with single space
+        /// Remove pipes dupe slashes and non alpa numeric characters except slashes
+        /// Remove leading slashes
+        /// </summary>
         public string Format(string place)
         {
-            place = place.Replace(" ", "");
+            place = place.Replace("  ", " ");
+
+            place = place.Replace("-", " ");
+
+            place = place.TrimStart(',');
 
             place = RemoveCommasAndPipes(place);
 
-            place = ReplaceSlashesWithSingleSlash(place);
-
             place = DeleteNonAlphaNumericExceptSlash(place);
 
+            place = ReplaceSlashesWithSingleSlash(place);
+
+            place = place.Trim().Trim('/');
+
+            place = place.Replace("/ ", "/");
+
             return place;
+        }
+        
+        /// <summary>
+        /// Valid when has 3 components AND
+        /// is in England or Wales
+        /// </summary>
+        public bool IsValidEnglandWales(string place, char placeMarker = '/')
+        {
+            var count = place.Count(c => c == placeMarker);
+
+            if (place.Contains("england", StringComparison.OrdinalIgnoreCase) 
+                || place.Contains("wales", StringComparison.OrdinalIgnoreCase))
+            {
+                if (count > 1)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -35,10 +63,15 @@ namespace PlaceLibNet.Domain
 
             var regex = new Regex(@"[^a-z]");
 
-            
             return regex.Replace(input, "");
         }
 
+        /// <summary>
+        /// Replace commas with slashes
+        /// Replace pipes with white space
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
         private string RemoveCommasAndPipes(string input)
         {
             input = input.Replace(',', '/');
@@ -50,7 +83,7 @@ namespace PlaceLibNet.Domain
         private string ReplaceSlashesWithSingleSlash(string input)
         {
             // Create a regular expression that matches a single slash or any number of whitespace characters.
-            var regex = new Regex(@"(\s+/\s+|\s+/|/\s+)");
+            var regex = new Regex(@"/+");
 
             // Replace all matches of the regular expression with a single slash.
             return regex.Replace(input, "/");
@@ -58,8 +91,8 @@ namespace PlaceLibNet.Domain
 
         private string DeleteNonAlphaNumericExceptSlash(string input)
         {
-            // Create a regular expression that matches a single slash or any number of whitespace characters.
-            var regex = new Regex(@"[^a-zA-Z\d\s/]");
+            // Deletes non alpha characters except slashes
+            var regex = new Regex(@"[^a-zA-Z/ ]");
 
             // Replace all matches of the regular expression with a single slash.
             return regex.Replace(input, "");

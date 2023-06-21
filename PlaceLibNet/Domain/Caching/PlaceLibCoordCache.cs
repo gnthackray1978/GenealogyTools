@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using AutoMapper;
 using Misc;
 using PlaceLibNet.Domain.Entities;
 
@@ -12,12 +15,28 @@ namespace PlaceLibNet.Domain.Caching
         private readonly List<CountyDto> _lowerCaseCounties;
 
         private readonly IPlaceNameFormatter _placeNameFormatter;
-
+        /// <summary>
+        /// Places table caching object
+        /// </summary>
+        /// <param name="places"></param>
+        /// <param name="lowerCaseCounties">LOWERCASE</param>
+        /// <param name="placeNameFormatter"></param>
         public PlaceLibCoordCache(List<PlaceSearchCoordSubset> places,
                                List<CountyDto> lowerCaseCounties, 
                                IPlaceNameFormatter placeNameFormatter)
         {
             _placeNameFormatter = placeNameFormatter;
+
+            if (places == null || lowerCaseCounties== null || placeNameFormatter== null)
+                throw new NullReferenceException();
+
+            if (places.Count == 0 || lowerCaseCounties.Count == 0)
+                throw new InvalidDataException();
+
+            if(Char.IsUpper(lowerCaseCounties.First().County,0))
+            {
+                throw new InvalidDataException("Counties collection should be all lowercase");
+            }
 
             _places = places;
             _lowerCaseCounties = lowerCaseCounties;
@@ -42,6 +61,12 @@ namespace PlaceLibNet.Domain.Caching
             return StringTools.Capitalize(result);
         }
 
+        /// <summary>
+        /// Searchs for PlaceSubset with Lat and Long in it for given places and county
+        /// </summary>
+        /// <param name="places">ANY CASE</param>
+        /// <param name="county">ANY CASE</param>
+        /// <returns></returns>
         public PlaceSearchCoordSubset Search(IEnumerable<string> places, string county)
         {
             var validatedCounty = validateCounty(county);
@@ -51,7 +76,7 @@ namespace PlaceLibNet.Domain.Caching
                 var placeCoords = PlaceSearchCoordSubset(placeName, validatedCounty);
 
                 if (placeCoords != null)
-                    break;
+                    return placeCoords;
             }
 
             return null;
@@ -70,14 +95,20 @@ namespace PlaceLibNet.Domain.Caching
                     Comparer<PlaceSearchCoordSubset>
                         .Create((s, y) => s.Placesort.CompareTo(y.Placesort)));
 
+            if (placeSearchCoord < 0)
+                return null;
+
             int idx = placeSearchCoord - 5;
 
             while (idx <= placeSearchCoord + 5)
             {
                 //Ctyhistnm is camel case in the db
-                if (_places[idx].Ctyhistnm == county)
+                if (idx >= 0 && idx < _places.Count)
                 {
-                    return _places[idx];
+                    if (_places[idx].Ctyhistnm == county)
+                    {
+                        return _places[idx];
+                    }
                 }
 
                 idx++;
