@@ -204,6 +204,15 @@ namespace FTMContextNet
             return tp.Execute();
         }
 
+        public IEnumerable<GedFileModel> GetGedFileInfo()
+        {
+            var persistedCacheRepository = new PersistedCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
+
+            var tp = new GetGedFiles(persistedCacheRepository, _outputHandler, _mapper);
+
+            return tp.Execute();
+        }
+
         public PlaceInfoModel GetPlaceInfo()
         {
             var ftmPlaceCacheRepository = new PlaceRepository(new PlacesContext(_iMSGConfigHelper), _outputHandler);

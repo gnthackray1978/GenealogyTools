@@ -1,7 +1,10 @@
-﻿using AutoMapper;
+﻿using System;
+using AutoMapper;
 using FTMContextNet.Application.Models.Read;
 using FTMContextNet.Domain.Entities.NonPersistent;
 using System.Collections.Generic;
+using System.Linq;
+using FTMContextNet.Domain.Entities.Persistent.Cache;
 using PlaceLibNet.Application.Models.Read;
 using PlaceLibNet.Domain.Entities;
 
@@ -12,29 +15,44 @@ namespace FTMContextNet.Application.Mapping
         public AutoMapperConfiguration()
         {
             this.CreateMap<Info, InfoModel>();
-            this.CreateMap<IEnumerable<PlaceLookup>, IEnumerable<PlaceModel>>().ConvertUsing(new Converter());
+            this.CreateMap<IEnumerable<PlaceLookup>, IEnumerable<PlaceModel>>().ConvertUsing(new PlaceConverter());
+            this.CreateMap<IEnumerable<FTMImport>, IEnumerable<GedFileModel>>().ConvertUsing(new GedFileInfoConverter());
         }
     }
 
-    class Converter: ITypeConverter<IEnumerable<PlaceLookup>, IEnumerable<PlaceModel>>
+    class PlaceConverter: ITypeConverter<IEnumerable<PlaceLookup>, IEnumerable<PlaceModel>>
     {
-        
         public IEnumerable<PlaceModel> Convert(IEnumerable<PlaceLookup> source, IEnumerable<PlaceModel> destination, ResolutionContext context)
         {
-            var tp = new List<PlaceModel>();
+            return source
+                .Select(item => 
+                    new PlaceModel()
+                    {
+                        place = item.Place, 
+                        placeformatted = item.PlaceFormatted, 
+                        placeid = item.PlaceId, 
+                        results = item.Results
+                    }).ToList();
+        }
+    }
 
-            foreach(var item in source)
-            {
-                tp.Add(new PlaceModel()
+    class GedFileInfoConverter : ITypeConverter<IEnumerable<FTMImport>, IEnumerable<GedFileModel>>
+    {
+        public IEnumerable<GedFileModel> Convert(IEnumerable<FTMImport> source, IEnumerable<GedFileModel> destination, ResolutionContext context)
+        {
+            return source
+                .Select(item =>
                 {
-                    place = item.Place,
-                    placeformatted = item.PlaceFormatted,
-                    placeid = item.PlaceId,
-                    results = item.Results
-                });
-            }
+                    DateTime.TryParse(item.DateImported, out DateTime dt);
 
-            return tp;
+                    return new GedFileModel
+                    {
+                        Id = item.Id,
+                        FileName = item.FileName,
+                        FileSize = item.FileSize,
+                        DateImported = dt
+                    };
+                }).ToList();
         }
     }
 }

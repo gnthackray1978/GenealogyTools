@@ -2,15 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text.RegularExpressions;
 using FTMContext;
-using FTMContextNet.Domain.Caching;
 using FTMContextNet.Domain.Entities.NonPersistent;
 using FTMContextNet.Domain.Entities.Persistent.Cache;
 using GoogleMapsHelpers;
 using LoggingLib;
 using Microsoft.EntityFrameworkCore;
-using QuickGed;
 using QuickGed.Types;
 
 namespace FTMContextNet.Data.Repositories
@@ -276,10 +273,12 @@ namespace FTMContextNet.Data.Repositories
             _persistedCacheContext.UpdatePersonLocations(personId,lng,lat,altLng,altLat);
         }
 
+        public List<FTMImport> GetImportData()
+        {
+            return _persistedCacheContext.FTMImport.ToList();
+        }
+
         #region debug data
-
-
-
 
         public Info GetInfo() {
             

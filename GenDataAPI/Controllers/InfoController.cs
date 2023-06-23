@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using ConfigHelper;
 using FTMContextNet;
 using FTMContextNet.Application.Models.Read;
@@ -36,6 +37,13 @@ namespace GenDataAPI.Controllers
         public PlaceInfoModel GetPlaceInfo()
         {
             return _facade.GetPlaceInfo();
+        }
+
+        [HttpGet]
+        [Route("/info/gedfiles")]
+        public IEnumerable<GedFileModel> GetGedFileInfo()
+        {
+            return _facade.GetGedFileInfo();
         }
     }
 }

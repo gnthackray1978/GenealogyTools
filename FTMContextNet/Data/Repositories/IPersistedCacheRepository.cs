@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using FTMContext;
-using FTMContextNet.Domain.Caching;
 using FTMContextNet.Domain.Entities.NonPersistent;
 using FTMContextNet.Domain.Entities.Persistent.Cache;
 using QuickGed.Types;
@@ -9,6 +8,7 @@ namespace FTMContextNet.Data.Repositories;
 
 public interface IPersistedCacheRepository
 {
+    List<FTMImport> GetImportData();
     List<string> DumpCount();
     DupeEntry CreateNewDupeEntry(int dupeId, FTMPersonView person, string ident);
     void DeleteDupes();

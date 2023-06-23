@@ -8,10 +8,10 @@ namespace FTMContextNet.Application.Services
     public class GetInfoService
     {
         private readonly Ilog _iLog;
-        private readonly PersistedCacheRepository _persistedCacheRepository; 
+        private readonly IPersistedCacheRepository _persistedCacheRepository; 
         private readonly IMapper _iMapper;
 
-        public GetInfoService(PersistedCacheRepository persistedCacheRepository,  Ilog outputHandlerp, IMapper iMapper)
+        public GetInfoService(IPersistedCacheRepository persistedCacheRepository,  Ilog outputHandlerp, IMapper iMapper)
         {
             _iLog = outputHandlerp;
             _persistedCacheRepository = persistedCacheRepository; 
