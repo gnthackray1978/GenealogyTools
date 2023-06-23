@@ -104,27 +104,11 @@ namespace PlaceLibNet.Data.Repositories
             }
 
         }
-
-        //public void FormatNames()
-        //{
-        //    using var placecontext = new PlacesContext(new MSGConfigHelper());
-
-        //    foreach (var fc in _placesContext.PlaceCache.ToList())
-        //    {
-
-        //        string name = PlaceNameFormatter.DeleteNonAlphaNumericExceptSlash(fc.NameFormatted);
-
-        //        // name = name.Replace(',', '/');
-        //        //  name = name.Replace('|', ' ').Trim();
-
-        //        name = PlaceNameFormatter.ReplaceSlashesWithSingleSlash(name);
-
-
-        //        if (fc.NameFormatted != name)
-        //            placecontext.UpdateFormattedName(fc.Id, name);
-        //    }
-        //}
-
+        
+        /// <summary>
+        /// Deserialise JSON result of google geolocate and use it to 
+        /// fill out place cache fields
+        /// </summary>
         public void SetGeolocatedResult()
         {
             

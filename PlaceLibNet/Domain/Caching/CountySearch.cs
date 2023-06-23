@@ -49,8 +49,9 @@ namespace PlaceLibNet.Domain.Caching
             }
             else
             {
+
                 placedbResult = _placeSort
-                    .BinarySearch(new PlacePair() { Place = searchString }
+                    .BinarySearch(new PlacePair() { Place = _placeNameFormatter.FormatComponent(searchString) }
                         , Comparer<PlacePair>.Create((a, b) => a.Place.CompareTo(b.Place)));
 
                 if (placedbResult >= 0)
