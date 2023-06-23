@@ -285,27 +285,11 @@ namespace FTMContextNet.Data.Repositories
             
             var pCount = _persistedCacheContext.FTMPersonView.Count();
             var mcount = _persistedCacheContext.FTMMarriages.Count();
-           // var placeCount = _persistedCacheContext.FTMPlaceCache.Count();
             var originsCount =  _persistedCacheContext.FTMPersonOrigins.Count();
-
-            //badlocations count
-        //    var badLocationCount = _persistedCacheContext.FTMPlaceCache.Count(w => w.BadData == true);
-
-            //not found
-          //  var notFoundCount = _persistedCacheContext.FTMPlaceCache.Count(w => (w.JSONResult == null || w.JSONResult == "null" || w.JSONResult == "[]") && w.Searched == true);
-
-          //  var unsearchedCount = _persistedCacheContext.FTMPlaceCache.Count(w => w.Searched == false);
-
-
-
-
+            
             return new Info() { 
-            //    BadLocationsCount = badLocationCount,
                 MarriagesCount = mcount,
-              //  NotFound = notFoundCount,
-              //  PlacesCount = placeCount,
                 PersonViewCount = pCount,
-               // Unsearched = unsearchedCount,
                 OriginMappingCount = originsCount,
                 DupeEntryCount = _persistedCacheContext.DupeEntries.Count(),
                 TreeRecordCount = _persistedCacheContext.TreeRecords.Count()
