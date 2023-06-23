@@ -44,8 +44,8 @@ namespace GenDataAPI.Controllers
         [HttpPost]
         [Route("/data/persons/locations")]
         public IActionResult UpdatePersonLocations()
-        {
-            //dont need this now as origins added automatically when tree is read.
+        { 
+            _facade.UpdatePersonLocations();
             return Ok(true);
         }
 
