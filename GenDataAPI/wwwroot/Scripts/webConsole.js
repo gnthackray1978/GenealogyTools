@@ -24,7 +24,7 @@ WebConsole.prototype = {
         var last = $("#output").last();
 
         //we have a last element
-        if (last && last.length >0) {
+        if (last && last.length > 0) {
             var contents = last[0].innerText;
 
             //it includes the message
@@ -62,20 +62,34 @@ WebConsole.prototype = {
 
         return true;
     },
-  
+
     displayPeopleStats: function (statsObject) {
         document.getElementById("dupeCount").innerHTML = 'Dupes:' + statsObject.dupeEntryCount;
         document.getElementById("originCount").innerHTML = 'Origin Mappings:' + statsObject.originMappingCount;
-        document.getElementById("personCount").innerHTML = 'Persons: '+statsObject.personViewCount;
+        document.getElementById("personCount").innerHTML = 'Persons: ' + statsObject.personViewCount;
         document.getElementById("marriagecount").innerHTML = 'Marriages: ' + statsObject.marriagesCount;
         document.getElementById("treerecordcount").innerHTML = 'Match Trees: ' + statsObject.treeRecordCount;
-    },  
+    },
     displayPlaceStats: function (statsObject) {
         document.getElementById("placesCount").innerHTML = 'Places: ' + statsObject.placesCount;
         document.getElementById("incompleteCount").innerHTML = 'Bad Names: ' + statsObject.badLocationsCount;
         document.getElementById("unsearchedCount").innerHTML = 'Unsearched: ' + statsObject.unsearched;
         document.getElementById("notfoundCount").innerHTML = 'Not Found: ' + statsObject.notFound;
-    },  
+    },
+
+    displayGedStats: function (statsObject) { 
+        console.log('displayGedStats called');
+
+        statsObject.forEach(function(current) {
+            var dateImported = current.dateImported;
+            var fileName = current.fileName;
+            var fileSize = current.fileSize;
+            $('#ged-file-list').append('<tr><td class = "tdFileName">'
+                + fileName + '</td><td class = "tdFileSize">'
+                + fileSize + '</td><td class = "tdDate">'
+                + dateImported + '</td><td><a href= "#">Delete</a></td><td><a href= "#">Select</a></td></tr>');
+        });
+    },
 
     printGeoCodeProgressCount: function (number) {  
         document.getElementById("geocodecount").innerHTML = number;

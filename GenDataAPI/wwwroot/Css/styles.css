@@ -9,3 +9,15 @@
 .bottomMargin {
     margin-bottom: 10px;
 }
+
+.tdFileName {
+    width: 250px;
+}
+
+.tdFileSize {
+    width: 100px;
+}
+
+.tdDate {
+    width: 250px;
+}

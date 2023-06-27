@@ -58,6 +58,7 @@
             tabs.run();
             p.displayPlaceStats();
             p.displayPeopleStats();
+            p.displayGedStats();
         });
 
     </script>
@@ -90,6 +91,30 @@
             <div class="col" id="unsearchedCount">Unsearched</div>
             <div class="col" id="notfoundCount">Not Found</div>
             <div class="col"></div>
+        </div>
+
+        <div class="row">
+            <div class="col subheader">GED Files</div>
+        </div>
+        <div class="row">
+            <input type="file" id="gedUpload" />
+            <div class="col"><a href="#Foo" onclick="p.importGed();">1. Import GED File</a></div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <table id="ged-file-list">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Size</th>
+                            <th>Date Imported</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <div class="row">
@@ -126,7 +151,7 @@
             <div class="col"></div>
             <div class="col"></div>
         </div>
-        </div>
+
 
 
         <div class="row">

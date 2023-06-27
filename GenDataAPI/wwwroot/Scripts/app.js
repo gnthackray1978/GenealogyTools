@@ -27,6 +27,26 @@ PlaceObj.prototype = {
 
         return true;
     },
+
+    displayGedStats: function () {
+        var that = this;
+
+        $.ajax({
+            url: "./info/gedfiles/",
+            type: "get", //send it through get method            
+            success: function (result) {
+                that.console.displayGedStats(result);
+            },
+            error: function (xhr) {
+                //Do Something to handle error
+                //george mummy and daddy 
+
+            }
+        });
+
+        return true;
+    },
+
     displayPlaceStats: function () {
         var that = this;
 
@@ -43,6 +63,59 @@ PlaceObj.prototype = {
             }
         });
 
+        return true;
+    },
+
+    // add persons locations into places cache
+    importGed: function () {
+
+        var that = this;
+
+
+        // Checking whether FormData is available in browser  
+        if (window.FormData !== undefined) {
+
+            var fileUpload = $("#gedUpload").get(0);
+            var files = fileUpload.files;
+
+            // Create FormData object  
+            //var data = new FormData();
+
+            //// Looping over all files and add it to FormData object  
+            //for (var i = 0; i < files.length; i++) {
+            //    data.append(files[i].name, files[i]);
+
+            //}
+
+          //  var files = input.files;
+
+            var formData = new FormData();
+            var tags = '';
+
+            for (var i = 0; i != files.length; i++) {
+                formData.append("files", files[i]);
+                tags += files[i].name + '|';
+            }
+ 
+            formData.append("tags", tags);
+
+            //data.append(files[i].name, files[i]);
+            $.ajax({
+                url: '/ged/add',
+                type: "POST",
+                contentType: false, // Not to set any content header  
+                processData: false, // Not to process data  
+                data: formData,
+                success: function (result) {
+                    alert(result);
+                },
+                error: function (err) {
+                    alert(err.statusText);
+                }
+            });
+        } else {
+            alert("FormData is not supported.");
+        }  
         return true;
     },
 
