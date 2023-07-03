@@ -93,10 +93,7 @@ namespace FTMContextNet.Data.Repositories
             _persistedCacheContext.DeleteMarriages(importId);
         }
 
-        public void DeleteImport(int importId)
-        {
-            _persistedCacheContext.DeleteImports(importId);
-        }
+
 
         public void DeleteTreeGroups()
         {
@@ -198,34 +195,8 @@ namespace FTMContextNet.Data.Repositories
             return comparisonPersons;
         }
 
-        public ImportData AddImportRecord(string fileName, long fileSize)
-        {
-            // if there has been a previous import with this filename 
-            // we want to overwrite it. 
 
-            var importData = new ImportData(){CurrentId = new List<int>()};
 
-            importData.CurrentId = _persistedCacheContext.FTMImport.Where(w => w.FileName == fileName).Select(s=>s.Id).ToList();
-
-           
-            var newId = _persistedCacheContext.FTMImport.Max(m=>m.Id) + 1;
-
-            var import = new FTMImport()
-            {
-                Id = newId, 
-                FileName = fileName,
-                FileSize = fileSize,
-                DateImported = DateTime.Today.ToShortDateString() + " " + DateTime.Today.ToShortTimeString()
-            };
-
-            _persistedCacheContext.FTMImport.Add(import);
-            
-            _persistedCacheContext.SaveChanges();
-
-            importData.NextId = newId;
-
-            return importData;
-        }
 
         public void AddDupeEntrys(List<KeyValuePair<int, string>> dupes)
         {
@@ -273,10 +244,7 @@ namespace FTMContextNet.Data.Repositories
             _persistedCacheContext.UpdatePersonLocations(personId,lng,lat,altLng,altLat);
         }
 
-        public List<FTMImport> GetImportData()
-        {
-            return _persistedCacheContext.FTMImport.ToList();
-        }
+
 
         #region debug data
 

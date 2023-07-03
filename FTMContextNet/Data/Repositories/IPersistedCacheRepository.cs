@@ -8,14 +8,14 @@ namespace FTMContextNet.Data.Repositories;
 
 public interface IPersistedCacheRepository
 {
-    List<FTMImport> GetImportData();
+
     List<string> DumpCount();
     DupeEntry CreateNewDupeEntry(int dupeId, FTMPersonView person, string ident);
     void DeleteDupes();
     void DeletePersons(int importId);
     void DeleteTreeRecords();
     void DeleteMarriages(int importId);
-    void DeleteImport(int importId);
+
     void DeleteTreeGroups();
     void DeleteRecordMapGroups();
     void DeleteOrigins();
@@ -23,7 +23,8 @@ public interface IPersistedCacheRepository
     void CreatePersonOriginEntries(int importId);
     List<IgnoreList> GetIgnoreList();
     List<PersonDupeSearchSubset> GetComparisonPersons();
-    ImportData AddImportRecord(string fileName, long fileSize);
+
+
     void AddDupeEntrys(List<KeyValuePair<int, string>> dupes);
     int OriginPersonCount();
     Info GetInfo();
