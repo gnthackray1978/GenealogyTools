@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using FTMContextNet.Application.Models.Read;
 using FTMContextNet.Data.Repositories;
+using FTMContextNet.Data.Repositories.GedImports;
 using LoggingLib;
 
 namespace FTMContextNet.Application.Services
@@ -13,21 +14,21 @@ namespace FTMContextNet.Application.Services
     public class GetGedFiles
     {
         private readonly Ilog _iLog;
-        private readonly IPersistedCacheRepository _persistedCacheRepository;
+        private readonly IPersistedImportCacheRepository _persistedImportCacheRepository;
         private readonly IMapper _iMapper;
 
-        public GetGedFiles(IPersistedCacheRepository persistedCacheRepository, Ilog outputHandlerp, IMapper iMapper)
+        public GetGedFiles(IPersistedImportCacheRepository persistedImportCacheRepository, Ilog outputHandlerp, IMapper iMapper)
         {
             _iLog = outputHandlerp;
-            _persistedCacheRepository = persistedCacheRepository;
+            _persistedImportCacheRepository = persistedImportCacheRepository;
             _iMapper = iMapper;
         }
 
-        public List<GedFileModel> Execute()
+        public List<ImportModel> Execute()
         {
             _iLog.WriteLine("Executing GetInfoService");
 
-            var gedFileModel = _iMapper.Map<List<GedFileModel>>(_persistedCacheRepository.GetImportData());
+            var gedFileModel = _iMapper.Map<List<ImportModel>>(_persistedImportCacheRepository.GetImportData());
 
 
             return gedFileModel;

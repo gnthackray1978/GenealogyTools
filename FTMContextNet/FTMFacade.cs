@@ -1,13 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using AutoMapper;
 using ConfigHelper;
-using LoggingLib;
-using FTMContextNet.Data;
+using FTMContextNet.Application.Mapping;
+using FTMContextNet.Application.Models.Create;
 using FTMContextNet.Application.Models.Read;
 using FTMContextNet.Application.Services;
+using FTMContextNet.Data;
 using FTMContextNet.Data.Repositories;
-using FTMContextNet.Application.Mapping;
-using AutoMapper;
+using FTMContextNet.Domain.Auth;
+using FTMContextNet.Domain.Entities.NonPersistent;
+using LoggingLib;
 using PlaceLibNet.Application.Models.Read;
 using PlaceLibNet.Application.Models.Write;
 using PlaceLibNet.Application.Services;
@@ -15,6 +16,10 @@ using PlaceLibNet.Data.Contexts;
 using PlaceLibNet.Data.Repositories;
 using QuickGed.Domain;
 using QuickGed.Services;
+using System;
+using System.Collections.Generic;
+using FTMContextNet.Application.Services.GedImport;
+using FTMContextNet.Data.Repositories.GedImports;
 
 namespace FTMContextNet
 {
@@ -132,10 +137,11 @@ namespace FTMContextNet
         public void ImportPersons()
         {
             var persistedCacheRepository = new PersistedCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
+            var persistedImportedCacheRepository = new PersistedImportCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
 
             var gr = new GedRepository(_outputHandler, new GedParser(new NodeTypeCalculator(), _iMSGConfigHelper.GedPath));
 
-            var createPersonsAndMarriages = new CreatePersonsAndMarriages(persistedCacheRepository, gr, _outputHandler);
+            var createPersonsAndMarriages = new CreatePersonsAndMarriages(persistedCacheRepository, persistedImportedCacheRepository, gr, _outputHandler);
 
             createPersonsAndMarriages.Execute();
         }
@@ -204,13 +210,40 @@ namespace FTMContextNet
             return tp.Execute();
         }
 
-        public IEnumerable<GedFileModel> GetGedFileInfo()
+        public IEnumerable<ImportModel> ReadImports()
         {
-            var persistedCacheRepository = new PersistedCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
+            var persistedCacheRepository = new PersistedImportCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
 
             var tp = new GetGedFiles(persistedCacheRepository, _outputHandler, _mapper);
 
             return tp.Execute();
+        }
+
+        public APIResult CreateImport(CreateImportModel createImportModel)
+        {
+            var persistedCacheRepository = new PersistedImportCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
+ 
+            var tp = new CreateImport(persistedCacheRepository, _outputHandler, new Auth());
+
+            return tp.Execute(createImportModel);
+        }
+
+        public APIResult SelectImport(int importId)
+        {
+            var persistedCacheRepository = new PersistedImportCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
+
+            var tp = new SelectImport(persistedCacheRepository, _outputHandler, new Auth());
+
+            return tp.Execute(importId);
+        }
+
+        public APIResult DeleteImport(int importId)
+        {
+            var persistedCacheRepository = new PersistedImportCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
+
+            var tp = new DeleteImport(persistedCacheRepository, _outputHandler, new Auth());
+
+            return tp.Execute(importId);
         }
 
         public PlaceInfoModel GetPlaceInfo()

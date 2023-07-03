@@ -8,6 +8,9 @@ public partial class FTMImport
     public double FileSize { get; set; }
 
     public string FileName { get; set; }
-        
+
+    public bool Selected { get; set; }
+
+    public int UserId { get; set; }
 
 }

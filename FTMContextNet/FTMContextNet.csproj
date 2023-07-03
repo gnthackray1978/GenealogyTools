@@ -31,7 +31,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Application\Models\Write\" />
     <Folder Include="Data\Configuration\" />
     <Folder Include="Data\Interfaces\" />
     <Folder Include="Domain\Enumerations\" />

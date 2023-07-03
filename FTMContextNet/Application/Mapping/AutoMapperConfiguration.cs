@@ -16,7 +16,7 @@ namespace FTMContextNet.Application.Mapping
         {
             this.CreateMap<Info, InfoModel>();
             this.CreateMap<IEnumerable<PlaceLookup>, IEnumerable<PlaceModel>>().ConvertUsing(new PlaceConverter());
-            this.CreateMap<IEnumerable<FTMImport>, IEnumerable<GedFileModel>>().ConvertUsing(new GedFileInfoConverter());
+            this.CreateMap<IEnumerable<FTMImport>, IEnumerable<ImportModel>>().ConvertUsing(new GedFileInfoConverter());
         }
     }
 
@@ -36,21 +36,23 @@ namespace FTMContextNet.Application.Mapping
         }
     }
 
-    class GedFileInfoConverter : ITypeConverter<IEnumerable<FTMImport>, IEnumerable<GedFileModel>>
+    class GedFileInfoConverter : ITypeConverter<IEnumerable<FTMImport>, IEnumerable<ImportModel>>
     {
-        public IEnumerable<GedFileModel> Convert(IEnumerable<FTMImport> source, IEnumerable<GedFileModel> destination, ResolutionContext context)
+        public IEnumerable<ImportModel> Convert(IEnumerable<FTMImport> source, IEnumerable<ImportModel> destination, ResolutionContext context)
         {
             return source
                 .Select(item =>
                 {
                     DateTime.TryParse(item.DateImported, out DateTime dt);
 
-                    return new GedFileModel
+                    return new ImportModel
                     {
                         Id = item.Id,
                         FileName = item.FileName,
                         FileSize = item.FileSize,
-                        DateImported = dt
+                        DateImported = dt,
+                        Selected = item.Selected,
+                        UserId = item.UserId
                     };
                 }).ToList();
         }

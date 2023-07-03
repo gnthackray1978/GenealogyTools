@@ -1,17 +1,21 @@
 ﻿using FTMContextNet.Data.Repositories;
+using FTMContextNet.Data.Repositories.GedImports;
 using LoggingLib;
 
 namespace FTMContextNet.Application.Services
 {
     public class CreatePersonsAndMarriages
     {
-        private readonly PersistedCacheRepository _persistedCacheRepository;
+        private readonly IPersistedCacheRepository _persistedCacheRepository;
+        private readonly IPersistedImportCacheRepository _persistedImportCacheRepository;
         private readonly GedRepository _gedRepository;
         private readonly Ilog _ilog;
 
-        public CreatePersonsAndMarriages(PersistedCacheRepository persistedCacheRepository,
+        public CreatePersonsAndMarriages(IPersistedCacheRepository persistedCacheRepository,
+            IPersistedImportCacheRepository persistedImportCacheRepository,
             GedRepository gedRepository, Ilog outputHandler) {
             _persistedCacheRepository = persistedCacheRepository;
+            _persistedImportCacheRepository = persistedImportCacheRepository;
             _gedRepository = gedRepository;
             _ilog = outputHandler;
         }
@@ -22,7 +26,7 @@ namespace FTMContextNet.Application.Services
             
             var gedDb =_gedRepository.ParseLabelledTree();
 
-            var importData = _persistedCacheRepository.AddImportRecord(gedDb.FileName, gedDb.FileSize);
+            var importData = _persistedImportCacheRepository.AddImportRecord(gedDb.FileName, gedDb.FileSize,false,1);
             
             foreach (var id in importData.CurrentId)
             {
@@ -30,7 +34,7 @@ namespace FTMContextNet.Application.Services
 
                 _persistedCacheRepository.DeleteMarriages(id);
 
-                _persistedCacheRepository.DeleteImport(id);
+                _persistedImportCacheRepository.DeleteImport(id);
             }
              
             _persistedCacheRepository.SavePersons(importData.NextId, gedDb.Persons);
