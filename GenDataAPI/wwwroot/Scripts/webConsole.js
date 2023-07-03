@@ -2,22 +2,6 @@
 
 }
 
-//var printOutput = (message) => {
-//    wc.printOutputLine(message);
-//};
-
-//var printTrace = (message) => {
-//    wc.printTrace(message);
-//};
-
-//var printTraceLine = (message) => {
-//    wc.printTraceLine(message);
-//};
-
-//var printErrorLine = (message) => {
-//    wc.printErrorLine(message);
-//};
-
 WebConsole.prototype = {
     printOutputLine: function (message) {
 
@@ -77,18 +61,34 @@ WebConsole.prototype = {
         document.getElementById("notfoundCount").innerHTML = 'Not Found: ' + statsObject.notFound;
     },
 
-    displayGedStats: function (statsObject) { 
+    displayGedStats: function (statsObject,appObj) { 
         console.log('displayGedStats called');
+        $('.del-ged-row').unbind('click');
+        $('.sel-ged-row').unbind('click');
+        $('#ged-file-list-body').empty();
 
         statsObject.forEach(function(current) {
             var dateImported = current.dateImported;
             var fileName = current.fileName;
             var fileSize = current.fileSize;
-            $('#ged-file-list').append('<tr><td class = "tdFileName">'
-                + fileName + '</td><td class = "tdFileSize">'
-                + fileSize + '</td><td class = "tdDate">'
-                + dateImported + '</td><td><a href= "#">Delete</a></td><td><a href= "#">Select</a></td></tr>');
+            var rowSelected = '<tr class = "selectedRow">';
+            var rowUnSelected = '<tr class = "unselectedRow">';
+
+            $('#ged-file-list').append((current.selected ? rowSelected : rowUnSelected)
+                + '<td><a data-id= "' + current.id + '" class = "sel-ged-row" href= "#">' + fileName + '</a></td>'
+                + '<td class = "tdFileSize">' + fileSize + '</td>'
+                + '<td class = "tdDate">'+ dateImported + '</td>'
+                + '<td><a data-id= "'+ current.id +'" class = "del-ged-row" href= "#">Delete</a></td>'
+                + '</tr>');
         });
+
+        $('.del-ged-row').bind('click', (x) => {
+            appObj.deleteGed($(x.currentTarget).data('id'));
+        });
+        $('.sel-ged-row').bind('click', (x) => {
+            appObj.selectGed($(x.currentTarget).data('id'));
+        }
+        );
     },
 
     printGeoCodeProgressCount: function (number) {  

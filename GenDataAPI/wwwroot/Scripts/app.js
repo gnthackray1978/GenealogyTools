@@ -28,6 +28,40 @@ PlaceObj.prototype = {
         return true;
     },
 
+    deleteGed: function (id) {
+        
+        var that = this;
+         
+        $.ajax({
+            type: "delete",
+            url: "/ged/delete",
+            contentType: "application/json",
+            dataType: "json",
+            data: JSON.stringify(id),
+            success: function (response) {
+                that.displayGedStats();
+            }
+
+        });
+    },
+
+    selectGed: function (id) {
+        
+        var that = this;
+ 
+        $.ajax({
+            type: "put",
+            url: "/ged/select", // "/api/controllerName/methodName"
+            contentType: "application/json",
+            dataType: "json",
+            data: JSON.stringify(id),
+            success: function (response) {
+                that.displayGedStats();
+            }
+
+        });
+    },
+
     displayGedStats: function () {
         var that = this;
 
@@ -35,7 +69,7 @@ PlaceObj.prototype = {
             url: "./info/gedfiles/",
             type: "get", //send it through get method            
             success: function (result) {
-                that.console.displayGedStats(result);
+                that.console.displayGedStats(result, that);
             },
             error: function (xhr) {
                 //Do Something to handle error
@@ -78,17 +112,6 @@ PlaceObj.prototype = {
             var fileUpload = $("#gedUpload").get(0);
             var files = fileUpload.files;
 
-            // Create FormData object  
-            //var data = new FormData();
-
-            //// Looping over all files and add it to FormData object  
-            //for (var i = 0; i < files.length; i++) {
-            //    data.append(files[i].name, files[i]);
-
-            //}
-
-          //  var files = input.files;
-
             var formData = new FormData();
             var tags = '';
 
@@ -107,7 +130,7 @@ PlaceObj.prototype = {
                 processData: false, // Not to process data  
                 data: formData,
                 success: function (result) {
-                    alert(result);
+                    that.displayGedStats();
                 },
                 error: function (err) {
                     alert(err.statusText);

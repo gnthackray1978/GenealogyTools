@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using ConfigHelper;
 using FTMContextNet;
+using FTMContextNet.Application.Models.Create;
 using GenDataAPI.Hub;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -30,23 +28,47 @@ public partial class GedController : ControllerBase
 
     [HttpPost]
     [Route("/ged/add")]
-    public ActionResult UploadFiles([FromForm] Payload payload)
+    public ActionResult UploadFiles([FromForm] FilePayload filePayload)
     {
-        long size = payload.Files.Sum(f => f.Length);
-
-        // full path to file in temp location
-        var filePath = Path.GetTempFileName();
-
-        var f = payload.Files.FirstOrDefault();
-        var n = payload.Tags.Split('|').FirstOrDefault();
-
-        if (f != null && n != null)
-        {            
-            using var stream = new FileStream(Path.Combine(Path.GetTempPath(), n), FileMode.Create);
-
-            f.CopyToAsync(stream);
+        long size = 0;
+        string fileName = "";
+        
+        try
+        {
+            size = FilePayload.ExtractFile(filePayload, out fileName);
         }
+        catch (Exception e)
+        {
+            return NotFound(e.Message);
+        }
+        
+        if (size == 0)
+        {
+            return NoContent();
+        }
+ 
+        return this.ConvertResult(_facade.CreateImport(new CreateImportModel
+        {
+            Selected = false,
+            FileName = fileName,
+            FileSize = size,
+        }));
+        
+    }
 
-        return Ok();
+    [HttpPut]
+    [Route("/ged/select")]
+    public ActionResult SelectGed([FromBody] int importId)
+    { 
+        return this.ConvertResult(_facade.SelectImport(importId));
+    }
+
+    [HttpDelete]
+    [Route("/ged/delete")]
+    public ActionResult DeleteGed([FromBody]int importId)
+    {
+        if (importId == 42) return Ok();
+
+        return this.ConvertResult(_facade.DeleteImport(importId));
     }
 }

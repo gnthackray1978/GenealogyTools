@@ -21,8 +21,6 @@
 
     <script src="./Scripts/signalWrapper.js"></script>
 
-    <script src="./Scripts/signalWrapper.js"></script>
-
     <script src="./Scripts/webConsole.js"></script>
     
     <script src="./Scripts/tabs.js"></script>
@@ -97,7 +95,7 @@
             <div class="col subheader">GED Files</div>
         </div>
         <div class="row">
-            <input type="file" id="gedUpload" />
+            <input class="buttonLeftMargin" type="file" id="gedUpload" />
             <div class="col"><a href="#Foo" onclick="p.importGed();">1. Import GED File</a></div>
         </div>
 
@@ -109,9 +107,10 @@
                             <th>Name</th>
                             <th>Size</th>
                             <th>Date Imported</th>
+                            <th>Operation</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="ged-file-list-body">
                     </tbody>
                 </table>
             </div>

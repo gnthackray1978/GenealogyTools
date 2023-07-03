@@ -41,9 +41,9 @@ namespace GenDataAPI.Controllers
 
         [HttpGet]
         [Route("/info/gedfiles")]
-        public IEnumerable<GedFileModel> GetGedFileInfo()
+        public IEnumerable<ImportModel> GetGedFileInfo()
         {
-            return _facade.GetGedFileInfo();
+            return _facade.ReadImports();
         }
     }
 }

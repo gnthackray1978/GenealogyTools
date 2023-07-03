@@ -21,3 +21,14 @@
 .tdDate {
     width: 250px;
 }
+
+.buttonLeftMargin {
+    margin-left: 15px;
+}
+
+.selectedRow {
+    background-color: red
+}
+.unselectedRow {
+    background-color: white
+}
