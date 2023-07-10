@@ -8,14 +8,14 @@ namespace FTMContextNet.Domain.Entities.NonPersistent.Matches
     {
         public List<Group> Groups { get; set; } = new List<Group>();
 
-        public Group FindByPersonId(int personId)
+        public Group FindById(int personId)
         {
             return Groups.FirstOrDefault(matchGroup => matchGroup.Contains(personId));
         }
 
-        public Group CreateGroup(int personId, string origin, int yearFrom)
+        public Group CreateGroup(Item item)
         {
-            var newGroup = Group.Create(Groups.Count + 1, personId, origin, yearFrom);
+            var newGroup = Group.Create(Groups.Count + 1, item);
 
             return newGroup;
         }
@@ -28,7 +28,7 @@ namespace FTMContextNet.Domain.Entities.NonPersistent.Matches
             }
         }
 
-        public void SaveGroup(Group group)
+        public void WriteGroup(Group group)
         {
             bool groupExists= false;
 

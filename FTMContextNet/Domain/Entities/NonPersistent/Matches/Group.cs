@@ -12,21 +12,14 @@ namespace FTMContextNet.Domain.Entities.NonPersistent.Matches
 
         public List<Item> Items { get; set; }
 
-        public static Group Create(int id,  int personId, string origin, int yearFrom)
+        public static Group Create(int id, Item item)
         {
             var mg = new Group
             {
                 Id = id,
             };
-            mg.Items.Add(new Item
-            {
-                Origin = origin,
-                PersonId = personId,
-                YearFrom = yearFrom
-
-            });
-             
-
+            mg.Items.Add(item);
+            
             return mg;
         }
         
@@ -34,16 +27,19 @@ namespace FTMContextNet.Domain.Entities.NonPersistent.Matches
             Items = new List<Item>(); 
         }
 
-        public void AddPerson(int personId, string origin, int yearFrom)
+        public void AddRange(IEnumerable<Item> items)
         {
-            if (!ContainsOrigin(origin))
+            foreach (var item in items)
             {
-                Items.Add(new Item
-                {
-                    Origin = origin,
-                    PersonId = personId,
-                    YearFrom = yearFrom
-                });
+                Add(item);
+            }
+        }
+
+        public void Add(Item item)
+        {
+            if (!ContainsOrigin(item.Origin))
+            {
+               Items.Add(item);
             }
         }
 

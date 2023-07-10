@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FTMContextNet.Domain.ExtensionMethods;
+using System;
 
 namespace FTMContextNet.Domain.Entities.NonPersistent.Gedcom
 {

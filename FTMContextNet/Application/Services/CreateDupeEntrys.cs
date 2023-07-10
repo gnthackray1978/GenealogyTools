@@ -23,21 +23,27 @@ namespace FTMContextNet.Application.Services
             _auth = auth;
         }
 
-        public static bool ContainsPair(List<string> testItem, List<IgnoreList> ignoreList)
+        public static bool ContainsPair(string nameA,string nameB, List<IgnoreList> ignoreList)
         {
+            var matchPair = new List<string>
+            {
+                nameA,
+                nameB
+            };
+
             foreach (var ignoreItem in ignoreList)
             {
-                if (ignoreItem.Person1.ToLower().Trim() == testItem[0].ToLower().Trim() && ignoreItem.Person2.ToLower().Trim() == testItem[1].ToLower().Trim())
+                if (ignoreItem.Person1.ToLower().Trim() == matchPair[0].ToLower().Trim() && ignoreItem.Person2.ToLower().Trim() == matchPair[1].ToLower().Trim())
                 {
                     return true;
                 }
             }
 
-            testItem.Reverse();
+            matchPair.Reverse();
 
             foreach (var ignoreItem in ignoreList)
             {
-                if (ignoreItem.Person1.ToLower().Trim() == testItem[0].ToLower().Trim() && ignoreItem.Person2.ToLower().Trim() == testItem[1].ToLower().Trim())
+                if (ignoreItem.Person1.ToLower().Trim() == matchPair[0].ToLower().Trim() && ignoreItem.Person2.ToLower().Trim() == matchPair[1].ToLower().Trim())
                 {
                     return true;
                 }
@@ -80,11 +86,28 @@ namespace FTMContextNet.Application.Services
 
                 // if this person is in a existing group
                 // get that group
-                var mg = groupCollection.FindByPersonId(cp.Id) ?? groupCollection.CreateGroup(cp.Id, cp.Fact.Origin, cp.Fact.BirthYearFrom);
 
-                AddIfMatch(comparisonPersons, cp, mg, ignoreList);
 
-                groupCollection.SaveGroup(mg);
+
+                var mg = groupCollection.FindById(cp.Id) ?? groupCollection.CreateGroup(new Item
+                {
+                    PersonId = cp.Id, 
+                    Origin = cp.Fact.Origin, 
+                    YearFrom = cp.Fact.BirthYearFrom
+                });
+                
+                mg.AddRange(comparisonPersons
+                    .Where(w => w.Equals(cp)
+                                && !ContainsPair(w.Fact.Surname, cp.Fact.Surname, ignoreList)
+                                && !mg.Contains(w.Id)).Select(s =>
+                        new Item
+                        {
+                            Origin = s.Fact.Origin,
+                            PersonId = s.Id,
+                            YearFrom = s.Fact.BirthYearFrom
+                        }));
+
+                groupCollection.WriteGroup(mg);
 
 
                 idx++;
@@ -113,48 +136,6 @@ namespace FTMContextNet.Application.Services
 
             _persistedCacheRepository.AddDupeEntrys(tp,_auth.GetUser());
         }
-
-        private static void AddIfMatch(List<PersonDupeSearchSubset> comparisonPersons,
-            PersonDupeSearchSubset cp, Group mg, List<IgnoreList> ignoreList)
-        {
-            foreach (var p in comparisonPersons
-                                .Where(w => w.FamilyName == cp.FamilyName
-                                          && w.GivenName == cp.GivenName
-                                          && cp.Fact != null
-                                          && w.Fact != null
-                                          && !mg.Contains(w.Id)))
-            {
-
-                var yearMatch = cp.Fact.MatchBirthYear(p.Fact);
-                    
-                var locationMatch = cp.Fact.MatchLocations(p.Fact);
-
-                var originMatch = cp.Fact.Origin == p.Fact.Origin;
-
-                //p.FamilyName
-                //cp.FamilyName
-
-                var matchPair = new List<string>
-                {
-                    p.Fact.Surname,
-                    cp.Fact.Surname
-                };
-
-                var surnameCheck = ContainsPair(matchPair, ignoreList);
-
-                // var surnameCheck = cp.Fact.DoubleCheckSurname(p.Fact);
-
-                if (yearMatch && locationMatch && !originMatch && !surnameCheck)
-                {
-
-                    mg.AddPerson(p.Id, p.Fact.Origin, p.Fact.BirthYearFrom);
-
-                }
-
-            }
-        }
-
-
-
+        
     }
 }

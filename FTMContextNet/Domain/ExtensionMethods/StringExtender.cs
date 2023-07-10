@@ -1,4 +1,4 @@
-﻿namespace FTMContextNet
+﻿namespace FTMContextNet.Domain.ExtensionMethods
 {
     public static class StringExtender
     {
