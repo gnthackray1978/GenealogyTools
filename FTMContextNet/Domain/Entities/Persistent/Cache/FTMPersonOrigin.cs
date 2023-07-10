@@ -5,10 +5,9 @@
         public int Id { get; set; }
         public int PersonId { get; set; }
         public string Origin { get; set; }
-
         public bool DirectAncestor { get; set; }
-
         public int ImportId { get; set; }
+        public int UserId { get; set; }
 
     }
 }

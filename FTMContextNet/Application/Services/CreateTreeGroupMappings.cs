@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using FTMContextNet.Data.Repositories;
+using FTMContextNet.Domain.Auth;
 using LoggingLib;
 
 namespace FTMContextNet.Application.Services
@@ -13,12 +14,14 @@ namespace FTMContextNet.Application.Services
     {
         private static readonly SemaphoreSlim RateLimit = new SemaphoreSlim(1,1);
         private readonly IPersistedCacheRepository _persistedCacheRepository;
+        private readonly IAuth _auth;
         private readonly Ilog _ilog;
 
-        public CreateTreeGroupMappings(IPersistedCacheRepository persistedCacheRepository, Ilog outputHandler)
+        public CreateTreeGroupMappings(IPersistedCacheRepository persistedCacheRepository,IAuth auth, Ilog outputHandler)
         {
             _persistedCacheRepository = persistedCacheRepository;
             _ilog = outputHandler;
+            _auth = auth;
         }
 
 
@@ -42,7 +45,7 @@ namespace FTMContextNet.Application.Services
                 {
                     foreach (var mapping in grp.Value)
                     {
-                        _persistedCacheRepository.SaveTreeRecordMapGroup(idx, mapping, grp.Key);
+                        _persistedCacheRepository.InsertTreeRecordMapGroup(idx, mapping, grp.Key, _auth.GetUser());
 
                         idx++;
                     }

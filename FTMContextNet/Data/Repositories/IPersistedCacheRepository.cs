@@ -20,14 +20,14 @@ public interface IPersistedCacheRepository
     void DeleteRecordMapGroups();
     void DeleteOrigins();
     List<string> MakePlaceRecordCache();
-    void CreatePersonOriginEntries(int importId);
+    void CreatePersonOriginEntries(int importId, int userId);
     List<IgnoreList> GetIgnoreList();
     List<PersonDupeSearchSubset> GetComparisonPersons();
 
 
-    void AddDupeEntrys(List<KeyValuePair<int, string>> dupes);
+    void AddDupeEntrys(List<KeyValuePair<int, string>> dupes, int userId);
     int OriginPersonCount();
-    Info GetInfo();
+    Info GetInfo(int userId);
 
     /// <summary>
     /// Updates treerecords table in cache. 
@@ -36,10 +36,10 @@ public interface IPersistedCacheRepository
     /// </summary>
     void PopulateTreeRecordsFromCache();
 
-    int SaveTreeGroups(int nextId, string treeGroup);
-    int SaveTreeRecordMapGroup(int nextId, string treeGroup, string treeName);
-    void SavePersons(int importId, List<Person> persons);
-    void SaveMarriages(int importId, List<RelationSubSet> marriages);
+    int InsertTreeGroups(int nextId, string treeGroup, int userId);
+    int InsertTreeRecordMapGroup(int nextId, string treeGroup, string treeName, int userId);
+    void InsertPersons(int importId,int userId, List<Person> persons);
+    void InsertMarriages(int importId,int userId,  List<RelationSubSet> marriages);
     int GetMyId();
     Dictionary<string, List<string>> GetGroups();
     Dictionary<int, string> GetRootNameDictionary();

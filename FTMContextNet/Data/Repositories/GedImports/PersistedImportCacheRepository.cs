@@ -83,5 +83,8 @@ public class PersistedImportCacheRepository : IPersistedImportCacheRepository
         return importData;
     }
 
-
+    public int GetCurrentImportId()
+    {
+        return _persistedCacheContext.FTMImport.FirstOrDefault(f => f.Selected)?.Id ?? -1;
+    }
 }

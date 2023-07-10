@@ -22,9 +22,7 @@ namespace FTMContextNet.Data.Repositories
             _persistedCacheContext = persistedCacheContext;
             _iLog = iLog;
         }
-
- 
-         
+        
         public List<string> DumpCount()
         {
 
@@ -136,7 +134,7 @@ namespace FTMContextNet.Data.Repositories
             return comparisonPersons;
         }
 
-        public void CreatePersonOriginEntries(int importId)
+        public void CreatePersonOriginEntries(int importId, int userId)
         {
             DeleteOrigins();
 
@@ -151,7 +149,7 @@ namespace FTMContextNet.Data.Repositories
                     ImportId = importId
                 }).ToList();
  
-            _persistedCacheContext.BulkInsertFTMPersonOrigins(1,1, recordsToSave.OrderBy(o => o.Origin).ToList());
+            _persistedCacheContext.BulkInsertFTMPersonOrigins(1, importId, userId, recordsToSave.OrderBy(o => o.Origin).ToList());
         
         }
 
@@ -198,7 +196,7 @@ namespace FTMContextNet.Data.Repositories
 
 
 
-        public void AddDupeEntrys(List<KeyValuePair<int, string>> dupes)
+        public void AddDupeEntrys(List<KeyValuePair<int, string>> dupes, int userId)
         {
            var dupeId = _persistedCacheContext.DupeEntries.Count() + 1;
 
@@ -219,36 +217,32 @@ namespace FTMContextNet.Data.Repositories
                     Origin = fpvPerson.Origin,
                     Location = Location.FormatPlace(fpvPerson.BirthLocation),
                     ChristianName = fpvPerson.FirstName,
-                    Surname = fpvPerson.Surname
+                    Surname = fpvPerson.Surname,
+                    UserId = userId
                 };
 
                 _persistedCacheContext.DupeEntries.Add(dupeEntry);
 
                 dupeId++;
-            }
+           }
 
-            _persistedCacheContext.SaveChanges();
+           _persistedCacheContext.SaveChanges();
 
         }
 
-        public int OriginPersonCount() {
-            
-            int idx = _persistedCacheContext.FTMPersonOrigins.Count() + 1;
-
-
-            return idx;
+        public int OriginPersonCount() 
+        {
+            return _persistedCacheContext.FTMPersonOrigins.Count() + 1;
         }
 
         public void UpdatePersons(int personId, string lat, string lng, string altLat, string altLng)
         {
             _persistedCacheContext.UpdatePersonLocations(personId,lng,lat,altLng,altLat);
         }
-
-
-
+        
         #region debug data
 
-        public Info GetInfo() {
+        public Info GetInfo(int userId) {
             
             var pCount = _persistedCacheContext.FTMPersonView.Count();
             var mcount = _persistedCacheContext.FTMMarriages.Count();
@@ -290,33 +284,32 @@ namespace FTMContextNet.Data.Repositories
             _iLog.WriteLine("Created " + _persistedCacheContext.BulkInsertTreeRecords(treeRecords)+ " tree records");
         }
         
-        public int SaveTreeGroups(int nextId, string treeGroup)
+        public int InsertTreeGroups(int nextId, string treeGroup, int userId)
         {
-            return _persistedCacheContext.InsertGroups(nextId, treeGroup);
+            return _persistedCacheContext.InsertGroups(nextId, treeGroup, userId);
+        }
+        
+        public int InsertTreeRecordMapGroup(int nextId, string treeGroup, string treeName, int userId)
+        {
+            return _persistedCacheContext.InsertRecordMapGroup(nextId, treeGroup, treeName, userId);
         }
 
-        public int SaveTreeRecordMapGroup(int nextId, string treeGroup, string treeName)
-        {
-            return _persistedCacheContext.InsertRecordMapGroup(nextId, treeGroup, treeName);
-        }
-
-        public void SavePersons(int importId, List<Person> persons)
+        public void InsertPersons(int importId,int userId, List<Person> persons)
         {
             var nextId = _persistedCacheContext.FTMPersonView.Count()+1;
             
             var ftmPersons = persons.Select(person => FTMPersonView.Create(person)).ToList();
 
-            _persistedCacheContext.BulkInsertFTMPersonView(nextId, importId, ftmPersons);
+            _persistedCacheContext.BulkInsertFTMPersonView(nextId, importId,userId, ftmPersons);
         }
 
-       
-        public void SaveMarriages(int importId, List<RelationSubSet> marriages)
+        public void InsertMarriages(int importId,int userId, List<RelationSubSet> marriages)
         {
             var nextId = _persistedCacheContext.FTMMarriages.Count() + 1;
              
             var ftmPersons = marriages.Select(person => FTMMarriage.Create(person)).ToList();
 
-            _persistedCacheContext.BulkInsertMarriages(nextId, importId, ftmPersons);
+            _persistedCacheContext.BulkInsertMarriages(nextId, importId,userId, ftmPersons);
         }
 
         public int GetMyId()

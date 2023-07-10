@@ -4,26 +4,18 @@ using FTMContext;
 
 namespace FTMContextNet.Domain.Entities.NonPersistent.Matches
 {
-    public class MatchGroups
+    public class GroupCollection
     {
-        public List<MatchGroup> Groups { get; set; } = new List<MatchGroup>();
+        public List<Group> Groups { get; set; } = new List<Group>();
 
-        public MatchGroup FindByPersonId(int personId)
+        public Group FindByPersonId(int personId)
         {
-            foreach (var matchGroup in Groups)
-            {
-                if (matchGroup.Contains(personId))
-                {
-                    return matchGroup;
-                }
-            }
-
-            return null;
+            return Groups.FirstOrDefault(matchGroup => matchGroup.Contains(personId));
         }
 
-        public MatchGroup CreateGroup(int personId, string origin, int yearFrom)
+        public Group CreateGroup(int personId, string origin, int yearFrom)
         {
-            var newGroup = MatchGroup.Create(Groups.Count + 1, personId, origin, yearFrom);
+            var newGroup = Group.Create(Groups.Count + 1, personId, origin, yearFrom);
 
             return newGroup;
         }
@@ -36,13 +28,13 @@ namespace FTMContextNet.Domain.Entities.NonPersistent.Matches
             }
         }
 
-        public void SaveGroup(MatchGroup group)
+        public void SaveGroup(Group group)
         {
             bool groupExists= false;
 
             Groups.ForEach(f=>
             {
-                if (f.ID == @group.ID)
+                if (f.Id == @group.Id)
                 {
                     groupExists = true;
                 }
@@ -50,7 +42,7 @@ namespace FTMContextNet.Domain.Entities.NonPersistent.Matches
 
 
             //if it's a new group and we found dupes
-            if (group.Persons.Count() > 1 && !groupExists)
+            if (group.Items.Count() > 1 && !groupExists)
             {
                 Groups.Add(group);
             }

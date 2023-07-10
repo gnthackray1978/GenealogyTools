@@ -8,5 +8,7 @@
 
         public int ImportId { get; set; }
 
+        public int UserId { get; set; }
+
     }
 }

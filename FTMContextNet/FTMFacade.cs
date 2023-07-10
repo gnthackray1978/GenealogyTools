@@ -140,8 +140,8 @@ namespace FTMContextNet
             var persistedImportedCacheRepository = new PersistedImportCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
 
             var gr = new GedRepository(_outputHandler, new GedParser(new NodeTypeCalculator(), _iMSGConfigHelper.GedPath));
-
-            var createPersonsAndMarriages = new CreatePersonsAndMarriages(persistedCacheRepository, persistedImportedCacheRepository, gr, _outputHandler);
+           
+            var createPersonsAndMarriages = new CreatePersonsAndMarriages(persistedCacheRepository, persistedImportedCacheRepository, gr, new Auth(), _outputHandler);
 
             createPersonsAndMarriages.Execute();
         }
@@ -150,7 +150,7 @@ namespace FTMContextNet
         {
             var persistedCacheRepository = new PersistedCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
 
-            var createDupeEntrys = new CreateDupeEntrys(persistedCacheRepository, _outputHandler);
+            var createDupeEntrys = new CreateDupeEntrys(persistedCacheRepository, new Auth(), _outputHandler);
 
             createDupeEntrys.Execute();
 
@@ -160,8 +160,10 @@ namespace FTMContextNet
         public void CreatePersonOrigins()
         {
             var persistedCacheRepository = new PersistedCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
+            var importCacheRepository = new PersistedImportCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
+            
 
-            var createPersonOrigin = new CreatePersonOrigin(persistedCacheRepository, _outputHandler);
+            var createPersonOrigin = new CreatePersonOrigin(persistedCacheRepository, importCacheRepository,new Auth(), _outputHandler);
 
             createPersonOrigin.Execute();
 
@@ -183,8 +185,8 @@ namespace FTMContextNet
         public void CreateTreeGroups()
         {
             var persistedCacheRepository = new PersistedCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
-
-            var ctr = new CreateTreeGroups(persistedCacheRepository, _outputHandler);
+            
+            var ctr = new CreateTreeGroups(persistedCacheRepository,new Auth(), _outputHandler);
 
             ctr.Execute();
         }
@@ -192,8 +194,8 @@ namespace FTMContextNet
         public void CreateTreeGroupMappings()
         {
             var persistedCacheRepository = new PersistedCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
-
-            var ctr = new CreateTreeGroupMappings(persistedCacheRepository, _outputHandler);
+            
+            var ctr = new CreateTreeGroupMappings(persistedCacheRepository, new Auth(), _outputHandler);
 
             ctr.Execute();
 
@@ -204,8 +206,9 @@ namespace FTMContextNet
         public InfoModel GetInfo() 
         {
             var persistedCacheRepository = new PersistedCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
-            
-            var tp = new GetInfoService(persistedCacheRepository, _outputHandler, _mapper);
+            var auth = new Auth();
+
+            var tp = new GetInfoService(persistedCacheRepository, _outputHandler, _mapper,auth);
 
             return tp.Execute();
         }

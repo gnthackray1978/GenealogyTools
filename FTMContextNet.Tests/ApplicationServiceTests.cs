@@ -4,6 +4,7 @@ using FTMContextNet.Application.Services;
 using FTMContextNet.Data;
 using FTMContextNet.Data.Repositories;
 using FTMContextNet.Data.Repositories.GedImports;
+using FTMContextNet.Domain.Auth;
 using FTMContextNet.Domain.Entities.NonPersistent;
 using FTMContextNet.Domain.Entities.Persistent.Cache;
 using LoggingLib;
@@ -36,7 +37,7 @@ public class ApplicationServiceTests
         var mapper = config.CreateMapper();
 
         this._mockPersistedCacheRepository
-            .Setup(s => s.GetInfo())
+            .Setup(s => s.GetInfo(1))
             .Returns(new Info()
             {
                 BadLocationsCount = 1,
@@ -44,7 +45,7 @@ public class ApplicationServiceTests
                 MarriagesCount = 3
             });
 
-        var gis = new GetInfoService(_mockPersistedCacheRepository.Object, _mockLog.Object, mapper);
+        var gis = new GetInfoService(_mockPersistedCacheRepository.Object, _mockLog.Object, mapper, new Auth());
 
         var mod =  gis.Execute();
 

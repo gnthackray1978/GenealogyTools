@@ -42,5 +42,7 @@ namespace FTMContextNet.Domain.Entities.Persistent.Cache
         public bool Located { get; set; }
 
         public int ImportId { get; set; }
+
+        public int UserId { get; set; }
     }
 }

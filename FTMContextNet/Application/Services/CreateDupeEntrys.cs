@@ -3,6 +3,7 @@ using FTMContextNet.Data.Repositories;
 using LoggingLib;
 using System.Collections.Generic;
 using System.Linq;
+using FTMContextNet.Domain.Auth;
 using FTMContextNet.Domain.Entities.NonPersistent.Matches;
 using FTMContextNet.Domain.Entities.Persistent.Cache;
 
@@ -10,15 +11,16 @@ namespace FTMContextNet.Application.Services
 {
     public class CreateDupeEntrys
     {
-        private readonly PersistedCacheRepository _persistedCacheRepository;
+        private readonly IPersistedCacheRepository _persistedCacheRepository;
         private readonly Ilog _ilog;
-
+        private readonly IAuth _auth;
         
-        public CreateDupeEntrys(PersistedCacheRepository persistedCacheRepository, Ilog outputHandler)
+        public CreateDupeEntrys(IPersistedCacheRepository persistedCacheRepository, IAuth auth,
+            Ilog outputHandler)
         {
             _persistedCacheRepository = persistedCacheRepository;
             _ilog = outputHandler;
-
+            _auth = auth;
         }
 
         public static bool ContainsPair(List<string> testItem, List<IgnoreList> ignoreList)
@@ -50,7 +52,7 @@ namespace FTMContextNet.Application.Services
 
             _ilog.WriteLine("Executing Create Dupe Entries");
 
-            var matchGroups = new MatchGroups();
+            var groupCollection = new GroupCollection();
 
             var comparisonPersons = _persistedCacheRepository.GetComparisonPersons();
 
@@ -78,42 +80,42 @@ namespace FTMContextNet.Application.Services
 
                 // if this person is in a existing group
                 // get that group
-                var mg = matchGroups.FindByPersonId(cp.Id) ?? matchGroups.CreateGroup(cp.Id, cp.Fact.Origin, cp.Fact.BirthYearFrom);
+                var mg = groupCollection.FindByPersonId(cp.Id) ?? groupCollection.CreateGroup(cp.Id, cp.Fact.Origin, cp.Fact.BirthYearFrom);
 
                 AddIfMatch(comparisonPersons, cp, mg, ignoreList);
 
-                matchGroups.SaveGroup(mg);
+                groupCollection.SaveGroup(mg);
 
 
                 idx++;
             }
 
-            _ilog.WriteLine("Found: " + matchGroups.Groups.Count());
+            _ilog.WriteLine("Found: " + groupCollection.Groups.Count());
 
-            matchGroups.SetAggregates();
+            groupCollection.SetAggregates();
 
 
            
             var tp = new List<KeyValuePair<int, string>>();
 
-            foreach (var group in matchGroups.Groups.GroupBy(g => g.IncludedTrees))
+            foreach (var group in groupCollection.Groups.GroupBy(g => g.IncludedTrees))
             {
                 _ilog.WriteCounter(group.Key);
 
                 var p = group.OrderByDescending(o => o.LatestTree).First();
 
-                foreach (var person in p.Persons)
+                foreach (var person in p.Items)
                 {                    
                     tp.Add(new KeyValuePair<int, string>(person.PersonId, group.Key));
                 }
                
             }
 
-            _persistedCacheRepository.AddDupeEntrys(tp);
+            _persistedCacheRepository.AddDupeEntrys(tp,_auth.GetUser());
         }
 
         private static void AddIfMatch(List<PersonDupeSearchSubset> comparisonPersons,
-            PersonDupeSearchSubset cp, MatchGroup mg, List<IgnoreList> ignoreList)
+            PersonDupeSearchSubset cp, Group mg, List<IgnoreList> ignoreList)
         {
             foreach (var p in comparisonPersons
                                 .Where(w => w.FamilyName == cp.FamilyName

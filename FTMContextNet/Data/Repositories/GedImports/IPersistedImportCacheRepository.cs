@@ -6,6 +6,8 @@ namespace FTMContextNet.Data.Repositories.GedImports;
 
 public interface IPersistedImportCacheRepository
 {
+    int GetCurrentImportId();
+
     ImportData AddImportRecord(string fileName, double fileSize, bool selected, int userId);
 
     int SelectImport(int importId, int userId);

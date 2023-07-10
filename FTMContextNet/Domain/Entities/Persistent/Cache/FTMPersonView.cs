@@ -68,5 +68,7 @@ namespace FTMContextNet.Domain.Entities.Persistent.Cache
         public bool RootPerson { get; set; }
 
         public bool LinkNode { get; set; }
+
+        public int UserId { get; set; }
     }
 }

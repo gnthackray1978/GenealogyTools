@@ -3,21 +3,22 @@ using System.Linq;
 
 namespace FTMContextNet.Domain.Entities.NonPersistent.Matches
 {
-    public class MatchGroup {
+    public class Group {
         public string IncludedTrees { get; set; }
         
-        public int ID { get; set; }
+        public int Id { get; set; }
 
         public int LatestTree { get; set; }
-        
 
-        public static MatchGroup Create(int id,  int personId, string origin, int yearFrom)
+        public List<Item> Items { get; set; }
+
+        public static Group Create(int id,  int personId, string origin, int yearFrom)
         {
-            var mg = new MatchGroup
+            var mg = new Group
             {
-                ID = id,
+                Id = id,
             };
-            mg.Persons.Add(new MatchPerson
+            mg.Items.Add(new Item
             {
                 Origin = origin,
                 PersonId = personId,
@@ -28,18 +29,16 @@ namespace FTMContextNet.Domain.Entities.NonPersistent.Matches
 
             return mg;
         }
-
-
-
-        public MatchGroup() {
-            Persons = new List<MatchPerson>(); 
+        
+        public Group() {
+            Items = new List<Item>(); 
         }
 
         public void AddPerson(int personId, string origin, int yearFrom)
         {
             if (!ContainsOrigin(origin))
             {
-                Persons.Add(new MatchPerson
+                Items.Add(new Item
                 {
                     Origin = origin,
                     PersonId = personId,
@@ -55,7 +54,7 @@ namespace FTMContextNet.Domain.Entities.NonPersistent.Matches
 
             List<string> origins = new List<string>();
 
-            foreach (var p in Persons)
+            foreach (var p in Items)
             {
                 if (p.YearFrom > LatestTree)
                     LatestTree = p.YearFrom;
@@ -69,17 +68,13 @@ namespace FTMContextNet.Domain.Entities.NonPersistent.Matches
             }
              
         }
-
-
-
-        public List<MatchPerson> Persons { get; set; } 
-
+        
         public bool Contains(int personId)
         {
 
             var personExists = false;
 
-            Persons.ForEach(f=>
+            Items.ForEach(f=>
             {
                 if (f.PersonId == personId)
                     personExists = true;
@@ -93,7 +88,7 @@ namespace FTMContextNet.Domain.Entities.NonPersistent.Matches
 
             var originExists = false;
 
-            Persons.ForEach(f =>
+            Items.ForEach(f =>
             {
                 if (f.Origin == origin)
                     originExists = true;
@@ -101,8 +96,6 @@ namespace FTMContextNet.Domain.Entities.NonPersistent.Matches
 
             return originExists;
         }
-
-
-
+        
     }
 }

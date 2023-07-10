@@ -1,6 +1,6 @@
 ﻿namespace FTMContextNet.Domain.Entities.NonPersistent.Matches;
 
-public class MatchPerson
+public class Item
 {
     public int PersonId { get; set; }
     public string Origin { get; set; }

@@ -1,5 +1,6 @@
 ﻿using FTMContextNet.Data.Repositories;
 using FTMContextNet.Data.Repositories.GedImports;
+using FTMContextNet.Domain.Auth;
 using LoggingLib;
 
 namespace FTMContextNet.Application.Services
@@ -10,14 +11,18 @@ namespace FTMContextNet.Application.Services
         private readonly IPersistedImportCacheRepository _persistedImportCacheRepository;
         private readonly GedRepository _gedRepository;
         private readonly Ilog _ilog;
+        private readonly IAuth _auth;
 
         public CreatePersonsAndMarriages(IPersistedCacheRepository persistedCacheRepository,
             IPersistedImportCacheRepository persistedImportCacheRepository,
-            GedRepository gedRepository, Ilog outputHandler) {
+            GedRepository gedRepository,
+            IAuth auth,
+            Ilog outputHandler) {
             _persistedCacheRepository = persistedCacheRepository;
             _persistedImportCacheRepository = persistedImportCacheRepository;
             _gedRepository = gedRepository;
             _ilog = outputHandler;
+            _auth = auth;
         }
 
         public void Execute() {
@@ -37,9 +42,9 @@ namespace FTMContextNet.Application.Services
                 _persistedImportCacheRepository.DeleteImport(id);
             }
              
-            _persistedCacheRepository.SavePersons(importData.NextId, gedDb.Persons);
+            _persistedCacheRepository.InsertPersons(_persistedImportCacheRepository.GetCurrentImportId(), _auth.GetUser(), gedDb.Persons);
             
-            _persistedCacheRepository.SaveMarriages(importData.NextId, gedDb.Relationships);
+            _persistedCacheRepository.InsertMarriages(_persistedImportCacheRepository.GetCurrentImportId(), _auth.GetUser(), gedDb.Relationships);
              
         }
 
