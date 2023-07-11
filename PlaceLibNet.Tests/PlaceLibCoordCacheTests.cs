@@ -1,4 +1,6 @@
 using System.Security.Cryptography.X509Certificates;
+using FTMContextNet.Data.Repositories;
+using PlaceLibNet.Data.Repositories;
 using PlaceLibNet.Domain;
 using PlaceLibNet.Domain.Caching;
 using PlaceLibNet.Domain.Entities;
@@ -52,7 +54,6 @@ public class PlaceLibCoordCacheTests
             new() { Id = 0, Placesort = "hunsingore", Ctyhistnm = "Lincolnshire", Lat ="1", Long = "2"},
             new() { Id = 1, Placesort = "hunsingore", Ctyhistnm = "Yorkshire", Lat ="3", Long = "4"},
             new() { Id = 2, Placesort = "fredblogs", Ctyhistnm = "Lincolnshire", Lat ="5", Long = "6"}
-
         };
 
         var counties = new List<CountyDto>()
@@ -60,7 +61,17 @@ public class PlaceLibCoordCacheTests
             new (){Country = "",County = "yorkshire"}
         };
 
-        var cs = new PlaceLibCoordCache(places, counties, new PlaceNameFormatter());
+        var mockPersistedCacheRepository = new Mock<IPlaceRepository>();
+
+        mockPersistedCacheRepository
+            .Setup(s => s.GetCounties(true))
+            .Returns(counties);
+
+        mockPersistedCacheRepository
+            .Setup(s => s.GetPlaceLibCoords())
+            .Returns(places);
+
+        var cs = new PlaceLibCoordCache(mockPersistedCacheRepository.Object, new PlaceNameFormatter());
 
         List<string> searchTargets = new List<string>() 
             { "tockwith", "hunsingore" };
@@ -87,8 +98,18 @@ public class PlaceLibCoordCacheTests
         {
             new (){Country = "",County = "Yorkshire"}
         };
-        
-        Action a = () => new PlaceLibCoordCache(places, counties, new PlaceNameFormatter());       // null is an invalid argument
+
+        var mockPersistedCacheRepository = new Mock<IPlaceRepository>();
+
+        mockPersistedCacheRepository
+            .Setup(s => s.GetCounties(true))
+            .Returns(counties);
+
+        mockPersistedCacheRepository
+            .Setup(s => s.GetPlaceLibCoords())
+            .Returns(places);
+
+        Action a = () => new PlaceLibCoordCache(mockPersistedCacheRepository.Object, new PlaceNameFormatter());       // null is an invalid argument
         
         a.Should().Throw<InvalidDataException>().WithMessage("Counties collection should be all lowercase");
     }
@@ -109,11 +130,20 @@ public class PlaceLibCoordCacheTests
             new (){Country = "",County = "yorkshire"}
         };
 
+        var mockPersistedCacheRepository = new Mock<IPlaceRepository>();
+
+        mockPersistedCacheRepository
+            .Setup(s => s.GetCounties(true))
+            .Returns(counties);
+
+        mockPersistedCacheRepository
+            .Setup(s => s.GetPlaceLibCoords())
+            .Returns(places);
 
         var searchTargets = new List<string>()
             { "tockwith", "hunsingore" };
 
-        var x = new PlaceLibCoordCache(places, counties, new PlaceNameFormatter());  
+        var x = new PlaceLibCoordCache(mockPersistedCacheRepository.Object, new PlaceNameFormatter());  
 
         var y = x.Search(searchTargets, "yorkshire");
 

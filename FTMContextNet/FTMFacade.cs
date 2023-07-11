@@ -20,6 +20,9 @@ using System;
 using System.Collections.Generic;
 using FTMContextNet.Application.Services.GedImport;
 using FTMContextNet.Data.Repositories.GedImports;
+using FTMContextNet.Domain.Caching;
+using PlaceLibNet.Domain;
+using PlaceLibNet.Domain.Caching;
 
 namespace FTMContextNet
 {
@@ -114,8 +117,18 @@ namespace FTMContextNet
             var placeRepository = new PlaceRepository(new PlacesContext(_iMSGConfigHelper), _outputHandler);
  
             var persistedCacheRepository = new PersistedCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
-            
-            var service = new CreatePersonLocationsInCache(placeRepository, persistedCacheRepository, _outputHandler);
+
+            var personPlaceCache = new PersonPlaceCache(persistedCacheRepository.MakePlaceRecordCache(), new PlaceNameFormatter());
+
+            var placeCache = new PlaceLookupCache(placeRepository.GetCachedPlaces(), new PlaceNameFormatter());
+
+            var placeLibCoordCache = new PlaceLibCoordCache(placeRepository, new PlaceNameFormatter());
+
+            var service = new CreatePersonLocationsInCache(placeRepository, 
+                placeLibCoordCache,
+                personPlaceCache,
+                placeCache,
+                 _outputHandler);
 
             service.Execute();
 

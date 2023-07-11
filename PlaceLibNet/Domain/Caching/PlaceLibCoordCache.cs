@@ -4,12 +4,36 @@ using System.IO;
 using System.Linq;
 using AutoMapper;
 using Misc;
+using PlaceLibNet.Data.Repositories;
 using PlaceLibNet.Domain.Entities;
 
 namespace PlaceLibNet.Domain.Caching
 {
-    public class PlaceLibCoordCache
+    public interface IPlaceLibCoordCache
     {
+        string validateCounty(string county);
+
+        /// <summary>
+        /// Searchs for PlaceSubset with Lat and Long in it for given places and county
+        /// </summary>
+        /// <param name="places">ANY CASE</param>
+        /// <param name="county">ANY CASE</param>
+        /// <returns></returns>
+        PlaceSearchCoordSubset Search(IEnumerable<string> places, string county);
+
+        /// <summary>
+        /// Search place library database
+        /// </summary>
+        /// <param name="placeName">LOWERCASE</param>
+        /// <param name="county">CAMELCASE</param>
+        /// <returns></returns>
+        PlaceSearchCoordSubset PlaceSearchCoordSubset(string placeName, string county);
+    }
+
+    public class PlaceLibCoordCache : IPlaceLibCoordCache
+    {
+        private readonly IPlaceRepository _placeRepository;
+
         private readonly List<PlaceSearchCoordSubset> _places;
 
         private readonly List<CountyDto> _lowerCaseCounties;
@@ -18,14 +42,15 @@ namespace PlaceLibNet.Domain.Caching
         /// <summary>
         /// Places table caching object
         /// </summary>
-        /// <param name="places"></param>
-        /// <param name="lowerCaseCounties">LOWERCASE</param>
+        /// <param name="placeRepository"></param>
         /// <param name="placeNameFormatter"></param>
-        public PlaceLibCoordCache(List<PlaceSearchCoordSubset> places,
-                               List<CountyDto> lowerCaseCounties, 
-                               IPlaceNameFormatter placeNameFormatter)
+        public PlaceLibCoordCache(IPlaceRepository placeRepository, IPlaceNameFormatter placeNameFormatter)
         {
             _placeNameFormatter = placeNameFormatter;
+
+            var places = placeRepository.GetPlaceLibCoords();
+
+            var lowerCaseCounties = placeRepository.GetCounties(true);
 
             if (places == null || lowerCaseCounties== null || placeNameFormatter== null)
                 throw new NullReferenceException();
@@ -45,7 +70,7 @@ namespace PlaceLibNet.Domain.Caching
 
         }
 
-        private string validateCounty(string county)
+        public string validateCounty(string county)
         {
             county = county.ToLower();
 
@@ -88,7 +113,7 @@ namespace PlaceLibNet.Domain.Caching
         /// <param name="placeName">LOWERCASE</param>
         /// <param name="county">CAMELCASE</param>
         /// <returns></returns>
-        private PlaceSearchCoordSubset PlaceSearchCoordSubset(string placeName, string county)
+        public PlaceSearchCoordSubset PlaceSearchCoordSubset(string placeName, string county)
         {
             int placeSearchCoord = _places.BinarySearch(new PlaceSearchCoordSubset()
                 { Placesort = _placeNameFormatter.FormatComponent(placeName) },

@@ -13,18 +13,29 @@ namespace FTMContextNet.Application.Services;
 
 public class CreatePersonLocationsInCache
 { 
-    private readonly PlaceRepository _placeRepository;
+    private readonly IPlaceRepository _placeRepository;
 
-    private readonly PersistedCacheRepository _persistedCacheRepository;
+    private readonly IPersonPlaceCache _personPlaceCache;
+    
+    private readonly IPlaceLookupCache _placeLookupCache;
+
+    private readonly IPlaceLibCoordCache _placeLibCoordCache;
 
     private readonly Ilog _logger;
 
-    public CreatePersonLocationsInCache(PlaceRepository placeRepository, 
-        PersistedCacheRepository persistedCacheRepository, Ilog logger)
+    public CreatePersonLocationsInCache(IPlaceRepository placeRepository,
+        IPlaceLibCoordCache placeLibCoordCache,
+        IPersonPlaceCache personPlaceCache,
+        IPlaceLookupCache placeLookupCache,
+        Ilog logger)
     {
-        _persistedCacheRepository = persistedCacheRepository;
-        
+        _placeLibCoordCache = placeLibCoordCache;
+
+        _personPlaceCache = personPlaceCache;
+
         _placeRepository = placeRepository;
+
+        _placeLookupCache = placeLookupCache;
 
         _logger = logger;
     }
@@ -55,28 +66,20 @@ public class CreatePersonLocationsInCache
         var timer = new Stopwatch();
         timer.Start();
          
-         
-
-         var personPlaceCache = new PersonPlaceCache(_persistedCacheRepository.MakePlaceRecordCache(), new PlaceNameFormatter());
-
         var unencodedPlacesCount = _placeRepository.GetUnknownPlacesCount();
-        var counties = _placeRepository.GetCounties(true);
-        var placeCache = new PlaceLookupCache(_placeRepository.GetCachedPlaces(), new PlaceNameFormatter());
-         
+    
         _logger.WriteLine("Unencoded places in cache: " + unencodedPlacesCount);
-        _logger.WriteLine("Person table locations count: " + personPlaceCache.Count);
-         
-        var placesLibCache = new PlaceLibCoordCache(_placeRepository.GetPlaceLibCoords(), counties, new PlaceNameFormatter());
-
+        _logger.WriteLine("Person table locations count: " + _personPlaceCache.Count);
+      
         //search the persons table place entries to see if they already exist in the place cache
         //if they don't exist then add a new placecache entry. 
         //look in the placelib to see if the new cache entry exists in there. if it does
         //use it to populate the lat and long of the cache entry.
         
-        var newCacheEntries = personPlaceCache
-            .Where(w => !placeCache.Exists(w.PlaceFormatted))
+        var newCacheEntries = _personPlaceCache
+            .Where(w => !_placeLookupCache.Exists(w.PlaceFormatted))
             .Select(personPlace => 
-                Convert(personPlace, placesLibCache.Search(personPlace.GetComponents(), personPlace.County))).ToList();
+                Convert(personPlace, _placeLibCoordCache.Search(personPlace.GetComponents(), personPlace.County))).ToList();
 
         _placeRepository.InsertIntoCache(newCacheEntries);
          

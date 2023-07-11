@@ -3,7 +3,7 @@ using PlaceLibNet.Domain.Entities;
 
 namespace PlaceLibNet.Domain.Caching;
 
-public class PlaceLookupCache
+public class PlaceLookupCache : IPlaceLookupCache
 {
     private readonly IPlaceNameFormatter _placeNameFormatter;
     public List<PlaceLookup> PlaceLookups { get; set; }

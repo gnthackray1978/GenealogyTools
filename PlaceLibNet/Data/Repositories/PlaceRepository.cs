@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text.RegularExpressions;
 using ConfigHelper;
 using GoogleMapsHelpers;
 using LoggingLib;
@@ -13,7 +12,7 @@ using PlaceLibNet.Domain.Entities;
 
 namespace PlaceLibNet.Data.Repositories
 {
-    public class PlaceRepository
+    public class PlaceRepository : IPlaceRepository
     {
         private readonly PlacesContext _placesContext;
         private readonly Ilog _iLog;
@@ -37,9 +36,7 @@ namespace PlaceLibNet.Data.Repositories
 
             return counties;
         }
-
-       
-
+        
         public List<PlaceSearchCoordSubset> GetPlaceLibCoords()
         {
             var result = _placesContext

@@ -25,6 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\FTMContextNet\FTMContextNet.csproj" />
     <ProjectReference Include="..\PlaceLibNet\PlaceLibNet.csproj" />
   </ItemGroup>
 

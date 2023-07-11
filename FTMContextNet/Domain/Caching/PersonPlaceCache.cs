@@ -7,7 +7,24 @@ using PlaceLibNet.Domain;
 
 namespace FTMContextNet.Domain.Caching;
 
-public class PersonPlaceCache : IEnumerable<PersonPlace>
+public interface IPersonPlaceCache : IEnumerable<PersonPlace>
+{
+    List<PersonPlace> Items { get; set; }
+    int Count { get; }
+    int InvalidLocationsCount { get; }
+    int DuplicateLocationsCount { get; }
+    void InsertRange(List<string> places);
+
+    /// <summary>
+    /// Add place if valid and not already added
+    /// </summary>
+    /// <param name="place">Place entry from the persons table</param>
+    void Insert(string place);
+
+    IEnumerator<PersonPlace> GetEnumerator();
+}
+
+public class PersonPlaceCache :  IPersonPlaceCache
 {
     private int _duplicateCount = 0;
     private int _invalidPlaces = 0;
