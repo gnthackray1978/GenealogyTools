@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using FTMContext;
+using FTMContextNet.Domain.Collections;
 using FTMContextNet.Domain.Entities.NonPersistent;
+using FTMContextNet.Domain.Entities.NonPersistent.Person;
 using FTMContextNet.Domain.Entities.Persistent.Cache;
 using QuickGed.Types;
 
@@ -21,8 +23,8 @@ public interface IPersistedCacheRepository
     void DeleteOrigins();
     List<string> MakePlaceRecordCache();
     void CreatePersonOriginEntries(int importId, int userId);
-    List<IgnoreList> GetIgnoreList();
-    List<PersonDupeSearchSubset> GetComparisonPersons();
+    DuplicateIgnoreList GetIgnoreList();
+    List<PersonIdentifier> GetComparisonPersons();
 
 
     void AddDupeEntrys(List<KeyValuePair<int, string>> dupes, int userId);

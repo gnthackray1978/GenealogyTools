@@ -1,11 +1,10 @@
-﻿using FTMContext;
-using FTMContextNet.Data.Repositories;
+﻿using FTMContextNet.Data.Repositories;
 using LoggingLib;
 using System.Collections.Generic;
 using System.Linq;
 using FTMContextNet.Domain.Auth;
-using FTMContextNet.Domain.Entities.NonPersistent.Matches;
-using FTMContextNet.Domain.Entities.Persistent.Cache;
+using FTMContextNet.Domain.Collections.Grouping;
+using FTMContextNet.Domain.ExtensionMethods;
 
 namespace FTMContextNet.Application.Services
 {
@@ -21,35 +20,6 @@ namespace FTMContextNet.Application.Services
             _persistedCacheRepository = persistedCacheRepository;
             _ilog = outputHandler;
             _auth = auth;
-        }
-
-        public static bool ContainsPair(string nameA,string nameB, List<IgnoreList> ignoreList)
-        {
-            var matchPair = new List<string>
-            {
-                nameA,
-                nameB
-            };
-
-            foreach (var ignoreItem in ignoreList)
-            {
-                if (ignoreItem.Person1.ToLower().Trim() == matchPair[0].ToLower().Trim() && ignoreItem.Person2.ToLower().Trim() == matchPair[1].ToLower().Trim())
-                {
-                    return true;
-                }
-            }
-
-            matchPair.Reverse();
-
-            foreach (var ignoreItem in ignoreList)
-            {
-                if (ignoreItem.Person1.ToLower().Trim() == matchPair[0].ToLower().Trim() && ignoreItem.Person2.ToLower().Trim() == matchPair[1].ToLower().Trim())
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         public void Execute()
@@ -89,25 +59,14 @@ namespace FTMContextNet.Application.Services
 
 
 
-                var mg = groupCollection.FindById(cp.Id) ?? groupCollection.CreateGroup(new Item
-                {
-                    PersonId = cp.Id, 
-                    Origin = cp.Fact.Origin, 
-                    YearFrom = cp.Fact.BirthYearFrom
-                });
+                var group = groupCollection.FindById(cp.Id) ?? groupCollection.CreateGroup(cp.ToItem());
                 
-                mg.AddRange(comparisonPersons
+                group.AddRange(comparisonPersons
                     .Where(w => w.Equals(cp)
-                                && !ContainsPair(w.Fact.Surname, cp.Fact.Surname, ignoreList)
-                                && !mg.Contains(w.Id)).Select(s =>
-                        new Item
-                        {
-                            Origin = s.Fact.Origin,
-                            PersonId = s.Id,
-                            YearFrom = s.Fact.BirthYearFrom
-                        }));
+                                && !ignoreList.ContainsPair(w.Surname, cp.Surname)
+                                && !group.Contains(w.Id)).Select(s =>s.ToItem()));
 
-                groupCollection.WriteGroup(mg);
+                groupCollection.WriteGroup(group);
 
 
                 idx++;
@@ -133,6 +92,8 @@ namespace FTMContextNet.Application.Services
                 }
                
             }
+
+
 
             _persistedCacheRepository.AddDupeEntrys(tp,_auth.GetUser());
         }

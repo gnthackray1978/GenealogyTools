@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using FTMContext;
+using FTMContextNet.Domain.Entities.NonPersistent.Matches;
 
-namespace FTMContextNet.Domain.Entities.NonPersistent.Matches
+namespace FTMContextNet.Domain.Collections.Grouping
 {
     public class GroupCollection
     {

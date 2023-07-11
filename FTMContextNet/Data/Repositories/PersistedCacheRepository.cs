@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using FTMContext;
+using FTMContextNet.Domain.Collections;
 using FTMContextNet.Domain.Entities.NonPersistent;
+using FTMContextNet.Domain.Entities.NonPersistent.Person;
 using FTMContextNet.Domain.Entities.Persistent.Cache;
 using GoogleMapsHelpers;
 using LoggingLib;
@@ -153,23 +155,16 @@ namespace FTMContextNet.Data.Repositories
         
         }
 
-        public List<IgnoreList> GetIgnoreList()
+        public DuplicateIgnoreList GetIgnoreList()
         {
-            var ignoreList = this._persistedCacheContext.IgnoreList.ToList();
-
-            return ignoreList;
+            return new DuplicateIgnoreList(this._persistedCacheContext.IgnoreList.ToList());
         }
 
-        public List<PersonDupeSearchSubset> GetComparisonPersons() {
+        public List<PersonIdentifier> GetComparisonPersons() {
 
             var comparisonPersons = this._persistedCacheContext.FTMPersonView.Where(ValidData())
-             .Select(s => new PersonDupeSearchSubset()
-             {
-                 Id = s.PersonId,
-                 FamilyName = Misc.Misc.MakeKey(s.FirstName),
-                 GivenName = Misc.Misc.MakeKey(s.Surname),
-                 Fact = PersonDataObj.Create(s.BirthFrom, s.BirthTo, s.Origin, s.LinkedLocations, s.Surname)
-             }).ToList();
+             .Select(s => PersonIdentifier.Create(s.PersonId,
+                 s.BirthFrom, s.BirthTo, s.Origin, s.LinkedLocations, s.Surname, s.FirstName)).ToList();
 
             return comparisonPersons;
         }
