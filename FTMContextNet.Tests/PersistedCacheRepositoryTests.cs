@@ -1,6 +1,7 @@
 using FTMContextNet.Data;
 using FTMContextNet.Data.Repositories;
 using FTMContextNet.Domain.Entities.Persistent.Cache;
+using FTMContextNet.Domain.ExtensionMethods;
 using LoggingLib;
 using Moq.EntityFrameworkCore;
 using QuickGed.Types;
@@ -26,16 +27,16 @@ namespace FTMContextNet.Tests
         {
             var testData = new List<FTMPersonView>
             {
-                new() {Id = 0,FirstName = "",Surname = "_20_Jones", RootPerson = true,LinkNode = false},
-                new() {Id = 1,FirstName = "",Surname = "_21_Smith", RootPerson = true,LinkNode = false},
-                new() {Id = 2,FirstName = "",Surname = "group common names", RootPerson = false,LinkNode = true}
+                new() {Id = 0,FirstName = "",Surname = "_20_Jones", RootPerson = true,LinkNode = false, ImportId = 1},
+                new() {Id = 1,FirstName = "",Surname = "_21_Smith", RootPerson = true,LinkNode = false, ImportId = 1},
+                new() {Id = 2,FirstName = "",Surname = "group common names", RootPerson = false,LinkNode = true,ImportId = 1}
 
             };
 
             var relations = new List<FTMMarriage>
             {
-                new(){Id = 1,GroomId = 0,BrideId = 2},
-                new(){Id = 2,GroomId = 1,BrideId = 2},
+                new(){Id = 1,GroomId = 0,BrideId = 2,ImportId = 1},
+                new(){Id = 2,GroomId = 1,BrideId = 2, ImportId = 1},
             };
 
             this._mockPersistedCacheContext
@@ -46,10 +47,12 @@ namespace FTMContextNet.Tests
                 .Setup(s => s.FTMMarriages)
                 .ReturnsDbSet(relations);
 
-            IPersistedCacheRepository cacheRepository =
+            var cacheRepository =
                 new PersistedCacheRepository(this._mockPersistedCacheContext.Object, this._mockLog.Object);
 
-            var results = cacheRepository.GetRelationships();
+           // var results = cacheRepository.GetRelationships();
+            var results = cacheRepository.CallPrivateMethod<List<RelationSubSet>>("GetRelationships", 1);
+
 
             results.Should().HaveCount(2);
 
@@ -66,9 +69,9 @@ namespace FTMContextNet.Tests
         {
             var testData = new List<FTMPersonView>
             {
-                new() {Id = 0,FirstName = "",Surname = "_20_Jones", RootPerson = true,LinkNode = false},
-                new() {Id = 1,FirstName = "John",Surname = "Smith", RootPerson = true,LinkNode = true},
-                new() {Id = 2,FirstName = "",Surname = "group common names", RootPerson = false,LinkNode = true}
+                new() {Id = 0,FirstName = "",Surname = "_20_Jones", RootPerson = true,LinkNode = false, ImportId = 1},
+                new() {Id = 1,FirstName = "John",Surname = "Smith", RootPerson = true,LinkNode = true, ImportId = 1},
+                new() {Id = 2,FirstName = "",Surname = "group common names", RootPerson = false,LinkNode = true, ImportId = 1}
             };
              
             _mockPersistedCacheContext
@@ -78,8 +81,10 @@ namespace FTMContextNet.Tests
             var cacheRepository =
                 new PersistedCacheRepository(this._mockPersistedCacheContext.Object, this._mockLog.Object);
 
-            var results = cacheRepository.GetGroupNamesDictionary();
+            //var results = cacheRepository.GetGroupNamesDictionary();
 
+            var results = cacheRepository.CallPrivateMethod<Dictionary<int, string>>("GetGroupNamesDictionary", 1);
+            
             results.Should().HaveCount(2);
 
             results.Keys.Contains(1).Should().BeTrue();
@@ -94,11 +99,11 @@ namespace FTMContextNet.Tests
         {
             var testData = new List<FTMPersonView>
             {
-                new() {Id = 0,FirstName = "",Surname = "_20_Jones", RootPerson = true,LinkNode = false},
-                new() {Id = 1,FirstName = "John",Surname = "Smith", RootPerson = false,LinkNode = true},
-                new() {Id = 2,FirstName = "",Surname = "common names", RootPerson = true,LinkNode = true}
+                new() {Id = 0,FirstName = "",Surname = "_20_Jones", RootPerson = true,LinkNode = false, ImportId = 1},
+                new() {Id = 1,FirstName = "John",Surname = "Smith", RootPerson = false,LinkNode = true, ImportId = 1},
+                new() {Id = 2,FirstName = "",Surname = "common names", RootPerson = true,LinkNode = true, ImportId = 1}
             };
-
+            
             _mockPersistedCacheContext
                 .Setup(s => s.FTMPersonView)
                 .ReturnsDbSet(testData);
@@ -106,8 +111,8 @@ namespace FTMContextNet.Tests
             var cacheRepository =
                 new PersistedCacheRepository(this._mockPersistedCacheContext.Object, this._mockLog.Object);
 
-            var results = cacheRepository.GetTreeIds();
-
+            var results = cacheRepository.CallPrivateMethod<List<int>>("GetTreeIds", 1);
+ 
             results.Should().HaveCount(2);
 
             results[0].Should().Be(0);
@@ -120,9 +125,9 @@ namespace FTMContextNet.Tests
         {
             var testData = new List<FTMPersonView>
             {
-                new() {Id = 0,FirstName = "",Surname = "_20_Jones", RootPerson = true,LinkNode = false},
-                new() {Id = 1,FirstName = "John",Surname = "Smith", RootPerson = true,LinkNode = true},
-                new() {Id = 2,FirstName = "",Surname = "group common names", RootPerson = false,LinkNode = true}
+                new() {Id = 0,FirstName = "",Surname = "_20_Jones", RootPerson = true,LinkNode = false,ImportId = 1},
+                new() {Id = 1,FirstName = "John",Surname = "Smith", RootPerson = true,LinkNode = true, ImportId = 1},
+                new() {Id = 2,FirstName = "",Surname = "group common names", RootPerson = false,LinkNode = true,ImportId = 1}
             };
 
             _mockPersistedCacheContext
@@ -131,8 +136,9 @@ namespace FTMContextNet.Tests
 
             var cacheRepository =
                 new PersistedCacheRepository(this._mockPersistedCacheContext.Object, this._mockLog.Object);
+             
+            var results = cacheRepository.CallPrivateMethod<Dictionary<int,string>>("GetRootNameDictionary", 1);
 
-            var results = cacheRepository.GetRootNameDictionary();
 
             results.Should().HaveCount(2);
 
@@ -151,16 +157,16 @@ namespace FTMContextNet.Tests
           
             var testData = new List<FTMPersonView>
             {
-                new() {Id = 0,FirstName = "",Surname = "_20_Jones", RootPerson = true,LinkNode = false},
-                new() {Id = 1,FirstName = "",Surname = "_21_Smith", RootPerson = true,LinkNode = false},
-                new() {Id = 2,FirstName = "",Surname = "group common names", RootPerson = false,LinkNode = true}
+                new() {Id = 0,FirstName = "",Surname = "_20_Jones", RootPerson = true,LinkNode = false, ImportId = 1},
+                new() {Id = 1,FirstName = "",Surname = "_21_Smith", RootPerson = true,LinkNode = false, ImportId = 1},
+                new() {Id = 2,FirstName = "",Surname = "group common names", RootPerson = false,LinkNode = true, ImportId = 1}
 
             };
 
             var relations = new List<FTMMarriage>
             {
-                new(){Id = 1,GroomId = 0,BrideId = 2},
-                new(){Id = 2,GroomId = 1,BrideId = 2},
+                new(){Id = 1,GroomId = 0,BrideId = 2, ImportId = 1},
+                new(){Id = 2,GroomId = 1,BrideId = 2, ImportId = 1},
             };
 
             this._mockPersistedCacheContext
@@ -178,10 +184,10 @@ namespace FTMContextNet.Tests
 
             //// Setup to call method of an actual instance
             //// if method returns void use mock.Setup(...).Callback(...)
-            _mockPersistedCacheRepository.Setup(m => m.GetGroups())
-                .Returns(() => inst.GetGroups());
+            _mockPersistedCacheRepository.Setup(m => m.GetGroups(1))
+                .Returns(() => inst.GetGroups(1));
 
-            var result = _mockPersistedCacheRepository.Object.GetGroups();
+            var result = _mockPersistedCacheRepository.Object.GetGroups(1);
 
 
         }

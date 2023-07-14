@@ -18,6 +18,8 @@ public class PersistedImportCacheRepository : IPersistedImportCacheRepository
         _iLog = iLog;
     }
 
+
+
     public void DeleteImport(int importId)
     {
         _persistedCacheContext.DeleteImports(importId);
@@ -50,6 +52,13 @@ public class PersistedImportCacheRepository : IPersistedImportCacheRepository
     public List<FTMImport> GetImportData()
     {
         return _persistedCacheContext.FTMImport.ToList();
+    }
+
+    public string GedFileName()
+    {
+        var path = _persistedCacheContext.FTMImport.FirstOrDefault(f => f.Selected)?.FileName ?? "";
+
+        return path;
     }
 
     public ImportData AddImportRecord(string fileName, double fileSize, bool selected, int userId)

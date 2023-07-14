@@ -237,7 +237,7 @@ namespace FTMContextNet.Data
              
         }
 
-        public int BulkInsertFTMPersonOrigins(int nextId,int importId,int userId, List<FTMPersonOrigin> origins)
+        public int BulkInsertFTMPersonOrigins(int nextId,int userId, List<FTMPersonOrigin> origins)
         {
 
             var connectionString = this.Database.GetDbConnection().ConnectionString;
@@ -297,7 +297,7 @@ namespace FTMContextNet.Data
             return this.SaveChanges();
         }
 
-        public int InsertGroups(int nextId, string groupName, int userId)
+        public int InsertGroups(int nextId, string groupName, int importId, int userId)
         {
 
             var connectionString = this.Database.GetDbConnection().ConnectionString;
@@ -306,11 +306,12 @@ namespace FTMContextNet.Data
             using var connection = new SqliteConnection(connectionString);
 
             var command = connection.CreateCommand();
-            command.CommandText = "INSERT INTO TreeGroups(Id, GroupName, UserId) VALUES ($Id,$GroupName,$UserId);";
+            command.CommandText = "INSERT INTO TreeGroups(Id, GroupName,ImportId, UserId) VALUES ($Id,$GroupName,$ImportId,$UserId);";
 
             command.Parameters.Add("$Id", SqliteType.Integer);
             command.Parameters.Add("$GroupName", SqliteType.Text);
             command.Parameters.Add("$UserId", SqliteType.Integer);
+            command.Parameters.Add("$ImportId", SqliteType.Integer);
 
             connection.Open();
 
@@ -322,13 +323,14 @@ namespace FTMContextNet.Data
             command.Parameters["$Id"].Value = nextId;
             command.Parameters["$GroupName"].Value = groupName;
             command.Parameters["$UserId"].Value = userId;
+            command.Parameters["$ImportId"].Value = importId;
             command.ExecuteNonQuery();
               
             transaction.Commit();
 
             return nextId;
         }
-        public int InsertRecordMapGroup(int nextId, string groupName, string treeName, int userId)
+        public int InsertRecordMapGroup(int nextId, string groupName, string treeName,int importId, int userId)
         {
 
             var connectionString = this.Database.GetDbConnection().ConnectionString;
@@ -337,13 +339,13 @@ namespace FTMContextNet.Data
             using var connection = new SqliteConnection(connectionString);
 
             var command = connection.CreateCommand();
-            command.CommandText = "INSERT INTO TreeRecordMapGroup(Id, TreeName, GroupName, UserId) VALUES ($Id,$TreeName,$GroupName, $UserId);";
+            command.CommandText = "INSERT INTO TreeRecordMapGroup(Id, TreeName, GroupName,ImportId, UserId) VALUES ($Id,$TreeName,$GroupName,$ImportId, $UserId);";
 
             command.Parameters.Add("$Id", SqliteType.Integer);
             command.Parameters.Add("$TreeName", SqliteType.Text);
             command.Parameters.Add("$GroupName", SqliteType.Text);
             command.Parameters.Add("$UserId", SqliteType.Integer);
-
+            command.Parameters.Add("$ImportId", SqliteType.Integer);
             connection.Open();
 
             using var transaction = connection.BeginTransaction();
@@ -355,6 +357,7 @@ namespace FTMContextNet.Data
             command.Parameters["$GroupName"].Value = groupName;
             command.Parameters["$TreeName"].Value = treeName;
             command.Parameters["$UserId"].Value = userId;
+            command.Parameters["$ImportId"].Value = userId;
             command.ExecuteNonQuery();
 
             transaction.Commit();
@@ -365,14 +368,14 @@ namespace FTMContextNet.Data
 
         #region delete commands
 
-        public void DeleteOrigins()
+        public void DeleteOrigins(int importId)
         {
-            RunCommand("DELETE FROM FTMPersonOrigins");
+            RunCommand("DELETE FROM FTMPersonOrigins WHERE ImportId = " + importId);
         }
 
-        public void DeleteDupes()
+        public void DeleteDupes(int importId)
         {
-            RunCommand("DELETE FROM DupeEntries");
+            RunCommand("DELETE FROM DupeEntries WHERE ImportId = " + importId);
         }
 
         public void DeletePersons(int importId)
@@ -380,9 +383,9 @@ namespace FTMContextNet.Data
             RunCommand("DELETE FROM FTMPersonView WHERE ImportId = " + importId);
         }
 
-        public void DeleteTreeRecords()
+        public void DeleteTreeRecords(int importId)
         {
-            RunCommand("DELETE FROM TreeRecords");
+            RunCommand("DELETE FROM TreeRecords WHERE Id = " + importId);
         }
 
         public void DeleteMarriages(int importId)
@@ -395,15 +398,14 @@ namespace FTMContextNet.Data
             RunCommand("DELETE FROM FTMImport WHERE Id = " + importId); ;
         }
 
-        public void DeleteTreeGroups()
+        public void DeleteTreeGroups(int importId)
         {
-            RunCommand("DELETE FROM TreeGroups");
+            RunCommand("DELETE FROM TreeGroups WHERE ImportId = " + importId);
         }
-
-
-        public void DeleteRecordMapGroups()
+        
+        public void DeleteRecordMapGroups(int importId)
         {
-            RunCommand("DELETE FROM TreeRecordMapGroup");
+            RunCommand("DELETE FROM TreeRecordMapGroup WHERE ImportId = " + importId);
         }
 
         #endregion

@@ -149,4 +149,40 @@ public class PlaceLibCoordCacheTests
 
         y.Id.Should().Be(0);
     }
+
+
+    [Fact]
+    public void String_ShouldBeExpectedValue_WhenSearchedForCountyValuePresent()
+    {
+        var places = new List<PlaceSearchCoordSubset>()
+        {
+            new() { Id = 0, Placesort = "hunsingore", Ctyhistnm = "Yorkshire", Lat ="1", Long = "2"},
+            new() { Id = 1, Placesort = "york", Ctyhistnm = "Yorkshire", Lat ="3", Long = "4"},
+            new() { Id = 2, Placesort = "fredblogs", Ctyhistnm = "Lincolnshire", Lat ="5", Long = "6"}
+        };
+
+        var counties = new List<CountyDto>()
+        {
+            new (){Country = "",County = "yorkshire"}
+        };
+
+        var mockPersistedCacheRepository = new Mock<IPlaceRepository>();
+
+        mockPersistedCacheRepository
+            .Setup(s => s.GetCounties(true))
+            .Returns(counties);
+
+        mockPersistedCacheRepository
+            .Setup(s => s.GetPlaceLibCoords())
+            .Returns(places);
+
+        var searchTargets = new List<string>()
+            { "tockwith", "hunsingore" };
+
+        var x = new PlaceLibCoordCache(mockPersistedCacheRepository.Object, new PlaceNameFormatter());
+
+        var y = x.Search(searchTargets, "tockwith, yorkshire, england");
+
+        y.Id.Should().Be(0);
+    }
 }

@@ -2,6 +2,7 @@
 using LoggingLib;
 using System.Collections.Generic;
 using System.Linq;
+using FTMContextNet.Data.Repositories.GedImports;
 using FTMContextNet.Domain.Auth;
 using FTMContextNet.Domain.Collections.Grouping;
 using FTMContextNet.Domain.ExtensionMethods;
@@ -11,26 +12,30 @@ namespace FTMContextNet.Application.Services
     public class CreateDupeEntrys
     {
         private readonly IPersistedCacheRepository _persistedCacheRepository;
+        private readonly IPersistedImportCacheRepository _persistedImportCacheRepository;
         private readonly Ilog _ilog;
         private readonly IAuth _auth;
         
-        public CreateDupeEntrys(IPersistedCacheRepository persistedCacheRepository, IAuth auth,
+        public CreateDupeEntrys(IPersistedCacheRepository persistedCacheRepository,
+            IPersistedImportCacheRepository importCacheRepository,
+            IAuth auth,
             Ilog outputHandler)
         {
             _persistedCacheRepository = persistedCacheRepository;
+            _persistedImportCacheRepository = importCacheRepository;
             _ilog = outputHandler;
             _auth = auth;
         }
 
         public void Execute()
         {
-            _persistedCacheRepository.DeleteDupes();
+          //  _persistedCacheRepository.DeleteDupes();
 
             _ilog.WriteLine("Executing Create Dupe Entries");
 
             var groupCollection = new GroupCollection();
 
-            var comparisonPersons = _persistedCacheRepository.GetComparisonPersons();
+            var comparisonPersons = _persistedCacheRepository.GetComparisonPersons(_persistedImportCacheRepository.GetCurrentImportId());
 
             var ignoreList = _persistedCacheRepository.GetIgnoreList();
 

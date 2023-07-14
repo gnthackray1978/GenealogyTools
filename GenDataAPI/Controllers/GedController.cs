@@ -19,8 +19,6 @@ public partial class GedController : ControllerBase
 
     public GedController(IHubContext<NotificationHub> hubContext, IMSGConfigHelper iMSGConfigHelper)
     {
-
-
         _iMSGConfigHelper = iMSGConfigHelper;
         _outputHandler = new OutputHandler(hubContext);
         _facade = new FTMFacade(_iMSGConfigHelper, _outputHandler);
@@ -35,7 +33,7 @@ public partial class GedController : ControllerBase
         
         try
         {
-            size = FilePayload.ExtractFile(filePayload, out fileName);
+            size = FilePayload.ExtractFile(filePayload, _iMSGConfigHelper.GedPath, out fileName);
         }
         catch (Exception e)
         {

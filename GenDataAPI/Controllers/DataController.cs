@@ -34,7 +34,7 @@ namespace GenDataAPI.Controllers
         [Route("/data/places")]
         public IActionResult AddToCache()
         {
-            _facade.CreateMissingPersonLocations();
+            //_facade.CreateMissingPersonLocations();
 
             return Ok(true);
         }
@@ -54,7 +54,11 @@ namespace GenDataAPI.Controllers
         public IActionResult AddPersons()
         {
             _facade.ImportPersons();
-
+            _facade.CreateDupeView();
+            _facade.CreateTreeRecord();
+            _facade.CreateTreeGroups();
+            _facade.CreateTreeGroupMappings();
+            _facade.CreateMissingPersonLocations();
             return Ok(true);
         }
 
@@ -62,8 +66,10 @@ namespace GenDataAPI.Controllers
         [Route("/data/dupes")]
         public IActionResult AddDupes()
         {
-            _facade.CreateDupeView();
-
+            //_facade.CreateDupeView();
+            //_facade.CreateTreeRecord();
+            //_facade.CreateTreeGroups();
+            //_facade.CreateTreeGroupMappings();
             return Ok(true);
         }
 
@@ -71,8 +77,7 @@ namespace GenDataAPI.Controllers
         [Route("/data/trees")]
         public IActionResult AddTrees()
         {
-            _facade.CreateTreeRecord();
-
+          
             return Ok(true);
         }
 
@@ -80,7 +85,7 @@ namespace GenDataAPI.Controllers
         [Route("/data/treegroups")]
         public IActionResult AddTreeGroups()
         {
-            _facade.CreateTreeGroups();
+        //    _facade.CreateTreeGroups();
 
             return Ok(true);
         }
@@ -89,7 +94,7 @@ namespace GenDataAPI.Controllers
         [Route("/data/treegroupmappings")]
         public IActionResult AddTreeGroupMappings()
         {
-            _facade.CreateTreeGroupMappings();
+        //    _facade.CreateTreeGroupMappings();
 
             return Ok(true);
         }

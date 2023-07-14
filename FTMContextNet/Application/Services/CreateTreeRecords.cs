@@ -1,15 +1,19 @@
 ﻿using FTMContextNet.Data.Repositories;
+using FTMContextNet.Data.Repositories.GedImports;
 using LoggingLib;
 
 namespace FTMContextNet.Application.Services
 {
     public class CreateTreeRecords
     {
-        private readonly PersistedCacheRepository _persistedCacheRepository; 
+        private readonly IPersistedCacheRepository _persistedCacheRepository;
+        private readonly IPersistedImportCacheRepository _persistedImportCacheRepository;
         private readonly Ilog _ilog;
 
-        public CreateTreeRecords(PersistedCacheRepository persistedCacheRepository,  Ilog outputHandler) {
-            _persistedCacheRepository = persistedCacheRepository; 
+        public CreateTreeRecords(IPersistedCacheRepository persistedCacheRepository,
+            IPersistedImportCacheRepository persistedImportCacheRepository,  Ilog outputHandler) {
+            _persistedCacheRepository = persistedCacheRepository;
+            _persistedImportCacheRepository = persistedImportCacheRepository;
             _ilog = outputHandler;
         }
 
@@ -17,9 +21,7 @@ namespace FTMContextNet.Application.Services
 
             _ilog.WriteLine("Executing Creating Tree Records");
 
-            _persistedCacheRepository.DeleteTreeRecords();
-
-            _persistedCacheRepository.PopulateTreeRecordsFromCache();
+            _persistedCacheRepository.PopulateTreeRecordsFromCache(_persistedImportCacheRepository.GetCurrentImportId());
         }
 
     }

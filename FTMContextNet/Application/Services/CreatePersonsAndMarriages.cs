@@ -31,16 +31,16 @@ namespace FTMContextNet.Application.Services
             
             var gedDb =_gedRepository.ParseLabelledTree();
 
-            var importData = _persistedImportCacheRepository.AddImportRecord(gedDb.FileName, gedDb.FileSize,false,1);
+            //var importData = _persistedImportCacheRepository.AddImportRecord(gedDb.FileName, gedDb.FileSize,false,1);
             
-            foreach (var id in importData.CurrentId)
-            {
-                _persistedCacheRepository.DeletePersons(id);
+            //foreach (var id in importData.CurrentId)
+            //{
+            //    _persistedCacheRepository.DeletePersons(id);
 
-                _persistedCacheRepository.DeleteMarriages(id);
+            //    _persistedCacheRepository.DeleteMarriages(id);
 
-                _persistedImportCacheRepository.DeleteImport(id);
-            }
+            //    _persistedImportCacheRepository.DeleteImport(id);
+            //}
              
             _persistedCacheRepository.InsertPersons(_persistedImportCacheRepository.GetCurrentImportId(), _auth.GetUser(), gedDb.Persons);
             

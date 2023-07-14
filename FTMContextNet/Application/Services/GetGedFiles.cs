@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using AutoMapper;
 using FTMContextNet.Application.Models.Read;
-using FTMContextNet.Data.Repositories;
 using FTMContextNet.Data.Repositories.GedImports;
 using LoggingLib;
 

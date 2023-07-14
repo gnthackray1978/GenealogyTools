@@ -67,7 +67,7 @@ namespace PlaceLibNet.Data.Repositories
         
         public void InsertIntoCache(IEnumerable<PlaceCache> placeCaches)
         {
-            var id= _placesContext.PlaceCache.Count() + 1;
+            var id= _placesContext.PlaceCache.Max(m=>m.Id) + 1;
 
             foreach (PlaceCache pc in placeCaches)
             {

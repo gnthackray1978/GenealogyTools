@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using FTMContextNet.Data.Repositories;
+using FTMContextNet.Data.Repositories.GedImports;
 using FTMContextNet.Domain.Auth;
 using LoggingLib;
 
@@ -14,30 +15,29 @@ namespace FTMContextNet.Application.Services
     {
         private static readonly SemaphoreSlim RateLimit = new SemaphoreSlim(1,1);
         private readonly IPersistedCacheRepository _persistedCacheRepository;
+        private readonly IPersistedImportCacheRepository _persistedImportCacheRepository;
         private readonly IAuth _auth;
         private readonly Ilog _ilog;
 
-        public CreateTreeGroupMappings(IPersistedCacheRepository persistedCacheRepository,IAuth auth, Ilog outputHandler)
+        public CreateTreeGroupMappings(IPersistedCacheRepository persistedCacheRepository, 
+            IPersistedImportCacheRepository persistedImportCacheRepository, IAuth auth, Ilog outputHandler)
         {
+            _persistedImportCacheRepository = persistedImportCacheRepository;
             _persistedCacheRepository = persistedCacheRepository;
             _ilog = outputHandler;
             _auth = auth;
         }
-
-
-
+        
         public async void Execute()
         {
             await RateLimit.WaitAsync();
 
 
-            try
+            try 
             {
                 _ilog.WriteLine("Executing Create Tree Group Mappings");
 
-                _persistedCacheRepository.DeleteRecordMapGroups();
-
-                var groups = _persistedCacheRepository.GetGroups();
+                var groups = _persistedCacheRepository.GetGroups(_persistedImportCacheRepository.GetCurrentImportId());
                 
                 var idx = 0;
 
@@ -45,7 +45,7 @@ namespace FTMContextNet.Application.Services
                 {
                     foreach (var mapping in grp.Value)
                     {
-                        _persistedCacheRepository.InsertTreeRecordMapGroup(idx, mapping, grp.Key, _auth.GetUser());
+                        _persistedCacheRepository.InsertTreeRecordMapGroup(idx, mapping, grp.Key, _persistedImportCacheRepository.GetCurrentImportId(), _auth.GetUser());
 
                         idx++;
                     }
@@ -59,27 +59,6 @@ namespace FTMContextNet.Application.Services
             }
             
         }
-
-        private Dictionary<string, List<string>> GetGroups()
-        {
-            var results = new Dictionary<string, List<string>>();
-
-            var treeIds = _persistedCacheRepository.GetTreeIds();
-
-            var relationships = _persistedCacheRepository.GetRelationships();
-
-            var treeNameDictionary = _persistedCacheRepository.GetRootNameDictionary();
-
-            var groupNames = _persistedCacheRepository.GetGroupNamesDictionary();
-
-            foreach (var treeId in treeIds)
-            {
-                var groupMembers = relationships.Where(t => t.MatchEither(treeId)).Select(s => s.GetOtherSide(treeId)).Distinct().ToList();
-
-                results.Add(treeNameDictionary[treeId], (from gm in groupMembers where groupNames.ContainsKey(gm) select groupNames[gm]).ToList());
-            }
-
-            return results;
-        }
+        
     }
 }

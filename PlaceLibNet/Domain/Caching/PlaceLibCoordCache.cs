@@ -65,26 +65,27 @@ namespace PlaceLibNet.Domain.Caching
 
             _places = places;
             _lowerCaseCounties = lowerCaseCounties;
-
+           // _lowerCaseCounties.Sort();
             _places.Sort((s, y) => s.Placesort.CompareTo(y.Placesort));
 
         }
 
         public string validateCounty(string county)
         {
-            county = county.ToLower();
-
-            var result = "";
-            foreach (var countyDto in _lowerCaseCounties.Where(countyDto => county == countyDto.County))
-            {
-                result = countyDto.County;
-                break;
-            }
+            var result = _lowerCaseCounties
+                .FirstOrDefault(countyDto => county == countyDto.County)?.County;
 
             if (string.IsNullOrEmpty(result)) return null;
 
             return StringTools.Capitalize(result);
         }
+
+
+        public string getCounty(string test)
+        {
+            return _lowerCaseCounties.FirstOrDefault(f => test.Contains(f.County))?.County;
+        }
+
 
         /// <summary>
         /// Searchs for PlaceSubset with Lat and Long in it for given places and county
@@ -94,17 +95,16 @@ namespace PlaceLibNet.Domain.Caching
         /// <returns></returns>
         public PlaceSearchCoordSubset Search(IEnumerable<string> places, string county)
         {
-            var validatedCounty = validateCounty(county);
+            county = county.ToLower();
 
-            foreach (var placeName in places)
-            {
-                var placeCoords = PlaceSearchCoordSubset(placeName, validatedCounty);
+            //try and get a county.
+            var validatedCounty = validateCounty(county) ?? getCounty(county);
 
-                if (placeCoords != null)
-                    return placeCoords;
-            }
+            if (validatedCounty != null) validatedCounty = StringTools.Capitalize(validatedCounty);
 
-            return null;
+            return places
+                .Select(placeName => PlaceSearchCoordSubset(placeName, validatedCounty))
+                .FirstOrDefault(placeCoords => placeCoords != null);
         }
 
         /// <summary>
@@ -123,6 +123,12 @@ namespace PlaceLibNet.Domain.Caching
             if (placeSearchCoord < 0)
                 return null;
 
+            // we've got no way to narrow this down
+            // if there are multiple places with this name
+            // so just return the first one.
+            if(county == null)
+                return _places[placeSearchCoord];
+            
             int idx = placeSearchCoord - 5;
 
             while (idx <= placeSearchCoord + 5)

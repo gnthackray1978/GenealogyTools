@@ -1,11 +1,9 @@
 ﻿using System.Diagnostics;
 using System.Linq;
-using FTMContextNet.Data.Repositories;
 using FTMContextNet.Domain.Caching;
 using FTMContextNet.Domain.Entities.NonPersistent.Person;
 using LoggingLib;
 using PlaceLibNet.Data.Repositories;
-using PlaceLibNet.Domain;
 using PlaceLibNet.Domain.Caching;
 using PlaceLibNet.Domain.Entities;
 
@@ -48,6 +46,7 @@ public class CreatePersonLocationsInCache
             NameFormatted = pri.PlaceFormatted,
             JSONResult = "[]",
             County = pri.County,
+            Country = pri.Country ??""
         };
 
         if (pscs == null) return placeCache;
@@ -79,7 +78,7 @@ public class CreatePersonLocationsInCache
         var newCacheEntries = _personPlaceCache
             .Where(w => !_placeLookupCache.Exists(w.PlaceFormatted))
             .Select(personPlace => 
-                Convert(personPlace, _placeLibCoordCache.Search(personPlace.GetComponents(), personPlace.County))).ToList();
+                Convert(personPlace, _placeLibCoordCache.Search(personPlace.GetComponents(), personPlace.PlaceFormatted))).ToList();
 
         _placeRepository.InsertIntoCache(newCacheEntries);
          

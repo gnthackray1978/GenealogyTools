@@ -19,19 +19,19 @@ public interface IPersistedCacheContext
 
     int BulkInsertMarriages(int nextId, int importId,int userId, List<FTMMarriage> marriages);
     int BulkInsertFTMPersonView(int nextId, int importId, int userId, List<FTMPersonView> ftmPersonViews);
-    int BulkInsertFTMPersonOrigins(int nextId,int importId, int userId, List<FTMPersonOrigin> origins);
+    int BulkInsertFTMPersonOrigins(int nextId, int userId, List<FTMPersonOrigin> origins);
 
     int BulkInsertTreeRecords(List<TreeRecord> treeRecords);
-    int InsertGroups(int nextId, string groupName, int userId);
-    int InsertRecordMapGroup(int nextId, string groupName, string treeName,int userId);
-    void DeleteOrigins();
-    void DeleteDupes();
+    int InsertGroups(int nextId, string groupName,int importId, int userId);
+    int InsertRecordMapGroup(int nextId, string groupName, string treeName,int importId,int userId);
+    void DeleteOrigins(int importId);
+    void DeleteDupes(int importId);
     void DeletePersons(int importId);
-    void DeleteTreeRecords();
+    void DeleteTreeRecords(int importId);
     void DeleteMarriages(int importId);
     void DeleteImports(int importId);
-    void DeleteTreeGroups();
-    void DeleteRecordMapGroups();
+    void DeleteTreeGroups(int importId);
+    void DeleteRecordMapGroups(int importId);
     void UpdatePersonLocations(int personId, string lng, string lat, string altLng, string altLat);
 
     int SaveChanges();

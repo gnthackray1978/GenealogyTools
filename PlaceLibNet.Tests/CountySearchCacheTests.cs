@@ -7,7 +7,6 @@ namespace PlaceLibNet.Tests
 
     //PlaceLibCoordCache
 
-
     public class CountySearchCacheTests
     {
         [Fact]

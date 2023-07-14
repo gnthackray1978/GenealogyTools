@@ -10,23 +10,19 @@ namespace FTMContextNet.Data.Repositories;
 
 public interface IPersistedCacheRepository
 {
-
     List<string> DumpCount();
-    DupeEntry CreateNewDupeEntry(int dupeId, FTMPersonView person, string ident);
-    void DeleteDupes();
+  //  DupeEntry CreateNewDupeEntry(int dupeId, FTMPersonView person, string ident);
+    void DeleteDupes(int importId);
     void DeletePersons(int importId);
-    void DeleteTreeRecords();
+    void DeleteTreeRecords(int importId);
     void DeleteMarriages(int importId);
-
-    void DeleteTreeGroups();
-    void DeleteRecordMapGroups();
-    void DeleteOrigins();
-    List<string> MakePlaceRecordCache();
+    void DeleteTreeGroups(int importId);
+    void DeleteRecordMapGroups(int importId);
+    void DeleteOrigins(int importId);
+    List<string> MakePlaceRecordCache(int importId);
     void CreatePersonOriginEntries(int importId, int userId);
     DuplicateIgnoreList GetIgnoreList();
-    List<PersonIdentifier> GetComparisonPersons();
-
-
+    List<PersonIdentifier> GetComparisonPersons(int importId);
     void AddDupeEntrys(List<KeyValuePair<int, string>> dupes, int userId);
     int OriginPersonCount();
     Info GetInfo(int userId);
@@ -36,17 +32,11 @@ public interface IPersistedCacheRepository
     /// stores number of people in tree.
     /// tree name etc
     /// </summary>
-    void PopulateTreeRecordsFromCache();
-
-    int InsertTreeGroups(int nextId, string treeGroup, int userId);
-    int InsertTreeRecordMapGroup(int nextId, string treeGroup, string treeName, int userId);
+    void PopulateTreeRecordsFromCache(int importId);
+    int InsertTreeGroups(int nextId, string treeGroup, int importId, int userId);
+    int InsertTreeRecordMapGroup(int nextId, string treeGroup, string treeName,int importId, int userId);
     void InsertPersons(int importId,int userId, List<Person> persons);
     void InsertMarriages(int importId,int userId,  List<RelationSubSet> marriages);
-    int GetMyId();
-    Dictionary<string, List<string>> GetGroups();
-    Dictionary<int, string> GetRootNameDictionary();
-    List<int> GetTreeIds();
-    Dictionary<int, string> GetGroupNamesDictionary();
-    List<RelationSubSet> GetRelationships();
-    Dictionary<int, string> GetGroupPerson();
+    Dictionary<string, List<string>> GetGroups(int importId); 
+    Dictionary<int, string> GetGroupPerson(int importId);
 }

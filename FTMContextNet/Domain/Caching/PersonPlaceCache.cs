@@ -66,13 +66,15 @@ public class PersonPlaceCache :  IPersonPlaceCache
         Items ??= new List<PersonPlace>();
 
         string formattedPlace = this._placeNameFormatter.Format(place);
+        string nation = this._placeNameFormatter.ValidateSupportedNation(formattedPlace);
 
-        if (this._placeNameFormatter.IsValidEnglandWales(formattedPlace))
+        if (nation!=null)
         {
             var placeLh = new PersonPlace()
             {
                 Place = place,
-                PlaceFormatted = formattedPlace
+                PlaceFormatted = formattedPlace,
+                Country = nation
             };
 
             if (Items.All(a => a.PlaceFormatted != placeLh.PlaceFormatted))

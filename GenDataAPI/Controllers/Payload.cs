@@ -14,7 +14,7 @@ public partial class GedController
         public IFormFile[] Files { get; set; }
         public string Tags { get; set; }
 
-        public static long ExtractFile(FilePayload filePayload, out string n)
+        public static long ExtractFile(FilePayload filePayload,string extractionPath, out string n)
         {
             long size = filePayload.Files.Sum(f => f.Length);
 
@@ -24,7 +24,7 @@ public partial class GedController
 
             if (f != null && n != null)
             {
-                using var stream = new FileStream(Path.Combine(Path.GetTempPath(), n), FileMode.Create);
+                using var stream = new FileStream(Path.Combine(extractionPath, n), FileMode.Create);
 
                 f.CopyToAsync(stream);
             }

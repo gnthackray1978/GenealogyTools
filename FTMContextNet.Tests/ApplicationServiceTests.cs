@@ -34,7 +34,7 @@ public class ApplicationServiceTests
     {
       
         this._mockPersistedCacheRepository
-            .Setup(s => s.GetComparisonPersons())
+            .Setup(s => s.GetComparisonPersons(1))
             .Returns(new List<PersonIdentifier>()
             {
                 PersonIdentifier.Create(1,1500,1600,"a1","Sleaford","Jones","John"),
@@ -52,8 +52,8 @@ public class ApplicationServiceTests
             .Setup(s => s.GetIgnoreList())
             .Returns(d);
 
-        this._mockPersistedCacheRepository
-            .Setup(s => s.DeleteDupes());
+       // this._mockPersistedCacheRepository
+      //      .Setup(s => s.DeleteDupes());
 
         List<KeyValuePair<int, string>> x = null;
 
@@ -64,7 +64,11 @@ public class ApplicationServiceTests
                 x = a;
             });
 
-        var gis = new CreateDupeEntrys(_mockPersistedCacheRepository.Object,   new Auth(), _mockLog.Object);
+        _mockPersistedImportCacheRepository
+            .Setup(s => s.GetCurrentImportId())
+            .Returns(1);
+
+        var gis = new CreateDupeEntrys(_mockPersistedCacheRepository.Object, _mockPersistedImportCacheRepository.Object,   new Auth(), _mockLog.Object);
 
         gis.Execute();
         

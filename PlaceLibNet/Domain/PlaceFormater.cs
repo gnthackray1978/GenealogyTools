@@ -29,6 +29,10 @@ namespace PlaceLibNet.Domain
 
             place = place.Replace("/ ", "/");
 
+            place = place.Replace(" /", "/");
+
+            place = place.Replace("//", "/");
+
             return place;
         }
         
@@ -36,20 +40,21 @@ namespace PlaceLibNet.Domain
         /// Valid when has 3 components AND
         /// is in England or Wales
         /// </summary>
-        public bool IsValidEnglandWales(string place, char placeMarker = '/')
+        public string ValidateSupportedNation(string place, char placeMarker = '/')
         {
             var count = place.Count(c => c == placeMarker);
 
-            if (place.Contains("england", StringComparison.OrdinalIgnoreCase) 
-                || place.Contains("wales", StringComparison.OrdinalIgnoreCase))
-            {
-                if (count > 1)
-                {
-                    return true;
-                }
-            }
+            if (count <= 1)
+                return null;
 
-            return false;
+            if (place.Contains("england", StringComparison.OrdinalIgnoreCase) )
+                return "england";
+
+            if (place.Contains("wales", StringComparison.OrdinalIgnoreCase))
+                return "wales";
+
+
+            return null;
         }
 
         /// <summary>
