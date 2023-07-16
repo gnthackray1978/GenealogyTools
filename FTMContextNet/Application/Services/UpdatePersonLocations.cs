@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Linq;
 using FTMContextNet.Data.Repositories;
+using FTMContextNet.Domain.Entities.NonPersistent;
 using LoggingLib; 
 using PlaceLibNet.Data.Repositories;
 using PlaceLibNet.Domain;
@@ -29,7 +30,7 @@ public class UpdatePersonLocations
     /// <summary>
     /// Update lat and long fields in the persons table.
     /// </summary>
-    public void Execute()
+    public APIResult Execute()
     {
         _logger.WriteLine("UpdatePersonLocations started");
 
@@ -76,6 +77,10 @@ public class UpdatePersonLocations
         timer.Stop(); 
         _logger.WriteLine("Time taken: " + timer.Elapsed.ToString(@"m\:ss\.fff"));
 
+        return new APIResult
+        {
+            ApiResultType = APIResultType.Success
+        };
     }
 
 }

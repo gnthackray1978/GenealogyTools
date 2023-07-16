@@ -109,33 +109,6 @@ namespace FTMContextNet
 
             service.Execute();
         }
-
-        /// <summary>
-        /// look in person table add any places to the cache that aren't already in there.
-        /// </summary>
-        public void CreateMissingPersonLocations()
-        {
-            var placeRepository = new PlaceRepository(new PlacesContext(_iMSGConfigHelper), _outputHandler);
-
-            var persistedImportCacheRepository = new PersistedImportCacheRepository(new PersistedCacheContext(_iMSGConfigHelper, _outputHandler),_outputHandler);
-
-            var persistedCacheRepository = new PersistedCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
-
-            var personPlaceCache = new PersonPlaceCache(persistedCacheRepository.MakePlaceRecordCache(persistedImportCacheRepository.GetCurrentImportId()), new PlaceNameFormatter());
-
-            var placeCache = new PlaceLookupCache(placeRepository.GetCachedPlaces(), new PlaceNameFormatter());
-
-            var placeLibCoordCache = new PlaceLibCoordCache(placeRepository, new PlaceNameFormatter());
-
-            var service = new CreatePersonLocationsInCache(placeRepository, 
-                placeLibCoordCache,
-                personPlaceCache,
-                placeCache,
-                 _outputHandler);
-
-            service.Execute();
-
-        }
         
         public void UpdatePlaceMetaData()
         {
@@ -148,80 +121,56 @@ namespace FTMContextNet
 
         #endregion
         
-        #region tree data
-
-        public void ImportPersons()
+       
+        public void ImportSavedGed()
         {
+            //dependencies
             var persistedCacheRepository = new PersistedCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
             var persistedImportedCacheRepository = new PersistedImportCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
+            var placeRepository = new PlaceRepository(new PlacesContext(_iMSGConfigHelper), _outputHandler);
+            var persistedImportCacheRepository = new PersistedImportCacheRepository(new PersistedCacheContext(_iMSGConfigHelper, _outputHandler), _outputHandler);
+            var personPlaceCache = new PersonPlaceCache(persistedCacheRepository.MakePlaceRecordCache(persistedImportCacheRepository.GetCurrentImportId()), new PlaceNameFormatter());
+            var placeCache = new PlaceLookupCache(placeRepository.GetCachedPlaces(), new PlaceNameFormatter());
+            var placeLibCoordCache = new PlaceLibCoordCache(placeRepository, new PlaceNameFormatter());
+            var gr = new GedRepository(_outputHandler, new GedParser(new NodeTypeCalculator(), Path.Combine(_iMSGConfigHelper.GedPath, persistedImportedCacheRepository.GedFileName())));
 
-            var gr = new GedRepository(_outputHandler, new GedParser(new NodeTypeCalculator(), Path.Combine(_iMSGConfigHelper.GedPath,persistedImportedCacheRepository.GedFileName())));
-           
+
+            //_facade.ImportPersons();
             var createPersonsAndMarriages = new CreatePersonsAndMarriages(persistedCacheRepository, persistedImportedCacheRepository, gr, new Auth(), _outputHandler);
 
             createPersonsAndMarriages.Execute();
-        }
 
-        public void CreateDupeView()
-        {
-            var persistedCacheRepository = new PersistedCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
-            var persistedImportedCacheRepository = new PersistedImportCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
-
+            //_facade.CreateDupeView();
             var createDupeEntrys = new CreateDupeEntrys(persistedCacheRepository, persistedImportedCacheRepository, new Auth(), _outputHandler);
 
             createDupeEntrys.Execute();
 
-            _outputHandler.WriteLine("Finished Creating Dupe View");
-        }
+            //_facade.CreateTreeRecord();
+            var ctr = new CreateTreeRecords(persistedCacheRepository, persistedImportedCacheRepository, new Auth(), _outputHandler);
+            ctr.Execute();
 
-        public void CreatePersonOrigins()
-        {
-            var persistedCacheRepository = new PersistedCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
-            var importCacheRepository = new PersistedImportCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
+            //_facade.CreateTreeGroups();
+            var ctr2 = new CreateTreeGroups(persistedCacheRepository, persistedImportedCacheRepository, new Auth(), _outputHandler);
+            ctr2.Execute();
+
+            //_facade.CreateTreeGroupMappings();
+            var ctr3 = new CreateTreeGroupMappings(persistedCacheRepository, persistedImportedCacheRepository, new Auth(), _outputHandler);
+
+            ctr3.Execute().Wait();
             
+            //_facade.CreateMissingPersonLocations();
+           
+            var service = new CreatePersonLocationsInCache(placeRepository,
+                placeLibCoordCache,
+                personPlaceCache,
+                placeCache,
+                new Auth(),
+                _outputHandler);
 
-            var createPersonOrigin = new CreatePersonOrigin(persistedCacheRepository, importCacheRepository,new Auth(), _outputHandler);
-
-            createPersonOrigin.Execute();
-
-            _outputHandler.WriteLine("Finished Creating Person Origins");
-        }
-
-        public void CreateTreeRecord()
-        {
-            
-            var persistedCacheRepository = new PersistedCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
-            var persistedImportedCacheRepository = new PersistedImportCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
-
-            var ctr = new CreateTreeRecords(persistedCacheRepository, persistedImportedCacheRepository, _outputHandler);
-
-            ctr.Execute();
-
-            _outputHandler.WriteLine("Finished Creating Tree Record View");
-        }
-
-        public void CreateTreeGroups()
-        {
-            var persistedCacheRepository = new PersistedCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
-            var persistedImportedCacheRepository = new PersistedImportCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
-
-            var ctr = new CreateTreeGroups(persistedCacheRepository, persistedImportedCacheRepository,new Auth(), _outputHandler);
-
-            ctr.Execute();
-        }
-
-        public void CreateTreeGroupMappings()
-        {
-            var persistedCacheRepository = new PersistedCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
-            var importCacheRepository = new PersistedImportCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
-
-            var ctr = new CreateTreeGroupMappings(persistedCacheRepository, importCacheRepository, new Auth(), _outputHandler);
-
-            ctr.Execute();
+            service.Execute();
 
         }
-
-        #endregion
+        
         
         public InfoModel GetInfo() 
         {
@@ -262,9 +211,23 @@ namespace FTMContextNet
 
         public APIResult DeleteImport(int importId)
         {
-            var persistedCacheRepository = new PersistedImportCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
+            var persistedCacheRepository = new PersistedCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
+          
+            var persistedImportedCacheRepository = new PersistedImportCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
+          
+            var auth = new Auth();
 
-            var tp = new Application.Services.GedImport.DeleteImport(persistedCacheRepository, _outputHandler, new Auth());
+            var gr = new GedRepository(_outputHandler,
+                new GedParser(new NodeTypeCalculator(),
+                    Path.Combine(_iMSGConfigHelper.GedPath, 
+                        persistedImportedCacheRepository.GedFileName())));
+
+            var d = new DeleteImportService(persistedCacheRepository, persistedImportedCacheRepository, gr, auth,
+                _outputHandler);
+
+            d.Execute();
+
+            var tp = new DeleteImport(persistedImportedCacheRepository, _outputHandler, new Auth());
 
             return tp.Execute(importId);
         }

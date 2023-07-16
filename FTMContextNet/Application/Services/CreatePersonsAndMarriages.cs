@@ -1,6 +1,7 @@
 ﻿using FTMContextNet.Data.Repositories;
 using FTMContextNet.Data.Repositories.GedImports;
 using FTMContextNet.Domain.Auth;
+using FTMContextNet.Domain.Entities.NonPersistent;
 using LoggingLib;
 
 namespace FTMContextNet.Application.Services
@@ -25,27 +26,29 @@ namespace FTMContextNet.Application.Services
             _auth = auth;
         }
 
-        public void Execute() {
+        public APIResult Execute() {
+
+            if (_auth.GetUser() == -1)
+            {
+                return new APIResult
+                {
+                    ApiResultType = APIResultType.Unauthorized
+                };
+            }
 
             _ilog.WriteLine("Executing CreatePersonsAndMarriages");
             
             var gedDb =_gedRepository.ParseLabelledTree();
-
-            //var importData = _persistedImportCacheRepository.AddImportRecord(gedDb.FileName, gedDb.FileSize,false,1);
-            
-            //foreach (var id in importData.CurrentId)
-            //{
-            //    _persistedCacheRepository.DeletePersons(id);
-
-            //    _persistedCacheRepository.DeleteMarriages(id);
-
-            //    _persistedImportCacheRepository.DeleteImport(id);
-            //}
-             
+ 
             _persistedCacheRepository.InsertPersons(_persistedImportCacheRepository.GetCurrentImportId(), _auth.GetUser(), gedDb.Persons);
             
             _persistedCacheRepository.InsertMarriages(_persistedImportCacheRepository.GetCurrentImportId(), _auth.GetUser(), gedDb.Relationships);
-             
+
+
+            return new APIResult
+            {
+                ApiResultType = APIResultType.Success
+            };
         }
 
     }

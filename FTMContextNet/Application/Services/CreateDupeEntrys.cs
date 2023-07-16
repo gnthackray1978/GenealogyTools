@@ -5,6 +5,7 @@ using System.Linq;
 using FTMContextNet.Data.Repositories.GedImports;
 using FTMContextNet.Domain.Auth;
 using FTMContextNet.Domain.Collections.Grouping;
+using FTMContextNet.Domain.Entities.NonPersistent;
 using FTMContextNet.Domain.ExtensionMethods;
 
 namespace FTMContextNet.Application.Services
@@ -27,9 +28,16 @@ namespace FTMContextNet.Application.Services
             _auth = auth;
         }
 
-        public void Execute()
+        public APIResult Execute()
         {
-          //  _persistedCacheRepository.DeleteDupes();
+            //  _persistedCacheRepository.DeleteDupes();
+            if (_auth.GetUser() == -1)
+            {
+                return new APIResult
+                {
+                    ApiResultType = APIResultType.Unauthorized
+                };
+            }
 
             _ilog.WriteLine("Executing Create Dupe Entries");
 
@@ -101,6 +109,12 @@ namespace FTMContextNet.Application.Services
 
 
             _persistedCacheRepository.AddDupeEntrys(tp,_auth.GetUser());
+
+
+            return new APIResult
+            {
+                ApiResultType = APIResultType.Success
+            };
         }
         
     }

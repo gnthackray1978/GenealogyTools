@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using FTMContextNet.Data.Repositories;
 using FTMContextNet.Data.Repositories.GedImports;
 using FTMContextNet.Domain.Auth;
+using FTMContextNet.Domain.Entities.NonPersistent;
 using LoggingLib;
 
 namespace FTMContextNet.Application.Services
@@ -28,8 +29,16 @@ namespace FTMContextNet.Application.Services
             _auth = auth;
         }
         
-        public async void Execute()
+        public async Task<APIResult> Execute()
         {
+            if (_auth.GetUser() == -1)
+            {
+                return new APIResult
+                {
+                    ApiResultType = APIResultType.Unauthorized
+                };
+            }
+
             await RateLimit.WaitAsync();
 
 
@@ -58,6 +67,11 @@ namespace FTMContextNet.Application.Services
                 RateLimit.Release();
             }
             
+            
+            return new APIResult
+            {
+                ApiResultType = APIResultType.Success
+            };
         }
         
     }

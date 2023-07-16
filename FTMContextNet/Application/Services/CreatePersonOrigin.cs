@@ -1,6 +1,7 @@
 ﻿using FTMContextNet.Data.Repositories;
 using FTMContextNet.Data.Repositories.GedImports;
 using FTMContextNet.Domain.Auth;
+using FTMContextNet.Domain.Entities.NonPersistent;
 using LoggingLib;
 
 namespace FTMContextNet.Application.Services;
@@ -20,14 +21,25 @@ public class CreatePersonOrigin
         _auth = auth;
     }
 
-    public void Execute()
+    public APIResult Execute()
     {
+        if (_auth.GetUser() == -1)
+        {
+            return new APIResult
+            {
+                ApiResultType = APIResultType.Unauthorized
+            };
+        }
 
         _ilog.WriteLine("Executing Create Person Origin");
 
         _persistedCacheRepository.CreatePersonOriginEntries(_importCacheRepository.GetCurrentImportId(), _auth.GetUser());
 
 
+        return new APIResult
+        {
+            ApiResultType = APIResultType.Success
+        };
     }
 
 }

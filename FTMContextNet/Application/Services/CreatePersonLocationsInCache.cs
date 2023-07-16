@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics;
 using System.Linq;
+using FTMContextNet.Domain.Auth;
 using FTMContextNet.Domain.Caching;
+using FTMContextNet.Domain.Entities.NonPersistent;
 using FTMContextNet.Domain.Entities.NonPersistent.Person;
 using LoggingLib;
 using PlaceLibNet.Data.Repositories;
@@ -21,10 +23,13 @@ public class CreatePersonLocationsInCache
 
     private readonly Ilog _logger;
 
+    private readonly IAuth _auth;
+
     public CreatePersonLocationsInCache(IPlaceRepository placeRepository,
         IPlaceLibCoordCache placeLibCoordCache,
         IPersonPlaceCache personPlaceCache,
         IPlaceLookupCache placeLookupCache,
+        IAuth auth,
         Ilog logger)
     {
         _placeLibCoordCache = placeLibCoordCache;
@@ -34,6 +39,8 @@ public class CreatePersonLocationsInCache
         _placeRepository = placeRepository;
 
         _placeLookupCache = placeLookupCache;
+
+        _auth = auth;
 
         _logger = logger;
     }
@@ -60,8 +67,16 @@ public class CreatePersonLocationsInCache
         return placeCache;
     }
 
-    public void Execute()
+    public APIResult Execute()
     {
+        if (_auth.GetUser() == -1)
+        {
+            return new APIResult
+            {
+                ApiResultType = APIResultType.Unauthorized
+            };
+        }
+
         var timer = new Stopwatch();
         timer.Start();
          
@@ -89,6 +104,11 @@ public class CreatePersonLocationsInCache
 
         _logger.WriteLine("Time taken: " + timer.Elapsed.ToString(@"m\:ss\.fff"));
 
+
+        return new APIResult
+        {
+            ApiResultType = APIResultType.Success
+        };
     }
     
 }
