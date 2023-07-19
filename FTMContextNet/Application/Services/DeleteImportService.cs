@@ -11,7 +11,7 @@ using LoggingLib;
 
 namespace FTMContextNet.Application.Services
 {
-    public class DeleteImportService
+    public class DeleteImportService : IServiceRunner
     {
         private readonly IPersistedCacheRepository _persistedCacheRepository;
         private readonly IPersistedImportCacheRepository _persistedImportCacheRepository;

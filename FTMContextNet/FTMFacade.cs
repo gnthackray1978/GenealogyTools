@@ -120,9 +120,10 @@ namespace FTMContextNet
         }
 
         #endregion
-        
-       
-        public void ImportSavedGed()
+
+      
+
+        public APIResult ImportSavedGed()
         {
             //dependencies
             var persistedCacheRepository = new PersistedCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
@@ -134,41 +135,42 @@ namespace FTMContextNet
             var placeLibCoordCache = new PlaceLibCoordCache(placeRepository, new PlaceNameFormatter());
             var gr = new GedRepository(_outputHandler, new GedParser(new NodeTypeCalculator(), Path.Combine(_iMSGConfigHelper.GedPath, persistedImportedCacheRepository.GedFileName())));
 
-
-            //_facade.ImportPersons();
-            var createPersonsAndMarriages = new CreatePersonsAndMarriages(persistedCacheRepository, persistedImportedCacheRepository, gr, new Auth(), _outputHandler);
-
-            createPersonsAndMarriages.Execute();
-
-            //_facade.CreateDupeView();
-            var createDupeEntrys = new CreateDupeEntrys(persistedCacheRepository, persistedImportedCacheRepository, new Auth(), _outputHandler);
-
-            createDupeEntrys.Execute();
-
-            //_facade.CreateTreeRecord();
-            var ctr = new CreateTreeRecords(persistedCacheRepository, persistedImportedCacheRepository, new Auth(), _outputHandler);
-            ctr.Execute();
-
-            //_facade.CreateTreeGroups();
-            var ctr2 = new CreateTreeGroups(persistedCacheRepository, persistedImportedCacheRepository, new Auth(), _outputHandler);
-            ctr2.Execute();
-
-            //_facade.CreateTreeGroupMappings();
-            var ctr3 = new CreateTreeGroupMappings(persistedCacheRepository, persistedImportedCacheRepository, new Auth(), _outputHandler);
-
-            ctr3.Execute().Wait();
+            APIResult apiResult = null;
             
-            //_facade.CreateMissingPersonLocations();
-           
+            var createPersonsAndMarriages = new CreatePersonsAndMarriages(persistedCacheRepository, persistedImportedCacheRepository, gr, new Auth(), _outputHandler);
+            apiResult = createPersonsAndMarriages.Execute();
+            if (apiResult.ApiResultType != APIResultType.Success)
+                return apiResult;
+
+            var createDupeEntrys = new CreateDupeEntrys(persistedCacheRepository, persistedImportedCacheRepository, new Auth(), _outputHandler);
+            apiResult = createDupeEntrys.Execute();
+            if (apiResult.ApiResultType != APIResultType.Success)
+                return apiResult;
+            
+            var ctr = new CreateTreeRecords(persistedCacheRepository, persistedImportedCacheRepository, new Auth(), _outputHandler);
+            apiResult = ctr.Execute();
+            if (apiResult.ApiResultType != APIResultType.Success)
+                return apiResult;
+            
+            var ctr2 = new CreateTreeGroups(persistedCacheRepository, persistedImportedCacheRepository, new Auth(), _outputHandler);
+            apiResult = ctr2.Execute();
+            if (apiResult.ApiResultType != APIResultType.Success)
+                return apiResult;
+
+            var ctr3 = new CreateTreeGroupMappings(persistedCacheRepository, persistedImportedCacheRepository, new Auth(), _outputHandler);
+            apiResult = ctr3.Execute().Result;
+            if (apiResult.ApiResultType != APIResultType.Success)
+                return apiResult;
+            
+
             var service = new CreatePersonLocationsInCache(placeRepository,
                 placeLibCoordCache,
                 personPlaceCache,
                 placeCache,
                 new Auth(),
                 _outputHandler);
-
-            service.Execute();
-
+            
+            return service.Execute();
         }
         
         

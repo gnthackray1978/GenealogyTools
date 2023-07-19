@@ -6,7 +6,7 @@ using LoggingLib;
 
 namespace FTMContextNet.Application.Services;
 
-public class CreatePersonOrigin
+public class CreatePersonOrigin : IServiceRunner
 {
     private readonly IPersistedCacheRepository _persistedCacheRepository;
     private readonly IPersistedImportCacheRepository _importCacheRepository;

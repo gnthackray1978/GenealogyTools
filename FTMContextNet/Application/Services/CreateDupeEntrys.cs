@@ -10,7 +10,7 @@ using FTMContextNet.Domain.ExtensionMethods;
 
 namespace FTMContextNet.Application.Services
 {
-    public class CreateDupeEntrys
+    public class CreateDupeEntrys : IServiceRunner
     {
         private readonly IPersistedCacheRepository _persistedCacheRepository;
         private readonly IPersistedImportCacheRepository _persistedImportCacheRepository;

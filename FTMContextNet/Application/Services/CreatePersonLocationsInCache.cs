@@ -11,7 +11,7 @@ using PlaceLibNet.Domain.Entities;
 
 namespace FTMContextNet.Application.Services;
 
-public class CreatePersonLocationsInCache
+public class CreatePersonLocationsInCache : IServiceRunner
 { 
     private readonly IPlaceRepository _placeRepository;
 

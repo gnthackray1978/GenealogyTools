@@ -10,7 +10,7 @@ using PlaceLibNet.Domain.Caching;
 
 namespace FTMContextNet.Application.Services;
 
-public class UpdatePersonLocations
+public class UpdatePersonLocations : IServiceRunner
 {
     private readonly PlaceRepository _placeRepository;
 

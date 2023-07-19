@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using FTMContextNet.Data.Repositories;
 using FTMContextNet.Data.Repositories.GedImports;
@@ -12,7 +8,7 @@ using LoggingLib;
 
 namespace FTMContextNet.Application.Services
 {
-    public class CreateTreeGroupMappings
+    public class CreateTreeGroupMappings 
     {
         private static readonly SemaphoreSlim RateLimit = new SemaphoreSlim(1,1);
         private readonly IPersistedCacheRepository _persistedCacheRepository;

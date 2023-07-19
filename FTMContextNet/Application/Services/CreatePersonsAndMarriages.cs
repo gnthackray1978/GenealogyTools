@@ -6,7 +6,7 @@ using LoggingLib;
 
 namespace FTMContextNet.Application.Services
 {
-    public class CreatePersonsAndMarriages
+    public class CreatePersonsAndMarriages : IServiceRunner 
     {
         private readonly IPersistedCacheRepository _persistedCacheRepository;
         private readonly IPersistedImportCacheRepository _persistedImportCacheRepository;
