@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ConfigHelper\ConfigHelper.csproj" />
     <ProjectReference Include="..\LoggingLib\LoggingLib.csproj" />
   </ItemGroup>
 

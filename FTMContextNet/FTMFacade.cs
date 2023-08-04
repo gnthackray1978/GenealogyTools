@@ -3,11 +3,9 @@ using ConfigHelper;
 using FTMContextNet.Application.Mapping;
 using FTMContextNet.Application.Models.Create;
 using FTMContextNet.Application.Models.Read;
-using FTMContextNet.Application.Services;
 using FTMContextNet.Data;
 using FTMContextNet.Data.Repositories;
-using FTMContextNet.Domain.Auth;
-using FTMContextNet.Domain.Entities.NonPersistent;
+using MSGIdent;
 using LoggingLib;
 using PlaceLibNet.Application.Models.Read;
 using PlaceLibNet.Application.Models.Write;
@@ -19,11 +17,29 @@ using QuickGed.Services;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using FTMContextNet.Application.Services.GedImport;
+using System.Threading;
+using FTMContextNet.Application.UserServices.CreateDuplicateList;
+using FTMContextNet.Application.UserServices.CreateGedImport;
+using FTMContextNet.Application.UserServices.CreatePersonLocationsInCache;
+using FTMContextNet.Application.UserServices.CreatePersonsAndRelationships;
+using FTMContextNet.Application.UserServices.DeleteImport;
+using FTMContextNet.Application.UserServices.GetGedList;
+using FTMContextNet.Application.UserServices.GetInfoList;
+using FTMContextNet.Application.UserServices.UpdateImportStatus;
+using FTMContextNet.Application.UserServices.UpdatePersonLocations;
 using FTMContextNet.Data.Repositories.GedImports;
 using FTMContextNet.Domain.Caching;
 using PlaceLibNet.Domain;
 using PlaceLibNet.Domain.Caching;
+using FTMContextNet.Domain.Commands;
+using PlaceLibNet.Application.Services.GetPlaceInfoService;
+using PlaceLibNet.Application.Services.GetUnknownPlacesSearchedAlreadyService;
+using PlaceLibNet.Application.Services.UpdatePlaceCacheNameFormatting;
+using PlaceLibNet.Application.Services.UpdatePlaceGeoData;
+using PlaceLibNet.Application.Services.UpdatePlaceMetaData;
+using PlaceLibNet.Domain.Commands;
+using CommandResult = FTMContextNet.Domain.Commands.CommandResult;
+using CommandResultType = FTMContextNet.Domain.Commands.CommandResultType;
 
 namespace FTMContextNet
 {
@@ -59,9 +75,8 @@ namespace FTMContextNet
             
             var placeRepository = new PlaceRepository(new PlacesContext(_iMSGConfigHelper), _outputHandler);
 
-
             var service = new GetUnknownPlacesSearchedAlreadyServices(placeRepository, _outputHandler, _mapper);
-            return service.Execute(amount);
+            return service.Handle(new GetUnknownPlacesSearchedAlreadyQuery(amount), new CancellationToken(false)).Result;
         }
 
         public void ClearData()
@@ -79,9 +94,9 @@ namespace FTMContextNet
             var placeRepository = new PlaceRepository(new PlacesContext(_iMSGConfigHelper), _outputHandler);
 
 
-            var service = new UpdatePlaceGeoData(placeRepository, _outputHandler, _mapper);
-
-            service.Execute(value);
+            var service = new UpdatePlaceGeoData(placeRepository, _outputHandler, _mapper,new Auth());
+             
+            service.Handle(new UpdatePlaceGeoDataCommand(value.placeid, value.results), new CancellationToken(false)).Wait();
         }
 
         /// <summary>
@@ -91,78 +106,64 @@ namespace FTMContextNet
         {
             var placeRepository = new PlaceRepository(new PlacesContext(_iMSGConfigHelper), _outputHandler);
             
-            var service = new UpdatePlaceCacheNameFormatting(placeRepository, _outputHandler);
+            var service = new UpdatePlaceCacheNameFormatting(placeRepository,new PlaceNameFormatter(), _outputHandler, new Auth() );
 
-            service.Execute();
+            service.Handle(new UpdatePlaceCacheCommand(), new CancellationToken(false)).Wait();
         }
 
         /// <summary>
         /// Updates Persons table with lat and longs.
         /// </summary>
-        public void UpdatePersonLocations()
+        public CommandResult UpdatePersonLocations()
         {
             var placeRepository = new PlaceRepository(new PlacesContext(_iMSGConfigHelper), _outputHandler);
 
             var persistedCacheRepository = new PersistedCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
 
-            var service = new UpdatePersonLocations(placeRepository, persistedCacheRepository, _outputHandler);
+            var service = new UpdatePersonLocations(placeRepository, persistedCacheRepository, _outputHandler, new Auth());
 
-            service.Execute();
+            return service.Handle(new UpdatePersonLocationsCommand(),new CancellationToken(false)).Result;
         }
         
         public void UpdatePlaceMetaData()
         {
             var placeRepository = new PlaceRepository(new PlacesContext(_iMSGConfigHelper),_outputHandler);
 
-            var service = new UpdatePlaceMetaData(placeRepository, _outputHandler);
+            var service = new UpdatePlaceMetaData(placeRepository, _outputHandler,new Auth());
 
-            service.Execute();
+            service.Handle(new UpdatePlaceMetaDataCommand(), new CancellationToken(false)).Wait();
         }
 
         #endregion
 
       
 
-        public APIResult ImportSavedGed()
+        public CommandResult ImportSavedGed()
         {
             //dependencies
             var persistedCacheRepository = new PersistedCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
             var persistedImportedCacheRepository = new PersistedImportCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
             var placeRepository = new PlaceRepository(new PlacesContext(_iMSGConfigHelper), _outputHandler);
-            var persistedImportCacheRepository = new PersistedImportCacheRepository(new PersistedCacheContext(_iMSGConfigHelper, _outputHandler), _outputHandler);
-            var personPlaceCache = new PersonPlaceCache(persistedCacheRepository.MakePlaceRecordCache(persistedImportCacheRepository.GetCurrentImportId()), new PlaceNameFormatter());
-            var placeCache = new PlaceLookupCache(placeRepository.GetCachedPlaces(), new PlaceNameFormatter());
+            
+            var personPlaceCache = new PersonPlaceCache(persistedCacheRepository, persistedImportedCacheRepository, new PlaceNameFormatter());
+            var placeCache = new PlaceLookupCache(placeRepository, new PlaceNameFormatter());
             var placeLibCoordCache = new PlaceLibCoordCache(placeRepository, new PlaceNameFormatter());
-            var gr = new GedRepository(_outputHandler, new GedParser(new NodeTypeCalculator(), Path.Combine(_iMSGConfigHelper.GedPath, persistedImportedCacheRepository.GedFileName())));
+          
+            var gr = new GedRepository(_outputHandler, new GedParser(new NodeTypeCalculator(), 
+                Path.Combine(_iMSGConfigHelper.GedPath, persistedImportedCacheRepository.GedFileName())));
 
-            APIResult apiResult = null;
+            CommandResult CommandResult = null;
             
             var createPersonsAndMarriages = new CreatePersonsAndMarriages(persistedCacheRepository, persistedImportedCacheRepository, gr, new Auth(), _outputHandler);
-            apiResult = createPersonsAndMarriages.Execute();
-            if (apiResult.ApiResultType != APIResultType.Success)
-                return apiResult;
+            CommandResult = createPersonsAndMarriages.Handle(new CreatePersonAndRelationshipsCommand(),new CancellationToken(false)).Result;
+            if (CommandResult.CommandResultType != CommandResultType.Success)
+                return CommandResult;
 
             var createDupeEntrys = new CreateDupeEntrys(persistedCacheRepository, persistedImportedCacheRepository, new Auth(), _outputHandler);
-            apiResult = createDupeEntrys.Execute();
-            if (apiResult.ApiResultType != APIResultType.Success)
-                return apiResult;
+            CommandResult = createDupeEntrys.Handle(new CreateDuplicateListCommand(),new CancellationToken(false)).Result;
+            if (CommandResult.CommandResultType != CommandResultType.Success)
+                return CommandResult;
             
-            var ctr = new CreateTreeRecords(persistedCacheRepository, persistedImportedCacheRepository, new Auth(), _outputHandler);
-            apiResult = ctr.Execute();
-            if (apiResult.ApiResultType != APIResultType.Success)
-                return apiResult;
-            
-            var ctr2 = new CreateTreeGroups(persistedCacheRepository, persistedImportedCacheRepository, new Auth(), _outputHandler);
-            apiResult = ctr2.Execute();
-            if (apiResult.ApiResultType != APIResultType.Success)
-                return apiResult;
-
-            var ctr3 = new CreateTreeGroupMappings(persistedCacheRepository, persistedImportedCacheRepository, new Auth(), _outputHandler);
-            apiResult = ctr3.Execute().Result;
-            if (apiResult.ApiResultType != APIResultType.Success)
-                return apiResult;
-            
-
             var service = new CreatePersonLocationsInCache(placeRepository,
                 placeLibCoordCache,
                 personPlaceCache,
@@ -170,7 +171,7 @@ namespace FTMContextNet
                 new Auth(),
                 _outputHandler);
             
-            return service.Execute();
+            return service.Handle(new CreatePersonLocationsCommand(),new CancellationToken(false)).Result;
         }
         
         
@@ -181,7 +182,7 @@ namespace FTMContextNet
 
             var tp = new GetInfoService(persistedCacheRepository, _outputHandler, _mapper,auth);
 
-            return tp.Execute();
+            return tp.Handle(new GetInfoServiceQuery(), new CancellationToken(false)).Result;
         }
 
         public IEnumerable<ImportModel> ReadImports()
@@ -190,28 +191,30 @@ namespace FTMContextNet
 
             var tp = new GetGedFiles(persistedCacheRepository, _outputHandler, _mapper);
 
-            return tp.Execute();
+            return tp.Handle(new GetGedFilesQuery(), new CancellationToken(false)).Result;
         }
 
-        public APIResult CreateImport(CreateImportModel createImportModel)
+        public CommandResult CreateImport(CreateImportModel createImportModel)
         {
             var persistedCacheRepository = new PersistedImportCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
  
             var tp = new CreateImport(persistedCacheRepository, _outputHandler, new Auth());
 
-            return tp.Execute(createImportModel);
+
+
+            return tp.Handle(new CreateImportCommand(createImportModel.FileName,createImportModel.FileSize, createImportModel.Selected),new CancellationToken(false)).Result;
         }
 
-        public APIResult SelectImport(int importId)
+        public CommandResult SelectImport(int importId)
         {
             var persistedCacheRepository = new PersistedImportCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
 
-            var tp = new SelectImport(persistedCacheRepository, _outputHandler, new Auth());
+            var tp = new UpdateImportStatus(persistedCacheRepository, _outputHandler, new Auth());
 
-            return tp.Execute(importId);
+            return tp.Handle(new UpdateImportStatusCommand(importId),new CancellationToken(false)).Result;
         }
 
-        public APIResult DeleteImport(int importId)
+        public CommandResult DeleteImport(int importId)
         {
             var persistedCacheRepository = new PersistedCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
           
@@ -227,11 +230,11 @@ namespace FTMContextNet
             var d = new DeleteImportService(persistedCacheRepository, persistedImportedCacheRepository, gr, auth,
                 _outputHandler);
 
-            d.Execute();
+            d.Handle(new DeleteTreeCommand(), new CancellationToken(false)).Wait();
 
             var tp = new DeleteImport(persistedImportedCacheRepository, _outputHandler, new Auth());
 
-            return tp.Execute(importId);
+            return tp.Handle(new DeleteImportCommand(importId), new CancellationToken(false)).Result;
         }
 
         public PlaceInfoModel GetPlaceInfo()
@@ -240,7 +243,7 @@ namespace FTMContextNet
 
             var tp = new GetPlaceInfoService(ftmPlaceCacheRepository, _outputHandler);
 
-            return tp.Execute();
+            return tp.Handle(new GetPlaceInfoQuery(), new CancellationToken(false)).Result;
         }
     }
 }

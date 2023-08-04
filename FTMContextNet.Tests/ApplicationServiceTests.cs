@@ -1,12 +1,14 @@
 using AutoMapper;
-using Castle.Components.DictionaryAdapter;
 using FTMContextNet.Application.Mapping;
-using FTMContextNet.Application.Services;
+using FTMContextNet.Application.UserServices.CreateDuplicateList;
+using FTMContextNet.Application.UserServices.GetGedList;
+using FTMContextNet.Application.UserServices.GetInfoList;
 using FTMContextNet.Data;
 using FTMContextNet.Data.Repositories;
 using FTMContextNet.Data.Repositories.GedImports;
-using FTMContextNet.Domain.Auth;
+using MSGIdent;
 using FTMContextNet.Domain.Collections;
+using FTMContextNet.Domain.Commands;
 using FTMContextNet.Domain.Entities.NonPersistent;
 using FTMContextNet.Domain.Entities.NonPersistent.Person;
 using FTMContextNet.Domain.Entities.Persistent.Cache;
@@ -70,7 +72,7 @@ public class ApplicationServiceTests
 
         var gis = new CreateDupeEntrys(_mockPersistedCacheRepository.Object, _mockPersistedImportCacheRepository.Object,   new Auth(), _mockLog.Object);
 
-        gis.Execute();
+        gis.Handle(new CreateDuplicateListCommand(),new CancellationToken(false)).Wait();
         
         x.Should().HaveCount(2);
 
@@ -99,11 +101,11 @@ public class ApplicationServiceTests
 
         var gis = new GetInfoService(_mockPersistedCacheRepository.Object, _mockLog.Object, mapper, new Auth());
 
-        var mod =  gis.Execute();
+        var mod =  gis.Handle(new GetInfoServiceQuery(),new CancellationToken(false));
 
         gis.Should().NotBeNull();
 
-        mod.BadLocationsCount.Should().Be(1);
+        mod.Result.BadLocationsCount.Should().Be(1);
     }
 
     [Fact]
@@ -128,7 +130,7 @@ public class ApplicationServiceTests
 
         var gis = new GetGedFiles(_mockPersistedImportCacheRepository.Object, _mockLog.Object, mapper);
 
-        var mod = gis.Execute();
+        var mod = gis.Handle(new GetGedFilesQuery(), new CancellationToken(false)).Result;
 
         DateTime.TryParse("1 Jan 2023", out DateTime dt);
 

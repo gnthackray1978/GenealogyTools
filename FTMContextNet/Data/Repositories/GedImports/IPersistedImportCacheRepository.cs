@@ -10,7 +10,7 @@ public interface IPersistedImportCacheRepository
 
     ImportData AddImportRecord(string fileName, double fileSize, bool selected, int userId);
 
-    int SelectImport(int importId, int userId);
+    string SelectImport(int importId, int userId);
 
     bool ImportExists(string fileName, double fileSize, int userId);
 

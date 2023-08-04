@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using PlaceLibNet.Data.Repositories;
 using PlaceLibNet.Domain.Entities;
 
 namespace PlaceLibNet.Domain.Caching;
@@ -6,7 +7,11 @@ namespace PlaceLibNet.Domain.Caching;
 public class PlaceLookupCache : IPlaceLookupCache
 {
     private readonly IPlaceNameFormatter _placeNameFormatter;
+    private readonly IPlaceRepository _placeRepository;
+
     public List<PlaceLookup> PlaceLookups { get; set; }
+
+    private bool isConstructed = false;
 
     /// <summary>
     /// PlaceCache table caching object.
@@ -18,7 +23,22 @@ public class PlaceLookupCache : IPlaceLookupCache
         PlaceLookups = placeLookups;
         _placeNameFormatter = placeNameFormatter;
         PlaceLookups.Sort((s, y) => s.PlaceFormatted.CompareTo(y.PlaceFormatted));
+        isConstructed = true;
+    }
+    public PlaceLookupCache(IPlaceRepository placeRepository, IPlaceNameFormatter placeNameFormatter)
+    {
+        _placeRepository = placeRepository;
+        _placeNameFormatter = placeNameFormatter;
+    }
 
+    public void Load()
+    {
+        if (!isConstructed)
+        {
+            PlaceLookups = _placeRepository.GetCachedPlaces();  
+            PlaceLookups.Sort((s, y) => s.PlaceFormatted.CompareTo(y.PlaceFormatted));
+            isConstructed = true;
+        }
     }
 
     public bool Exists(string place)

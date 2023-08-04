@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using FTMContextNet.Data.Repositories;
+using FTMContextNet.Data.Repositories.GedImports;
 using FTMContextNet.Domain.Entities.NonPersistent.Person;
 using PlaceLibNet.Domain;
 
@@ -22,13 +24,19 @@ public interface IPersonPlaceCache : IEnumerable<PersonPlace>
     void Insert(string place);
 
     IEnumerator<PersonPlace> GetEnumerator();
+
+    void Load();
 }
 
 public class PersonPlaceCache :  IPersonPlaceCache
 {
-    private int _duplicateCount = 0;
+    private readonly IPersistedCacheRepository _iPersistedCacheRepository;
+    private readonly IPersistedImportCacheRepository _persistedImportedCacheRepository;
+    private readonly IPlaceNameFormatter _placeNameFormatter;
+
     private int _invalidPlaces = 0;
-    private IPlaceNameFormatter _placeNameFormatter;
+    private int _duplicateCount = 0;
+
     public List<PersonPlace> Items { get; set; }
 
     public int Count => Items.Count;
@@ -36,6 +44,8 @@ public class PersonPlaceCache :  IPersonPlaceCache
     public int InvalidLocationsCount => _invalidPlaces;
 
     public int DuplicateLocationsCount => _duplicateCount;
+
+    private bool _isConstructed = false;
 
     /// <summary>
     /// Load with list of places from the persons table.
@@ -45,8 +55,31 @@ public class PersonPlaceCache :  IPersonPlaceCache
     /// <param name="iNameFormatter"></param>
     public PersonPlaceCache(List<string> places, IPlaceNameFormatter iNameFormatter)
     {
-        _placeNameFormatter= iNameFormatter;
+        if(places.Count > 0)
+            _isConstructed = true;
+
+        _placeNameFormatter = iNameFormatter;
         InsertRange(places);
+    }
+
+    public PersonPlaceCache(IPersistedCacheRepository iPersistedCacheRepository, IPersistedImportCacheRepository persistedImportCacheRepository, IPlaceNameFormatter iNameFormatter)
+    {
+        _placeNameFormatter = iNameFormatter;
+        _iPersistedCacheRepository = iPersistedCacheRepository;
+        _persistedImportedCacheRepository = persistedImportCacheRepository;
+    }
+
+    //PersistedCacheRepository
+
+    public void Load()
+    {
+        if (!_isConstructed)
+        {
+            var places =
+                _iPersistedCacheRepository.MakePlaceRecordCache(_persistedImportedCacheRepository.GetCurrentImportId());
+
+            InsertRange(places);
+        }
     }
 
     public void InsertRange(List<string> places)

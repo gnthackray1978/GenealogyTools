@@ -1,12 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System.Diagnostics;
+using System.Threading;
 using AzureContext;
 using ConfigHelper;
 using FTMContextNet;
-using FTMContextNet.Application.Models.Read;
+using FTMContextNet.Application.UserServices.CreatePersonLocationsInCache;
+using FTMContextNet.Application.UserServices.GetInfoList;
+using FTMContextNet.Domain.Commands;
 using GenDataAPI.Hub;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-using PlaceLibNet.Application.Models.Read;
 
 namespace GenDataAPI.Controllers
 {
@@ -17,31 +20,52 @@ namespace GenDataAPI.Controllers
         
         private readonly IMSGConfigHelper _iMSGConfigHelper;
         private readonly OutputHandler _outputHandler;
-        private readonly FTMFacade _facade;
+        //private readonly FTMFacade _facade;
+        private readonly IMediator _mediator;
 
-        public DataController(IHubContext<NotificationHub> hubContext, IMSGConfigHelper iMSGConfigHelper)
+        public DataController(IHubContext<NotificationHub> hubContext, IMSGConfigHelper iMSGConfigHelper, IMediator mediator)
         {
             _iMSGConfigHelper = iMSGConfigHelper;
+
             _outputHandler = new OutputHandler(hubContext);
-            _facade = new FTMFacade(_iMSGConfigHelper, _outputHandler);
+           // _facade = new FTMFacade(_iMSGConfigHelper, _outputHandler);
+            _mediator = mediator;
         }
         
         [HttpPost]
         [Route("/data/persons/locations")]
+        public IActionResult AddPersonLocations()
+        {
+            return this.ConvertResult(_mediator
+                .Send(new CreatePersonLocationsCommand(), new CancellationToken(false)).Result);
+        }
+
+        [HttpPut]
+        [Route("/data/persons/locations")]
         public IActionResult UpdatePersonLocations()
-        { 
-            _facade.UpdatePersonLocations();
-            return Ok(true);
+        {
+            return this.ConvertResult(_mediator
+                .Send(new UpdatePersonLocationsCommand(), new CancellationToken(false)).Result);
         }
 
         [HttpPost]
-        [Route("/data/persons")]
+        [Route("/data/persons/add")]
         public IActionResult AddPersons()
         {
-            _facade.ImportSavedGed();
-            return Ok(true);
+            return this.ConvertResult(_mediator
+                .Send(new CreatePersonAndRelationshipsCommand(), new CancellationToken(false)).Result);
         }
-        
+
+        [HttpPost]
+        [Route("/data/dupes")]
+        public IActionResult AddDupes()
+        {
+            return this.ConvertResult(_mediator
+                .Send(new CreateDuplicateListCommand(), new CancellationToken(false)).Result);
+        }
+
+
+
         [HttpPost]
         [Route("/data/azure")]
         public IActionResult AddAzure()
@@ -53,15 +77,7 @@ namespace GenDataAPI.Controllers
 
             return Ok(true);
         }
-
-
-        [HttpDelete]
-        [Route("/data")]
-        public IActionResult Delete()
-        {
-            _facade.ClearData();
-            return Ok(true);
-        }
+         
          
     }
 }

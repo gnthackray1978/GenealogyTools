@@ -1,22 +1,22 @@
-﻿using FTMContextNet.Domain.Entities.NonPersistent;
+﻿using FTMContextNet.Domain.Commands;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GenDataAPI
 {
-    public static class APIResultExtensions
+    public static class CommandResultExtensions
     {
-        public static ActionResult ConvertResult(this ControllerBase value, APIResult cb)
+        public static ActionResult ConvertResult(this ControllerBase value, CommandResult cb)
         {
-            if (cb.ApiResultType == APIResultType.Success)
+            if (cb.CommandResultType == CommandResultType.Success)
                 return value.Ok(cb.Id);
 
-            if (cb.ApiResultType == APIResultType.RecordExists)
+            if (cb.CommandResultType == CommandResultType.RecordExists)
                 return value.Conflict(cb.Message);
 
-            if (cb.ApiResultType == APIResultType.InvalidRequest)
+            if (cb.CommandResultType == CommandResultType.InvalidRequest)
                 return value.BadRequest(cb.Message);
 
-            if (cb.ApiResultType == APIResultType.Unauthorized)
+            if (cb.CommandResultType == CommandResultType.Unauthorized)
                 return value.Forbid(cb.Message);
 
             return value.Ok();

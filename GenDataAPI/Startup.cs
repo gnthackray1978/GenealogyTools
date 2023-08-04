@@ -1,20 +1,23 @@
+using System;
+using System.Reflection;
+using AutoMapper;
+using ConfigHelper;
+using FTMContextNet.Application.Mapping;
+using FTMContextNet.Data;
+using FTMContextNet.Data.Repositories;
+using FTMContextNet.Data.Repositories.GedImports;
+using MSGIdent;
+using GenDataAPI.Hub;
+using LoggingLib;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using ConfigHelper;
-using GenDataAPI.Hub;
-using static GenDataAPI.Program2;
+using PlaceLibNet.Data.Contexts;
+using PlaceLibNet.Domain.Caching;
 
-namespace FTMServices4
+namespace GenDataAPI
 {
     public class Startup
     {
@@ -30,8 +33,27 @@ namespace FTMServices4
         {
             var msgConfigHelper = new MSGConfigHelper();
 
-            services.AddSingleton<IMSGConfigHelper>(msgConfigHelper);
+            var config = new MapperConfiguration(cfg =>
+            {
 
+                cfg.AddProfile(new AutoMapperConfiguration());
+            });
+
+            services.AddSingleton<IMSGConfigHelper>(msgConfigHelper)
+                    .AddMediatR(cfg => cfg
+                    .RegisterServicesFromAssemblies(AppDomain.CurrentDomain.GetAssemblies())
+                    .RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()))
+                    .AddSingleton<Ilog>(new Log())
+                    .AddSingleton<IMapper>(config.CreateMapper())
+                    .AddSingleton<IAuth>(new Auth())
+                    .AddTransient<IPlacesContext,PlacesContext>()
+                    .AddTransient<IPersistedCacheContext, PersistedCacheContext>()
+                    .AddTransient<IPersistedImportCacheRepository, PersistedImportCacheRepository>()
+                    .AddTransient<IPersistedCacheRepository, PersistedCacheRepository>()
+                    .AddTransient<IPlaceLibCoordCache, PlaceLibCoordCache>()
+                    .AddTransient<IPlaceLookupCache,PlaceLookupCache>();
+            
+            //PersistedImportCacheRepository
             services.AddControllers();
             services.AddSignalR();
         }

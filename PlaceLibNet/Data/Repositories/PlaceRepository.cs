@@ -14,10 +14,10 @@ namespace PlaceLibNet.Data.Repositories
 {
     public class PlaceRepository : IPlaceRepository
     {
-        private readonly PlacesContext _placesContext;
+        private readonly IPlacesContext _placesContext;
         private readonly Ilog _iLog;
         
-        public PlaceRepository(PlacesContext placesContext, Ilog iLog)
+        public PlaceRepository(IPlacesContext placesContext, Ilog iLog)
         {
             _placesContext = placesContext;
             _iLog = iLog;
@@ -25,9 +25,9 @@ namespace PlaceLibNet.Data.Repositories
         
         public List<CountyDto> GetCounties(bool toLower = false)
         {
-            using var placecontext = new PlacesContext(new MSGConfigHelper());
+           // using var placecontext = new PlacesContext(new MSGConfigHelper());
 
-            var counties = placecontext.Places.Select(s => new CountyDto()
+            var counties = _placesContext.Places.Select(s => new CountyDto()
             {
                 County = toLower ? s.Ctyhistnm.ToLower() : s.Ctyhistnm,
                 Country = s.Ctry15nm

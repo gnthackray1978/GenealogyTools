@@ -1,8 +1,12 @@
 ﻿using System;
+using System.Threading;
 using ConfigHelper;
 using FTMContextNet;
 using FTMContextNet.Application.Models.Create;
+using FTMContextNet.Application.UserServices.CreatePersonLocationsInCache;
+using FTMContextNet.Domain.Commands;
 using GenDataAPI.Hub;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 
@@ -14,14 +18,16 @@ public partial class GedController : ControllerBase
 {
 
     private readonly IMSGConfigHelper _iMSGConfigHelper;
-    private readonly OutputHandler _outputHandler;
-    private readonly FTMFacade _facade;
+    private readonly OutputHandler _outputHandler; 
+    private readonly IMediator _mediator;
 
-    public GedController(IHubContext<NotificationHub> hubContext, IMSGConfigHelper iMSGConfigHelper)
+
+    public GedController(IHubContext<NotificationHub> hubContext, 
+        IMSGConfigHelper iMSGConfigHelper, IMediator mediator)
     {
         _iMSGConfigHelper = iMSGConfigHelper;
-        _outputHandler = new OutputHandler(hubContext);
-        _facade = new FTMFacade(_iMSGConfigHelper, _outputHandler);
+        _outputHandler = new OutputHandler(hubContext); 
+        _mediator = mediator;
     }
 
     [HttpPost]
@@ -44,21 +50,19 @@ public partial class GedController : ControllerBase
         {
             return NoContent();
         }
- 
-        return this.ConvertResult(_facade.CreateImport(new CreateImportModel
-        {
-            Selected = false,
-            FileName = fileName,
-            FileSize = size,
-        }));
-        
+
+        return this.ConvertResult(_mediator
+            .Send(new CreateImportCommand(fileName, size,false), new CancellationToken(false)).Result);
+         
     }
 
     [HttpPut]
     [Route("/ged/select")]
     public ActionResult SelectGed([FromBody] int importId)
     { 
-        return this.ConvertResult(_facade.SelectImport(importId));
+       
+        return this.ConvertResult(_mediator
+            .Send(new UpdateImportStatusCommand(importId), new CancellationToken(false)).Result);
     }
 
     [HttpDelete]
@@ -67,6 +71,7 @@ public partial class GedController : ControllerBase
     {
         if (importId == 42) return Ok();
 
-        return this.ConvertResult(_facade.DeleteImport(importId));
+        return this.ConvertResult(_mediator
+            .Send(new DeleteImportCommand(importId), new CancellationToken(false)).Result);
     }
 }

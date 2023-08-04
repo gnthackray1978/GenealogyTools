@@ -2,6 +2,7 @@
 using ConfigHelper;
 using FTMContextNet;
 using GenDataAPI.Hub;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using PlaceLibNet.Application.Models.Read;
@@ -18,11 +19,14 @@ namespace GenDataAPI.Controllers
         private readonly IMSGConfigHelper _iMSGConfigHelper;
         private readonly IHubContext<NotificationHub> _hubContext;
         private readonly FTMFacade _facade;
+        private readonly IMediator _mediator;
 
-        public GeoCodeController(IHubContext<NotificationHub> hubContext, IMSGConfigHelper iMSGConfigHelper)
+        public GeoCodeController(IHubContext<NotificationHub> hubContext,
+            IMSGConfigHelper iMSGConfigHelper, IMediator mediator)
         {
             _hubContext = hubContext;
             _iMSGConfigHelper = iMSGConfigHelper;
+            _mediator = mediator;
             _facade = new FTMFacade(_iMSGConfigHelper, new OutputHandler(_hubContext));
         }
 

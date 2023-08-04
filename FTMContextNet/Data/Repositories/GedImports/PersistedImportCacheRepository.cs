@@ -35,7 +35,7 @@ public class PersistedImportCacheRepository : IPersistedImportCacheRepository
         return _persistedCacheContext.FTMImport.Any(a => a.Id == importId);
     }
 
-    public int SelectImport(int importId, int userId)
+    public string SelectImport(int importId, int userId)
     {
         foreach (var imp in _persistedCacheContext.FTMImport.Where(w => w.UserId == userId))
         {
@@ -46,7 +46,7 @@ public class PersistedImportCacheRepository : IPersistedImportCacheRepository
 
         _persistedCacheContext.SaveChanges();
         
-        return 0;
+        return "";
     }
      
     public List<FTMImport> GetImportData()
