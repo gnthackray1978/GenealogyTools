@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using LoggingLib;
 using MediatR;
+using MSG.CommonTypes;
 using MSGIdent;
 using PlaceLibNet.Data.Repositories;
 using PlaceLibNet.Domain;

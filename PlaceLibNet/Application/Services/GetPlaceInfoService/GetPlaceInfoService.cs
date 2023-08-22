@@ -12,9 +12,9 @@ namespace PlaceLibNet.Application.Services.GetPlaceInfoService
     public class GetPlaceInfoService: IRequestHandler<GetPlaceInfoQuery, PlaceInfoModel>
     {
         private readonly Ilog _iLog;
-        private readonly PlaceRepository _placeRepository;
+        private readonly IPlaceRepository _placeRepository;
 
-        public GetPlaceInfoService(PlaceRepository placeRepository, Ilog outputHandler)
+        public GetPlaceInfoService(IPlaceRepository placeRepository, Ilog outputHandler)
         {
             _iLog = outputHandler;
             _placeRepository = placeRepository;

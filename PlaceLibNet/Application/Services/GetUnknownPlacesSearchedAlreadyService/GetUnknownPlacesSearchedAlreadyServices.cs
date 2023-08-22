@@ -15,10 +15,10 @@ namespace PlaceLibNet.Application.Services.GetUnknownPlacesSearchedAlreadyServic
         IRequestHandler<GetUnknownPlacesSearchedAlreadyQuery, IEnumerable<PlaceModel>>
     {
         private readonly Ilog _iLog;
-        private readonly PlaceRepository _placeRepository;
+        private readonly IPlaceRepository _placeRepository;
         private readonly IMapper _iMapper;
 
-        public GetUnknownPlacesSearchedAlreadyServices(PlaceRepository placeRepository, Ilog iLog, IMapper iMapper)
+        public GetUnknownPlacesSearchedAlreadyServices(IPlaceRepository placeRepository, Ilog iLog, IMapper iMapper)
         {
             _iLog = iLog;
             _placeRepository = placeRepository;

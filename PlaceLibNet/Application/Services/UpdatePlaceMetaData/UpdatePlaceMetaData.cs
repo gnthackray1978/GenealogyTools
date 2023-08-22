@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using LoggingLib;
 using MediatR;
+using MSG.CommonTypes;
 using MSGIdent;
 using PlaceLibNet.Data.Repositories;
 using PlaceLibNet.Domain.Caching;
@@ -12,10 +13,10 @@ namespace PlaceLibNet.Application.Services.UpdatePlaceMetaData
     public class UpdatePlaceMetaData : IRequestHandler<UpdatePlaceMetaDataCommand, CommandResult>
     {
         private readonly Ilog _iLog;
-        private readonly PlaceRepository _placeRepository;
+        private readonly IPlaceRepository _placeRepository;
         private readonly IAuth _auth;
 
-        public UpdatePlaceMetaData(PlaceRepository placeRepository, Ilog iLog, IAuth auth)
+        public UpdatePlaceMetaData(IPlaceRepository placeRepository, Ilog iLog, IAuth auth)
         {
             _iLog = iLog;
             _auth = auth;

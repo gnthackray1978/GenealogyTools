@@ -3,21 +3,22 @@ using System.Threading.Tasks;
 using AutoMapper;
 using LoggingLib;
 using MediatR;
+using MSG.CommonTypes;
 using MSGIdent;
-using PlaceLibNet.Data.Repositories;
-using PlaceLibNet.Domain.Caching;
+using PlaceLibNet.Data.Repositories; 
 using PlaceLibNet.Domain.Commands;
+    
 
 namespace PlaceLibNet.Application.Services.UpdatePlaceGeoData
 {
     public class UpdatePlaceGeoData : IRequestHandler<UpdatePlaceGeoDataCommand, CommandResult>
     {
         private readonly Ilog _iLog;
-        private readonly PlaceRepository _placeRepository;
+        private readonly IPlaceRepository _placeRepository;
         private readonly IMapper _iMapper;
         private readonly IAuth _auth;
 
-        public UpdatePlaceGeoData(PlaceRepository placeRepository, Ilog iLog, IMapper iMapper, IAuth auth)
+        public UpdatePlaceGeoData(IPlaceRepository placeRepository, Ilog iLog, IMapper iMapper, IAuth auth)
         {
             _iLog = iLog;
             _placeRepository = placeRepository;

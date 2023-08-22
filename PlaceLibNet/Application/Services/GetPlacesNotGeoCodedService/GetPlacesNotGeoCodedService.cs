@@ -13,10 +13,10 @@ namespace PlaceLibNet.Application.Services.GetPlacesNotGeoCodedService
     public class GetPlacesNotGeoCodedService : IRequestHandler<GetPlacesNotGeoCodedQuery, IEnumerable<PlaceModel>>
     {
         private readonly Ilog _outputHandler;
-        private readonly PlaceRepository _placeRepository;
+        private readonly IPlaceRepository _placeRepository;
         private readonly IMapper _iMapper;
 
-        public GetPlacesNotGeoCodedService(PlaceRepository placeRepository, Ilog outputHandler, IMapper iMapper)
+        public GetPlacesNotGeoCodedService(IPlaceRepository placeRepository, Ilog outputHandler, IMapper iMapper)
         {
             _outputHandler = outputHandler;
             _placeRepository = placeRepository;
