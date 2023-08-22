@@ -5,24 +5,23 @@ using QuickGed.Types;
 
 namespace QuickGed.Services;
 
-public class GedParser
+public class GedParser : IGedParser
 {
     private readonly INodeTypeCalculator _nodeTypeCalculator;
-    private readonly string _gedPath;
-
-    public GedParser(INodeTypeCalculator nodeTypeCalculator, string gedPath)
+   
+    public GedParser(INodeTypeCalculator nodeTypeCalculator)
     {
         _nodeTypeCalculator = nodeTypeCalculator;
-        _gedPath = gedPath;
+        
     }
 
-    public GedDb Parse()
-    {
+    public GedDb Parse(string path)
+    { 
         var db = GedDb.Create();
 
-        db.FileName = Path.GetFileName(this._gedPath);
+        db.FileName = Path.GetFileName(path);
 
-        var fi = new FileInfo(_gedPath);
+        var fi = new FileInfo(path);
 
         db.FileSize = fi.Length;
 
@@ -30,7 +29,7 @@ public class GedParser
         var timer = new Stopwatch();
         timer.Start();
 
-        var gedcomLines = File.ReadAllLines(_gedPath).Select(GedcomLine.Parse);
+        var gedcomLines = File.ReadAllLines(path).Select(GedcomLine.Parse);
 
        
 
