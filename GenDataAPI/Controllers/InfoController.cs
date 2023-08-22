@@ -1,12 +1,18 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using ConfigHelper;
 using FTMContextNet;
 using FTMContextNet.Application.Models.Read;
+using FTMContextNet.Application.UserServices.GetGedList;
+using FTMContextNet.Application.UserServices.GetInfoList;
+using FTMContextNet.Application.UserServices.GetTreeImportStatus;
 using GenDataAPI.Hub;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using PlaceLibNet.Application.Models.Read;
+using PlaceLibNet.Application.Services.GetPlaceInfoService;
 
 namespace GenDataAPI.Controllers
 {
@@ -16,34 +22,37 @@ namespace GenDataAPI.Controllers
     {
         private readonly IHubContext<NotificationHub> _hubContext;
         private readonly IMSGConfigHelper _iMSGConfigHelper;
-        private readonly FTMFacade _facade;
+        private readonly IMediator _mediator;
 
-        public InfoController(IHubContext<NotificationHub> hubContext, IMSGConfigHelper iMSGConfigHelper)
+        public InfoController(IHubContext<NotificationHub> hubContext, IMSGConfigHelper iMSGConfigHelper, IMediator mediator)
         {
             _hubContext = hubContext;
             _iMSGConfigHelper = iMSGConfigHelper;
-            _facade = new FTMFacade(_iMSGConfigHelper, new OutputHandler(hubContext));
+            _mediator = mediator;
         }
 
         [HttpGet]
         [Route("/info/people")]
         public InfoModel GetPeopleInfo()
         {
-            return _facade.GetInfo();
+            return _mediator
+                .Send(new GetInfoServiceQuery(), new CancellationToken(false)).Result;
         }
 
         [HttpGet]
         [Route("/info/places")]
         public PlaceInfoModel GetPlaceInfo()
         {
-            return _facade.GetPlaceInfo();
+            return _mediator
+                .Send(new GetPlaceInfoQuery(), new CancellationToken(false)).Result;
         }
 
         [HttpGet]
         [Route("/info/gedfiles")]
         public IEnumerable<ImportModel> GetGedFileInfo()
         {
-            return _facade.ReadImports();
+            return _mediator
+                .Send(new GetGedFilesQuery(), new CancellationToken(false)).Result;
         }
     }
 }

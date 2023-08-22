@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
 using ConfigHelper;
-using FTMContextNet;
-using FTMContextNet.Application.Models.Create;
-using FTMContextNet.Application.UserServices.CreatePersonLocationsInCache;
+using FTMContextNet.Application.UserServices.GetTreeImportStatus;
 using FTMContextNet.Domain.Commands;
 using GenDataAPI.Hub;
 using MediatR;
@@ -32,7 +31,7 @@ public partial class GedController : ControllerBase
 
     [HttpPost]
     [Route("/ged/add")]
-    public ActionResult UploadFiles([FromForm] FilePayload filePayload)
+    public async Task<IActionResult> UploadFiles([FromForm] FilePayload filePayload)
     {
         long size = 0;
         string fileName = "";
@@ -51,27 +50,43 @@ public partial class GedController : ControllerBase
             return NoContent();
         }
 
-        return this.ConvertResult(_mediator
-            .Send(new CreateImportCommand(fileName, size,false), new CancellationToken(false)).Result);
+        var r = await _mediator
+            .Send(new CreateImportCommand(fileName, size, false),
+                new CancellationToken(false));
+
+        return this.ConvertResult(r);
          
     }
 
     [HttpPut]
     [Route("/ged/select")]
-    public ActionResult SelectGed([FromBody] int importId)
-    { 
-       
-        return this.ConvertResult(_mediator
-            .Send(new UpdateImportStatusCommand(importId), new CancellationToken(false)).Result);
+    public async Task<IActionResult> SelectGed([FromBody] int importId)
+    {
+        var r = await  _mediator
+            .Send(new UpdateImportStatusCommand(importId), new CancellationToken(false));
+        
+        return  this.ConvertResult(r);
     }
 
     [HttpDelete]
     [Route("/ged/delete")]
-    public ActionResult DeleteGed([FromBody]int importId)
+    public async Task<IActionResult> DeleteGed([FromBody]int importId)
     {
         if (importId == 42) return Ok();
 
-        return this.ConvertResult(_mediator
-            .Send(new DeleteImportCommand(importId), new CancellationToken(false)).Result);
+        var r = await _mediator
+            .Send(new DeleteImportCommand(importId), new CancellationToken(false));
+
+        return this.ConvertResult(r);
+    }
+
+    [HttpGet]
+    [Route("/ged/status")]
+    public async Task<IActionResult> TreeStatus()
+    {
+        var r = await _mediator
+            .Send(new GetTreeImportStatusQuery(), new CancellationToken(false));
+
+        return Ok(r);
     }
 }
