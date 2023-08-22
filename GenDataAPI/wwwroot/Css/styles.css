@@ -5,6 +5,9 @@
     font-weight: bold;
 }
 
+.topMargin {
+    margin-top: 10px;
+}
 
 .bottomMargin {
     margin-bottom: 10px;

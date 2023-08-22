@@ -3,6 +3,10 @@
 }
 
 WebConsole.prototype = {
+    printError: function (err) {
+        this.printOutputLine(err.status + ' ' + err.statusText + ' ' + err.responseText);
+    },
+
     printOutputLine: function (message) {
 
         var last = $("#output").last();
@@ -59,6 +63,25 @@ WebConsole.prototype = {
         document.getElementById("incompleteCount").innerHTML = 'Bad Names: ' + statsObject.badLocationsCount;
         document.getElementById("unsearchedCount").innerHTML = 'Unsearched: ' + statsObject.unsearched;
         document.getElementById("notfoundCount").innerHTML = 'Not Found: ' + statsObject.notFound;
+    },
+
+    displayCorrectImportUpdateSections: function (statsObject, appObj) {
+        console.log('displayCorrectImportUpdateSections: ' + statsObject);
+
+        if (statsObject)
+        {
+            $('#pae-update-row').show(); 
+            $('#lpr-rows').show(); 
+            
+            $('#pae-import-row').hide();
+        }
+        else
+        {
+            $('#pae-import-row').show();
+            $('#lpr-rows').hide();
+            $('#pae-update-row').hide(); 
+        }
+        
     },
 
     displayGedStats: function (statsObject,appObj) { 

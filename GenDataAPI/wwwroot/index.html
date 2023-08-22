@@ -57,6 +57,8 @@
             p.displayPlaceStats();
             p.displayPeopleStats();
             p.displayGedStats();
+            p.displayCorrectImportUpdateSections();
+            
         });
 
     </script>
@@ -70,7 +72,7 @@
     
   
     <div class="container-fluid">
-        <h2>FTM Data Manager</h2>
+        <h2>Tree Manager</h2>
 
         <div class="row">
             <div class="col subheader">Stats</div>
@@ -96,10 +98,10 @@
         </div>
         <div class="row">
             <input class="buttonLeftMargin" type="file" id="gedUpload" />
-            <div class="col"><a href="#Foo" onclick="p.importGed();">1. Import GED File</a></div>
+            <div class="col"><a href="#Foo" onclick="p.importGed();">1. Upload GED File</a></div>
         </div>
 
-        <div class="row">
+        <div class="row topMargin">
             <div class="col">
                 <table id="ged-file-list">
                     <thead>
@@ -116,29 +118,43 @@
             </div>
         </div>
 
-        <div class="row">
-            <div class="col subheader">Place Cache Operations</div>
+
+
+        <div class="row topMargin">
+            <div class="col subheader">People and Events</div>
         </div>
 
-        <div class="row">
-
-            <div class="col"><a href="#Foo" onclick="p.getUnEncodedLocationsFromServer();">1. GeoCode Location entries </a><div id="geocodecount" style="display:inline">0</div></div>
-            <div class="col"><a href="#Foo" onclick="p.updatePlaceMetadata();">2. Update Place Cache Metadata</a></div>
+        <div id="pae-import-row" class="row">
+            <div class="col"><a href="#Foo" onclick="p.importPersons();">1. Import </a></div>
+            <div class="col"></div>
+            <div class="col"></div>
             <div class="col"></div>
         </div>
 
-        <div class="row">
-            <div class="col subheader">Create data views</div>
-        </div>
-
-        <div class="row">
-            <div class="col"><a href="#Foo" onclick="p.importPersons();">1. Import Persons and Marriages</a></div>
+        <div id="pae-update-row" class="row">
+            <div class="col"><a href="#Foo" onclick="p.importPersons();">1. Create Dupe List </a></div>
             <div class="col"><a href="#Foo" onclick="p.updateLocations();">2. Update Persons Locations</a></div>
             <div class="col"></div>
-
+            <div class="col"></div>
         </div>
-         
 
+
+        <div id="lpr-rows" >
+            <div class="row topMargin">
+                <div class="col subheader">Location Processing</div>
+            </div>
+
+            <div class="row">
+                <div class="col"><a href="#Foo" onclick="p.getUnEncodedLocationsFromServer();">1. Adding missing locations </a></div>
+                <div class="col"><a href="#Foo" onclick="p.getUnEncodedLocationsFromServer();">2. GeoCode Location entries </a><div id="geocodecount" style="display:inline">0</div></div>
+                <div class="col"><a href="#Foo" onclick="p.updatePlaceMetadata();">3. Update location data</a></div>
+                <div class="col"></div>
+            </div>
+        </div>
+
+        <div class="row topMargin">
+        <div class="col subheader">Data Migrations</div>
+        </div>
         <div class="row bottomMargin">
             <div class="col"><a href="#Foo" onclick="p.azureimport();">1. Export to azure</a></div>
             <div class="col"></div>
@@ -146,6 +162,9 @@
         </div>
 
 
+        <div class="row topMargin">
+            <div class="col subheader">Telemetry</div>
+        </div>
 
         <div class="row">
             <div class="col subheader"><a href="#Output" onclick="tabs.showOutput();">Output</a></div>
