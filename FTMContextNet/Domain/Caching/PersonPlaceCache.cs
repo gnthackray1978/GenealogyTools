@@ -49,6 +49,7 @@ public class PersonPlaceCache :  IPersonPlaceCache
 
     /// <summary>
     /// Load with list of places from the persons table.
+    /// REQUIRES that the tree has been imported before this is run.
     /// Then format places and remove duplicates.
     /// </summary>
     /// <param name="places">Unformatted places from the persons table</param>
