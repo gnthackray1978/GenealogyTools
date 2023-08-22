@@ -87,6 +87,12 @@ namespace FTMContextNet.Data.Repositories
             _persistedCacheContext.DeleteOrigins(importId);
         }
 
+        public bool ImportPresent(int importId)
+        {
+            //throw new NotImplementedException();
+            return this._persistedCacheContext.FTMPersonView.Any(a => a.ImportId == importId);
+        }
+
         #endregion
 
         #region Valid Data

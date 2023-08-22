@@ -11,7 +11,7 @@ namespace FTMContextNet.Data.Repositories;
 public interface IPersistedCacheRepository
 {
     List<string> DumpCount();
-  //  DupeEntry CreateNewDupeEntry(int dupeId, FTMPersonView person, string ident);
+    void UpdatePersons(int personId, string lat, string lng, string altLat, string altLng);
     void DeleteDupes(int importId);
     void DeletePersons(int importId);
     void DeleteTreeRecords(int importId);
@@ -19,6 +19,8 @@ public interface IPersistedCacheRepository
     void DeleteTreeGroups(int importId);
     void DeleteRecordMapGroups(int importId);
     void DeleteOrigins(int importId);
+    bool ImportPresent(int importId);
+
     List<string> MakePlaceRecordCache(int importId);
     void CreatePersonOriginEntries(int importId, int userId);
     DuplicateIgnoreList GetIgnoreList();
@@ -26,6 +28,7 @@ public interface IPersistedCacheRepository
     void AddDupeEntrys(List<KeyValuePair<int, string>> dupes, int userId);
     int OriginPersonCount();
     Info GetInfo(int userId);
+    List<PersonLocation> GetPersonMapLocations();
 
     /// <summary>
     /// Updates treerecords table in cache. 
