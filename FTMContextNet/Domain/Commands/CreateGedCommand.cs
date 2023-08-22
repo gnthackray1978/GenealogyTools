@@ -4,10 +4,12 @@ using System.Linq;
 using System.Security.AccessControl;
 using System.Text;
 using System.Threading.Tasks;
+using MediatR;
+using MSG.CommonTypes;
 
 namespace FTMContextNet.Domain.Commands
 {
-    public class CreateGedCommand
+    public class CreateGedCommand : IRequest<CommandResult>
     {
         public string FileName { get; set; }
         public double FileSize { get; set; }
