@@ -12,14 +12,24 @@ public class PlaceLookupCacheTests
     [Fact]
     public void PlaceLookup_ShouldBeCorrect_WhenPlaceSearchedFor()
     {
+
+        var mockPersistedCacheRepository = new Mock<IPlaceRepository>();
+        
         var placeLookups = new List<PlaceLookup>()
         {
             new() { PlaceId = 0, Place = @"/Coton, Cambridgeshire|//", PlaceFormatted = @"Coton/Cambridgeshire", Lat ="1", Lng = "2"},
             new() { PlaceId = 1, Place = @"//Beswick/Lancashire//England/1668440/0.9332857/-0.03845536", PlaceFormatted = @"Ringstead/Northamptonshire/England", Lat ="3", Lng = "4"},
             new() { PlaceId = 2, Place = @"/Chorlton-upon-Medlock, Manchester, Lancashire, England|//", PlaceFormatted = @"ChorltonuponMedlock/Manchester/Lancashire/England", Lat ="5", Lng = "6"}
         };
+
+
+        mockPersistedCacheRepository
+            .Setup(s => s.GetCachedPlaces())
+            .Returns(placeLookups);
+
+        var plc = new PlaceLookupCache(mockPersistedCacheRepository.Object, new PlaceNameFormatter());
         
-        var plc = new PlaceLookupCache(placeLookups, new PlaceNameFormatter());
+        plc.Load();
 
         var f = plc.Search("Ringstead, Northamptonshire, England");
 
@@ -29,6 +39,8 @@ public class PlaceLookupCacheTests
     [Fact]
     public void Place_ShouldBeFound_WhenPlaceSearchedFor()
     {
+        var mockPersistedCacheRepository = new Mock<IPlaceRepository>();
+
         var placeLookups = new List<PlaceLookup>()
         {
             new() { PlaceId = 0, Place = @"/Coton, Cambridgeshire|//", PlaceFormatted = @"Coton/Cambridgeshire", Lat ="1", Lng = "2"},
@@ -36,7 +48,13 @@ public class PlaceLookupCacheTests
             new() { PlaceId = 2, Place = @"/Chorlton-upon-Medlock, Manchester, Lancashire, England|//", PlaceFormatted = @"ChorltonuponMedlock/Manchester/Lancashire/England", Lat ="5", Lng = "6"}
         };
 
-        var plc = new PlaceLookupCache(placeLookups, new PlaceNameFormatter());
+        mockPersistedCacheRepository
+            .Setup(s => s.GetCachedPlaces())
+            .Returns(placeLookups);
+
+        var plc = new PlaceLookupCache(mockPersistedCacheRepository.Object, new PlaceNameFormatter());
+
+        plc.Load();
 
         var f = plc.Exists("Ringstead, Northamptonshire, England");
 
