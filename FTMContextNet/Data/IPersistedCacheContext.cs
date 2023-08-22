@@ -35,4 +35,6 @@ public interface IPersistedCacheContext
     void UpdatePersonLocations(int personId, string lng, string lat, string altLng, string altLat);
 
     int SaveChanges();
+
+    bool ImportExistsInPersons(int importId);
 }

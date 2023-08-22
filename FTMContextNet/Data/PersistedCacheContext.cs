@@ -237,6 +237,11 @@ namespace FTMContextNet.Data
              
         }
 
+        public bool ImportExistsInPersons(int importId)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public int BulkInsertFTMPersonOrigins(int nextId,int userId, List<FTMPersonOrigin> origins)
         {
 
