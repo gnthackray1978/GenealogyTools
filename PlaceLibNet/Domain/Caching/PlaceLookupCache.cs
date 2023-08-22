@@ -10,21 +10,7 @@ public class PlaceLookupCache : IPlaceLookupCache
     private readonly IPlaceRepository _placeRepository;
 
     public List<PlaceLookup> PlaceLookups { get; set; }
-
-    private bool isConstructed = false;
-
-    /// <summary>
-    /// PlaceCache table caching object.
-    /// </summary>
-    /// <param name="placeLookups">PLACEFORMATTED should be as the name suggests formatted!</param>
-    public PlaceLookupCache(List<PlaceLookup> placeLookups, IPlaceNameFormatter placeNameFormatter)
-    {
-        //place lookup comes from the place cache table
-        PlaceLookups = placeLookups;
-        _placeNameFormatter = placeNameFormatter;
-        PlaceLookups.Sort((s, y) => s.PlaceFormatted.CompareTo(y.PlaceFormatted));
-        isConstructed = true;
-    }
+ 
     public PlaceLookupCache(IPlaceRepository placeRepository, IPlaceNameFormatter placeNameFormatter)
     {
         _placeRepository = placeRepository;
@@ -33,12 +19,8 @@ public class PlaceLookupCache : IPlaceLookupCache
 
     public void Load()
     {
-        if (!isConstructed)
-        {
-            PlaceLookups = _placeRepository.GetCachedPlaces();  
-            PlaceLookups.Sort((s, y) => s.PlaceFormatted.CompareTo(y.PlaceFormatted));
-            isConstructed = true;
-        }
+        PlaceLookups = _placeRepository.GetCachedPlaces();  
+        PlaceLookups.Sort((s, y) => s.PlaceFormatted.CompareTo(y.PlaceFormatted));
     }
 
     public bool Exists(string place)
