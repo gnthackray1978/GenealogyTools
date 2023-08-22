@@ -38,8 +38,7 @@ using PlaceLibNet.Application.Services.UpdatePlaceCacheNameFormatting;
 using PlaceLibNet.Application.Services.UpdatePlaceGeoData;
 using PlaceLibNet.Application.Services.UpdatePlaceMetaData;
 using PlaceLibNet.Domain.Commands;
-using CommandResult = FTMContextNet.Domain.Commands.CommandResult;
-using CommandResultType = FTMContextNet.Domain.Commands.CommandResultType;
+using MSG.CommonTypes;
 
 namespace FTMContextNet
 {
@@ -149,12 +148,11 @@ namespace FTMContextNet
             var placeCache = new PlaceLookupCache(placeRepository, new PlaceNameFormatter());
             var placeLibCoordCache = new PlaceLibCoordCache(placeRepository, new PlaceNameFormatter());
           
-            var gr = new GedRepository(_outputHandler, new GedParser(new NodeTypeCalculator(), 
-                Path.Combine(_iMSGConfigHelper.GedPath, persistedImportedCacheRepository.GedFileName())));
+            var gr = new GedRepository(_outputHandler, new GedParser(new NodeTypeCalculator()));
 
             CommandResult CommandResult = null;
             
-            var createPersonsAndMarriages = new CreatePersonsAndMarriages(persistedCacheRepository, persistedImportedCacheRepository, gr, new Auth(), _outputHandler);
+            var createPersonsAndMarriages = new CreatePersonsAndMarriages(persistedCacheRepository, persistedImportedCacheRepository, gr, new Auth(), _outputHandler, _iMSGConfigHelper);
             CommandResult = createPersonsAndMarriages.Handle(new CreatePersonAndRelationshipsCommand(),new CancellationToken(false)).Result;
             if (CommandResult.CommandResultType != CommandResultType.Success)
                 return CommandResult;
@@ -222,10 +220,9 @@ namespace FTMContextNet
           
             var auth = new Auth();
 
-            var gr = new GedRepository(_outputHandler,
-                new GedParser(new NodeTypeCalculator(),
-                    Path.Combine(_iMSGConfigHelper.GedPath, 
-                        persistedImportedCacheRepository.GedFileName())));
+
+
+            var gr = new GedRepository(_outputHandler,new GedParser(new NodeTypeCalculator()));
 
             var d = new DeleteImportService(persistedCacheRepository, persistedImportedCacheRepository, gr, auth,
                 _outputHandler);
