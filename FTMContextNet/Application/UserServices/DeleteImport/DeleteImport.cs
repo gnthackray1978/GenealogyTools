@@ -5,6 +5,7 @@ using MSGIdent;
 using FTMContextNet.Domain.Commands;
 using LoggingLib;
 using MediatR;
+using MSG.CommonTypes;
 
 //DeleteImportCommand
 namespace FTMContextNet.Application.UserServices.DeleteImport;

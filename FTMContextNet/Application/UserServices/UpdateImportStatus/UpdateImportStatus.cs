@@ -5,6 +5,7 @@ using FTMContextNet.Domain.Commands;
 using LoggingLib;
 using MediatR;
 using MSGIdent;
+using MSG.CommonTypes;
 
 namespace FTMContextNet.Application.UserServices.UpdateImportStatus;
 

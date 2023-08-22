@@ -8,11 +8,10 @@ using FTMContextNet.Domain.Commands;
 using FTMContextNet.Domain.Entities.NonPersistent.Person;
 using LoggingLib;
 using MediatR;
+using MSG.CommonTypes;
 using PlaceLibNet.Data.Repositories;
 using PlaceLibNet.Domain.Caching;
 using PlaceLibNet.Domain.Entities;
-using CommandResult = FTMContextNet.Domain.Commands.CommandResult;
-using CommandResultType = FTMContextNet.Domain.Commands.CommandResultType;
 
 namespace FTMContextNet.Application.UserServices.CreatePersonLocationsInCache;
 
