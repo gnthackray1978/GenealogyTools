@@ -39,10 +39,10 @@ namespace PlaceLibNet.Data.Contexts
             _configObj = config;
         }
 
-        public PlacesContext(DbContextOptions<PlacesContext> options)
-            : base(options)
-        {
-        }
+        //public PlacesContext(DbContextOptions<PlacesContext> options)
+        //    : base(options)
+        //{
+        //}
 
         public virtual DbSet<Places> Places { get; set; }
         public virtual DbSet<PlaceCache> PlaceCache { get; set; }
