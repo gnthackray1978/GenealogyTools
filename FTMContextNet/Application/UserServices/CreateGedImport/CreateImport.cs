@@ -6,6 +6,7 @@ using FTMContextNet.Domain.Commands;
 using FTMContextNet.Domain.Entities.NonPersistent;
 using LoggingLib;
 using MediatR;
+using MSG.CommonTypes;
 
 namespace FTMContextNet.Application.UserServices.CreateGedImport;
 
@@ -35,7 +36,7 @@ public class CreateImport : IRequestHandler<CreateImportCommand, CommandResult>
 
         var exists = _persistedImportCacheRepository.ImportExists(request.FileName, request.FileSize, _auth.GetUser());
          
-        if (!exists) return CommandResult.Fail(CommandResultType.RecordExists, "Record exists");
+        if (exists) return CommandResult.Fail(CommandResultType.RecordExists, "Record exists");
         
         ImportData id  = new ImportData();
 
