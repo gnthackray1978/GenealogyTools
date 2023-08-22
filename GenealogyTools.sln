@@ -23,8 +23,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FTMContextNet.Tests", "FTMC
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlaceLibNet.Tests", "PlaceLibNet.Tests\PlaceLibNet.Tests.csproj", "{21146C2C-5232-44AF-BDAD-4DB61349F423}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSGIdent", "MSGIdent\MSGIdent.csproj", "{B71B153E-2913-40FA-A2EE-8F32E2CB21A6}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -71,10 +69,6 @@ Global
 		{21146C2C-5232-44AF-BDAD-4DB61349F423}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{21146C2C-5232-44AF-BDAD-4DB61349F423}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{21146C2C-5232-44AF-BDAD-4DB61349F423}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B71B153E-2913-40FA-A2EE-8F32E2CB21A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B71B153E-2913-40FA-A2EE-8F32E2CB21A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B71B153E-2913-40FA-A2EE-8F32E2CB21A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B71B153E-2913-40FA-A2EE-8F32E2CB21A6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
