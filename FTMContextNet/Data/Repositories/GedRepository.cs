@@ -10,13 +10,12 @@ using QuickGed.Types;
 
 namespace FTMContextNet.Data.Repositories
 {
-    
-    public class GedRepository 
+    public class GedRepository : IGedRepository
     {
         private readonly Ilog _logger;
-        private readonly GedParser _gedParser;
+        private readonly IGedParser _gedParser;
 
-        public GedRepository(Ilog logger, GedParser gedParser)
+        public GedRepository(Ilog logger, IGedParser gedParser)
         {
             this._logger = logger;
             this._gedParser = gedParser;
@@ -61,9 +60,9 @@ namespace FTMContextNet.Data.Repositories
 
         #endregion
 
-        public GedDb ParseLabelledTree()
+        public GedDb ParseLabelledTree(string path)
         {
-            var gedDb = _gedParser.Parse();
+            var gedDb = _gedParser.Parse(path);
             
             var rootPersons = gedDb.Persons.Where(w => w.IsRootPerson).ToList();
 
