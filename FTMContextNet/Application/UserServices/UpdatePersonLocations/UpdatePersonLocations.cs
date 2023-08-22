@@ -9,23 +9,22 @@ using MediatR;
 using PlaceLibNet.Data.Repositories;
 using PlaceLibNet.Domain;
 using PlaceLibNet.Domain.Caching;
-using CommandResult = FTMContextNet.Domain.Commands.CommandResult;
-using CommandResultType = FTMContextNet.Domain.Commands.CommandResultType;
+using MSG.CommonTypes;
 
 namespace FTMContextNet.Application.UserServices.UpdatePersonLocations;
 
 public class UpdatePersonLocations : IRequestHandler<UpdatePersonLocationsCommand, CommandResult>
 {
-    private readonly PlaceRepository _placeRepository;
+    private readonly IPlaceRepository _placeRepository;
 
-    private readonly PersistedCacheRepository _persistedCacheRepository;
+    private readonly IPersistedCacheRepository _persistedCacheRepository;
 
     private readonly IAuth _auth;
 
     private readonly Ilog _ilog;
 
-    public UpdatePersonLocations(PlaceRepository placeRepository, 
-        PersistedCacheRepository persistedCacheRepository, Ilog logger, IAuth auth)
+    public UpdatePersonLocations(IPlaceRepository placeRepository, 
+        IPersistedCacheRepository persistedCacheRepository, Ilog logger, IAuth auth)
     {
         _persistedCacheRepository = persistedCacheRepository;
 
@@ -42,7 +41,9 @@ public class UpdatePersonLocations : IRequestHandler<UpdatePersonLocationsComman
     {
         var locations = _persistedCacheRepository.GetPersonMapLocations();
 
-        var placeCache = new PlaceLookupCache(_placeRepository.GetCachedPlaces(), new PlaceNameFormatter());
+        var placeCache = new PlaceLookupCache(_placeRepository, new PlaceNameFormatter());
+
+        placeCache.Load();
 
         _ilog.WriteLine(locations.Count + " locations");
 

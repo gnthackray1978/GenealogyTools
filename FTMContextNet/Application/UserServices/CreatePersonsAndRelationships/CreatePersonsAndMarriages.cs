@@ -1,10 +1,13 @@
-﻿using System.Threading;
+﻿using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
+using ConfigHelper;
 using FTMContextNet.Data.Repositories;
 using FTMContextNet.Data.Repositories.GedImports;
 using MSGIdent;
 using FTMContextNet.Domain.Commands;
 using LoggingLib;
+using MSG.CommonTypes;
 using MediatR;
 
 namespace FTMContextNet.Application.UserServices.CreatePersonsAndRelationships
@@ -14,21 +17,24 @@ namespace FTMContextNet.Application.UserServices.CreatePersonsAndRelationships
         private static readonly SemaphoreSlim RateLimit = new SemaphoreSlim(1, 1);
         private readonly IPersistedCacheRepository _persistedCacheRepository;
         private readonly IPersistedImportCacheRepository _persistedImportCacheRepository;
-        private readonly GedRepository _gedRepository;
+        private readonly IGedRepository _gedRepository;
         private readonly Ilog _ilog;
         private readonly IAuth _auth;
+        private readonly IMSGConfigHelper _iMSGConfigHelper;
 
         public CreatePersonsAndMarriages(IPersistedCacheRepository persistedCacheRepository,
             IPersistedImportCacheRepository persistedImportCacheRepository,
-            GedRepository gedRepository,
+            IGedRepository gedRepository,
             IAuth auth,
-            Ilog outputHandler)
+            Ilog outputHandler,
+            IMSGConfigHelper iMSGConfigHelper)
         {
             _persistedCacheRepository = persistedCacheRepository;
             _persistedImportCacheRepository = persistedImportCacheRepository;
             _gedRepository = gedRepository;
             _ilog = outputHandler;
             _auth = auth;
+            _iMSGConfigHelper = iMSGConfigHelper;
         }
           
         public async Task<CommandResult> Handle(CreatePersonAndRelationshipsCommand request, CancellationToken cancellationToken)
@@ -37,7 +43,15 @@ namespace FTMContextNet.Application.UserServices.CreatePersonsAndRelationships
             {
                 return CommandResult.Fail(CommandResultType.Unauthorized);
             }
-            
+
+            if (IsTreeImported())
+            {
+                return CommandResult.Fail(CommandResultType.RecordExists);
+            }
+
+            //check if tree has been imported already if so then abort.
+
+
             await AddTreeRecords(cancellationToken);
 
             AddTreeMetaData();
@@ -47,14 +61,23 @@ namespace FTMContextNet.Application.UserServices.CreatePersonsAndRelationships
             return CommandResult.Success();
         }
 
+        private bool IsTreeImported()
+        {
+            var importId = _persistedImportCacheRepository.GetCurrentImportId();
+
+            return _persistedImportCacheRepository.ImportExists(importId);
+        }
+
         private async Task AddTreeRecords(CancellationToken cancellationToken)
         {
             _ilog.WriteLine("Executing CreatePersonsAndMarriages");
 
-
+             
             await Task.Run(() =>
             {
-                var gedDb = _gedRepository.ParseLabelledTree();
+                string path = Path.Combine(_iMSGConfigHelper.GedPath, _persistedImportCacheRepository.GedFileName());
+
+                var gedDb = _gedRepository.ParseLabelledTree(path);
 
                 _persistedCacheRepository.InsertPersons(_persistedImportCacheRepository.GetCurrentImportId(),
                     _auth.GetUser(), gedDb.Persons);

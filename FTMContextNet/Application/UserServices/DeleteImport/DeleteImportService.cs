@@ -6,6 +6,7 @@ using MSGIdent;
 using FTMContextNet.Domain.Commands;
 using LoggingLib;
 using MediatR;
+using MSG.CommonTypes;
 
 namespace FTMContextNet.Application.UserServices.DeleteImport
 {
@@ -13,13 +14,13 @@ namespace FTMContextNet.Application.UserServices.DeleteImport
     {
         private readonly IPersistedCacheRepository _persistedCacheRepository;
         private readonly IPersistedImportCacheRepository _persistedImportCacheRepository;
-        private readonly GedRepository _gedRepository;
+        private readonly IGedRepository _gedRepository;
         private readonly Ilog _ilog;
         private readonly IAuth _auth;
 
         public DeleteImportService(IPersistedCacheRepository persistedCacheRepository,
             IPersistedImportCacheRepository persistedImportCacheRepository,
-            GedRepository gedRepository,
+            IGedRepository gedRepository,
             IAuth auth,
             Ilog outputHandler)
         {
