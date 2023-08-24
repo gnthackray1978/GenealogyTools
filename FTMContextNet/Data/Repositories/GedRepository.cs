@@ -65,9 +65,6 @@ namespace FTMContextNet.Data.Repositories
             var gedDb = _gedParser.Parse(path);
             
             var rootPersons = gedDb.Persons.Where(w => w.IsRootPerson).ToList();
-            // if there are no root persons then we need to 
-            // give all people in the ged the same label
-            // i.e. assume they are the same tree.
 
             Console.WriteLine(rootPersons.Count);
 
@@ -84,14 +81,6 @@ namespace FTMContextNet.Data.Repositories
              
 
                 idx++;
-            }
-
-            if (rootPersons.Count == 0)
-            {
-                foreach (var p in gedDb.Persons)
-                {
-                    p.Origin = gedDb.FileName;
-                }
             }
 
 

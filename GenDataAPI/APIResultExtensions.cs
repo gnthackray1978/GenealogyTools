@@ -13,10 +13,10 @@ namespace GenDataAPI
                 return value.Ok(cb.Id == "" ? true : cb.Id);
 
             if (cb.CommandResultType == CommandResultType.RecordExists)
-                return value.Conflict(cb.Message == "" ? "Record Exists" : cb.Message);
+                return value.Conflict(cb.Message == "" ? true : cb.Message);
 
             if (cb.CommandResultType == CommandResultType.InvalidRequest)
-                return value.BadRequest(cb.Message == "" ? "Invalid Request" : cb.Message);
+                return value.BadRequest(cb.Message == "" ? true : cb.Message);
 
             if (cb.CommandResultType == CommandResultType.Unauthorized)
                 return value.Forbid(cb.Message);

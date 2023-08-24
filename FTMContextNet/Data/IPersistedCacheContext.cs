@@ -26,7 +26,6 @@ public interface IPersistedCacheContext
     int InsertRecordMapGroup(int nextId, string groupName, string treeName,int importId,int userId);
     void DeleteOrigins(int importId);
     void DeleteDupes(int importId);
-    void DeleteDupes();
     void DeletePersons(int importId);
     void DeleteTreeRecords(int importId);
     void DeleteMarriages(int importId);

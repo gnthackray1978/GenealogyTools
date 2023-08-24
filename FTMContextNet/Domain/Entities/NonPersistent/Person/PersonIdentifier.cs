@@ -9,14 +9,7 @@ namespace FTMContextNet.Domain.Entities.NonPersistent.Person
         public int Id { get; set; }
         public string NameKey { get; set; }
         public string SurnameKey { get; set; }
-     //   public List<string> AssociatedLocations { get; set; }
-
-        public string County { get; set; }
-
-        public double Lng { get; set; }
-
-        public double Lat { get; set; }
-
+        public List<string> AssociatedLocations { get; set; }
         public int BirthYearFrom { get; set; }
         public int BirthYearTo { get; set; }
         public string Origin { get; set; }
@@ -25,29 +18,20 @@ namespace FTMContextNet.Domain.Entities.NonPersistent.Person
 
         public bool Equals(PersonIdentifier other)
         {
-            if (other == null) 
-                return false;
+            var yearMatch = this.MatchBirthYear(this);
 
-            if (this.Origin == other.Origin)
-                return false;
+            var locationMatch = this.MatchLocations(this);
 
-            if (this.NameKey != other.NameKey)
-                return false;
+            var originMatch = this.Origin == other.Origin;
 
-            if (this.SurnameKey != other.SurnameKey)
-                return false;
+            var name = this.NameKey == other.NameKey;
 
-            if (!MatchBirthYear(other))
-                return false;
- 
-            if (!MatchLocations(other))
-                return false;
+            var surname = this.SurnameKey == other.SurnameKey;
 
-            return false;
+            return name && surname && yearMatch && locationMatch && !originMatch;
         }
 
-        public static PersonIdentifier Create(int id, int birthFrom, int birthTo, string origin, 
-            string county, double lng, double lat, string surname, string firstName)
+        public static PersonIdentifier Create(int id, int birthFrom, int birthTo, string origin, string linkedLocations, string surname, string firstName)
         {
             var returnObj = new PersonIdentifier
             {
@@ -58,19 +42,16 @@ namespace FTMContextNet.Domain.Entities.NonPersistent.Person
                 Id = id,
                 SurnameKey = Misc.Misc.MakeKey(firstName),
                 NameKey = Misc.Misc.MakeKey(surname),
-                County = county,
-                Lng = lng,
-                Lat = lat
-
+                AssociatedLocations = new List<string>()
             };
 
 
-            //var trimmedLocations = linkedLocations.Trim();
+            var trimmedLocations = linkedLocations.Trim();
 
-            //if (trimmedLocations.Contains(","))
-            //    returnObj.AssociatedLocations.AddRange(trimmedLocations.Split(','));
-            //else
-            //    returnObj.AssociatedLocations.Add(trimmedLocations);
+            if (trimmedLocations.Contains(","))
+                returnObj.AssociatedLocations.AddRange(trimmedLocations.Split(','));
+            else
+                returnObj.AssociatedLocations.Add(trimmedLocations);
 
             return returnObj;
         }
@@ -91,12 +72,12 @@ namespace FTMContextNet.Domain.Entities.NonPersistent.Person
 
         public bool MatchLocations(PersonIdentifier p2)
         {
-            //foreach (var p2C in p2.AssociatedLocations) {
-            //    foreach (var p1C in this.AssociatedLocations) {
-            //        if (p2C == p1C)
-            //            return true;
-            //    }
-            //}
+            foreach (var p2C in p2.AssociatedLocations) {
+                foreach (var p1C in this.AssociatedLocations) {
+                    if (p2C == p1C)
+                        return true;
+                }
+            }
  
             return false;
         }

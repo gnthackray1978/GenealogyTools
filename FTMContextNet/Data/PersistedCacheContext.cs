@@ -383,12 +383,6 @@ namespace FTMContextNet.Data
             RunCommand("DELETE FROM DupeEntries WHERE ImportId = " + importId);
         }
 
-        public void DeleteDupes()
-        {
-            RunCommand("DELETE FROM DupeEntries");
-        }
-
-
         public void DeletePersons(int importId)
         {
             RunCommand("DELETE FROM FTMPersonView WHERE ImportId = " + importId);

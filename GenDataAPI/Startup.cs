@@ -7,13 +7,11 @@ using FTMContextNet.Data;
 using FTMContextNet.Data.Repositories;
 using FTMContextNet.Data.Repositories.GedImports;
 using FTMContextNet.Domain.Caching;
-using GenDataAPI.Controllers;
 using MSGIdent;
 using GenDataAPI.Hub;
 using LoggingLib;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -46,16 +44,11 @@ namespace GenDataAPI
                 cfg.AddProfile(new AutoMapperConfiguration());
             });
 
-           // var hubContext = app.ApplicationServices.GetService < IHubContext < Notification >>
-
-
-
             services.AddSingleton<IMSGConfigHelper>(msgConfigHelper)
                     .AddMediatR(cfg => cfg
                     .RegisterServicesFromAssemblies(AppDomain.CurrentDomain.GetAssemblies())
                     .RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()))
-                    //.AddSingleton<Ilog>(new Log())
-                    .AddTransient<Ilog, OutputHandler>()
+                    .AddSingleton<Ilog>(new Log())
                     .AddSingleton<INodeTypeCalculator>(new NodeTypeCalculator())
                     .AddSingleton<IMapper>(config.CreateMapper())
                     .AddSingleton<IAuth>(new Auth())

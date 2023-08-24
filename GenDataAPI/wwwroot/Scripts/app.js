@@ -36,7 +36,7 @@ PlaceObj.prototype = {
             success: function (result) {
                 that.console.displayPeopleStats(result);
             },
-            error: (e) => that.console.printError(e)
+            error: that.console.printError
         });
 
         return true;
@@ -57,7 +57,7 @@ PlaceObj.prototype = {
                     that.displayCorrectImportUpdateSections();
                 });
             },
-            error: (e) => that.console.printError(e)
+            error: that.console.printError
         });
     },
 
@@ -67,7 +67,7 @@ PlaceObj.prototype = {
  
         $.ajax({
             type: "put",
-            url: "/ged/select", 
+            url: "/ged/select", // "/api/controllerName/methodName"
             contentType: "application/json",
             dataType: "json",
             data: JSON.stringify(id),
@@ -77,7 +77,7 @@ PlaceObj.prototype = {
                 });
                 
             },
-            error: (e) => that.console.printError(e)
+            error: that.console.printError
         });
     },
 
@@ -93,7 +93,7 @@ PlaceObj.prototype = {
                 if (success)
                     success();
             },
-            error: (e) => that.console.printError(e)
+            error: that.console.printError
         });
 
         return true;
@@ -108,7 +108,7 @@ PlaceObj.prototype = {
             success: function (result) {
                 that.console.displayPlaceStats(result);
             },
-            error: (e) => that.console.printError(e)
+            error: that.console.printError
         });
 
         return true;
@@ -148,7 +148,10 @@ PlaceObj.prototype = {
                         that.displayCorrectImportUpdateSections();
                     });
                 },
-                error: (e) => that.console.printError(e)
+                error: function (err) {
+                    //alert(err.statusText + err.status + err.responseText);
+                    that.console.printError(err);
+                }
             });
         } else {
           //  alert("FormData is not supported.");
@@ -171,7 +174,7 @@ PlaceObj.prototype = {
             success: function (response) {
                 that.displayPlaceStats();
             },
-            error: (e) => that.console.printError(e)
+            error: that.console.printError
         });
         return true;
     },
@@ -193,7 +196,7 @@ PlaceObj.prototype = {
             success: function (response) {
                 that.displayPeopleStats();
             },
-            error: (e) => that.console.printError(e)
+            error: that.console.printError
 
         });
         return true;
@@ -213,13 +216,8 @@ PlaceObj.prototype = {
             data: JSON.stringify(Upload),
             success: function (response) {
                 that.displayPeopleStats();
-
-                that.displayGedStats(() => {
-                    that.displayCorrectImportUpdateSections();
-                });
-
             },
-            error: (e) => that.console.printError(e)
+            error: that.console.printError
 
         });
         return true;
@@ -240,7 +238,7 @@ PlaceObj.prototype = {
             success: function (response) {
                 that.displayPeopleStats();
             },
-            error: (e) => that.console.printError(e)
+            error: that.console.printError
 
         });
         return true;
@@ -263,7 +261,7 @@ PlaceObj.prototype = {
             success: function (response) {
                 that.displayPeopleStats();
             },
-            error: (e) => that.console.printError(e)
+            error: that.console.printError
 
 
         });
@@ -287,7 +285,7 @@ PlaceObj.prototype = {
             success: function (response) {
                 that.displayPeopleStats();
             },
-            error: (e) => that.console.printError(e)
+            error: that.console.printError
         });
         return true;
     },
@@ -309,7 +307,7 @@ PlaceObj.prototype = {
             success: function (response) {
                 that.displayPeopleStats();
             },
-            error: (e) => that.console.printError(e)
+            error: that.console.printError
         });
         return true;
     },
@@ -347,7 +345,7 @@ PlaceObj.prototype = {
             contentType: "application/json",
             dataType: "json",
             data: JSON.stringify(placeLookup),  //the parameter in method
-            error: (e) => that.console.printError(e)
+            error: that.console.printError
         });
 
          
@@ -371,7 +369,7 @@ PlaceObj.prototype = {
             success: function (response) {
                 that.displayPlaceStats();
             },
-            error: (e) => that.console.printError(e)
+            error: that.console.printError
         });
 
         return true;
@@ -402,7 +400,7 @@ PlaceObj.prototype = {
                     printBasic('GET geocode did not return data');
                 }
             },
-            error: (e) => that.console.printError(e)
+            error: that.console.printError
         });
 
 
