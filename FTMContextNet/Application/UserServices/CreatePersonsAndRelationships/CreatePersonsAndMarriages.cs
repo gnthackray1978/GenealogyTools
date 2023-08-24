@@ -14,7 +14,7 @@ namespace FTMContextNet.Application.UserServices.CreatePersonsAndRelationships
 {
     public class CreatePersonsAndMarriages : IRequestHandler<CreatePersonAndRelationshipsCommand, CommandResult>
     {
-        private static readonly SemaphoreSlim RateLimit = new SemaphoreSlim(1, 1);
+       //private static readonly SemaphoreSlim RateLimit = new SemaphoreSlim(1, 1);
         private readonly IPersistedCacheRepository _persistedCacheRepository;
         private readonly IPersistedImportCacheRepository _persistedImportCacheRepository;
         private readonly IGedRepository _gedRepository;
@@ -65,7 +65,7 @@ namespace FTMContextNet.Application.UserServices.CreatePersonsAndRelationships
         {
             var importId = _persistedImportCacheRepository.GetCurrentImportId();
 
-            return _persistedImportCacheRepository.ImportExists(importId);
+            return _persistedCacheRepository.ImportPresent(importId);
         }
 
         private async Task AddTreeRecords(CancellationToken cancellationToken)
@@ -97,8 +97,8 @@ namespace FTMContextNet.Application.UserServices.CreatePersonsAndRelationships
             }
 
 
-            try
-            {
+         //   try
+         //   {
                 _ilog.WriteLine("Creating Tree Group Mappings");
 
                 var groups = _persistedCacheRepository.GetGroups(_persistedImportCacheRepository.GetCurrentImportId());
@@ -116,11 +116,11 @@ namespace FTMContextNet.Application.UserServices.CreatePersonsAndRelationships
                 }
 
                 _ilog.WriteLine("Finished Create Tree Group Mappings");
-            }
-            finally
-            {
-                RateLimit.Release();
-            }
+          // }
+         //  finally
+          //  {
+              //  RateLimit.Release();
+          //  }
 
         }
 
