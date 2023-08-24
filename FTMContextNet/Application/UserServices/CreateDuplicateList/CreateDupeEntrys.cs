@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -52,9 +53,11 @@ namespace FTMContextNet.Application.UserServices.CreateDuplicateList
         {
             var groupCollection = new GroupCollection();
 
-            var comparisonPersons =
-                _persistedCacheRepository.GetComparisonPersons(_persistedImportCacheRepository.GetCurrentImportId());
+            _persistedCacheRepository.DeleteDupes();
 
+            var comparisonPersons =
+                _persistedCacheRepository.GetComparisonPersons(0);
+            
             var ignoreList = _persistedCacheRepository.GetIgnoreList();
 
             int idx = 0;

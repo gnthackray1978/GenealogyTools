@@ -13,6 +13,7 @@ public interface IPersistedCacheRepository
     List<string> DumpCount();
     void UpdatePersons(int personId, string lat, string lng, string altLat, string altLng);
     void DeleteDupes(int importId);
+    void DeleteDupes();
     void DeletePersons(int importId);
     void DeleteTreeRecords(int importId);
     void DeleteMarriages(int importId);

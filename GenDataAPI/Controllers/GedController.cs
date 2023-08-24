@@ -75,7 +75,7 @@ public partial class GedController : ControllerBase
         if (importId == 42) return Ok();
 
         var r = await _mediator
-            .Send(new DeleteImportCommand(importId), new CancellationToken(false));
+            .Send(new DeleteTreeCommand(), new CancellationToken(false));
 
         return this.ConvertResult(r);
     }

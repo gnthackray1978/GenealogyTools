@@ -32,11 +32,60 @@ public class ApplicationServiceTests
     }
 
     [Fact]
+    public void CreateDupes_CorrectDupes2_WhenServiceCalled()
+    {
+
+        this._mockPersistedCacheRepository
+            .Setup(s => s.GetComparisonPersons(0))
+            .Returns(new List<PersonIdentifier>()
+            {
+                PersonIdentifier.Create(3,1798,1798,"|22.5|Ketchum","Sleaford","Waterson","William"),
+                PersonIdentifier.Create(1173,1795,1795,"|00|Ballam|wakerley","Sleaford","Watterson","William"),
+                PersonIdentifier.Create(31961,1861,1861,"|22|saritajones","Grantham","Gosling","Robert"),
+                
+            });
+
+        var d = new DuplicateIgnoreList(new List<IgnoreList>()
+        {
+            new (){Id = 1,Person1 = "Smith", Person2 = "Smitz"}
+        });
+
+        this._mockPersistedCacheRepository
+            .Setup(s => s.GetIgnoreList())
+            .Returns(d);
+
+        // this._mockPersistedCacheRepository
+        //      .Setup(s => s.DeleteDupes());
+
+        List<KeyValuePair<int, string>> x = null;
+
+        this._mockPersistedCacheRepository
+            .Setup(s => s.AddDupeEntrys(It.IsAny<List<KeyValuePair<int, string>>>(), It.IsAny<int>()))
+            .Callback<List<KeyValuePair<int, string>>, int>((a, b) =>
+            {
+                x = a;
+            });
+
+        _mockPersistedImportCacheRepository
+            .Setup(s => s.GetCurrentImportId())
+            .Returns(1);
+
+        var gis = new CreateDupeEntrys(_mockPersistedCacheRepository.Object, _mockPersistedImportCacheRepository.Object, new Auth(), _mockLog.Object);
+
+        gis.Handle(new CreateDuplicateListCommand(), new CancellationToken(false)).Wait();
+
+        x.Should().HaveCount(2);
+
+        x.First().Key.Should().Be(1);
+        x.Last().Key.Should().Be(2);
+    }
+
+    [Fact]
     public void CreateDupes_CorrectDupes_WhenServiceCalled()
     {
       
         this._mockPersistedCacheRepository
-            .Setup(s => s.GetComparisonPersons(1))
+            .Setup(s => s.GetComparisonPersons(0))
             .Returns(new List<PersonIdentifier>()
             {
                 PersonIdentifier.Create(1,1500,1600,"a1","Sleaford","Jones","John"),

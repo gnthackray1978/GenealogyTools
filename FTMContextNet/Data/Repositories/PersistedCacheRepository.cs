@@ -14,6 +14,7 @@ using QuickGed.Types;
 
 namespace FTMContextNet.Data.Repositories
 {
+    //todo sort this out, but do we really need 10 extra files(with interfaces) 1 for each table?
     public class PersistedCacheRepository : IPersistedCacheRepository
     {        
         private readonly IPersistedCacheContext _persistedCacheContext;
@@ -37,7 +38,7 @@ namespace FTMContextNet.Data.Repositories
             return results;
         }
 
-        private void DumpRecordCount<TT>(List<string> results, DbSet<TT> set, string name) where TT : class
+        private void DumpRecordCount<T>(List<string> results, DbSet<T> set, string name) where T : class
         {
             string result = "";
 
@@ -55,6 +56,11 @@ namespace FTMContextNet.Data.Repositories
         public void DeleteDupes(int importId)
         {
             _persistedCacheContext.DeleteDupes(importId);
+        }
+
+        public void DeleteDupes()
+        {
+            _persistedCacheContext.DeleteDupes();
         }
 
         public void DeletePersons(int importId)
@@ -95,6 +101,7 @@ namespace FTMContextNet.Data.Repositories
 
         #endregion
 
+         
         #region Valid Data
         private static Expression<Func<FTMPersonView, bool>> ValidData(int importId)
         {
@@ -159,8 +166,9 @@ namespace FTMContextNet.Data.Repositories
 
             var comparisonPersons = this._persistedCacheContext.FTMPersonView
                 .Where(ValidData(importId))
-             .Select(s => PersonIdentifier.Create(s.PersonId,
-                 s.BirthFrom, s.BirthTo, s.Origin, s.LinkedLocations, s.Surname, s.FirstName)).ToList();
+             .Select(s => PersonIdentifier.Create(s.Id,
+                 s.BirthFrom, s.BirthTo, s.Origin, "",s.BirthLat,s.BirthLong,
+                 s.Surname, s.FirstName)).ToList();
 
             return comparisonPersons;
         }
@@ -184,22 +192,25 @@ namespace FTMContextNet.Data.Repositories
             return comparisonPersons;
         }
         
+
+
         public void AddDupeEntrys(List<KeyValuePair<int, string>> dupes, int userId)
         {
-           var dupeId = _persistedCacheContext.DupeEntries.Max(m=>m.Id) + 1;
+           var dupeId = (_persistedCacheContext.DupeEntries.Max(a => (int?)a.Id) ?? 1)+1;
 
+         
            foreach (var pair in dupes)
            {
 
                 var personId = pair.Key;
                 var ident = pair.Value;
-                var fpvPerson = _persistedCacheContext.FTMPersonView.First(f => f.PersonId == personId);
+                var fpvPerson = _persistedCacheContext.FTMPersonView.First(f => f.Id == personId);
 
                 var dupeEntry = new DupeEntry
                 {
                     Id = dupeId,
                     Ident = ident,
-                    PersonId = fpvPerson.PersonId,
+                    PersonId = fpvPerson.Id,
                     BirthYearFrom = fpvPerson.BirthFrom,
                     BirthYearTo = fpvPerson.BirthTo,
                     Origin = fpvPerson.Origin,
@@ -272,7 +283,9 @@ namespace FTMContextNet.Data.Repositories
 
             _iLog.WriteLine("Created " + _persistedCacheContext.BulkInsertTreeRecords(treeRecords)+ " tree records");
         }
-        
+
+        #region inserts
+
         public int InsertTreeGroups(int nextId, string treeGroup,int importId, int userId)
         {
             return _persistedCacheContext.InsertGroups(nextId, treeGroup, importId, userId);
@@ -300,7 +313,9 @@ namespace FTMContextNet.Data.Repositories
 
             _persistedCacheContext.BulkInsertMarriages(nextId, importId,userId, ftmPersons);
         }
-         
+
+        #endregion
+
         public Dictionary<string, List<string>> GetGroups(int importId)
         {
             var results = new Dictionary<string, List<string>>();
