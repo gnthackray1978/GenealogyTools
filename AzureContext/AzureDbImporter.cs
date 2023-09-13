@@ -55,7 +55,7 @@ namespace AzureContext
                     Surname = d.Surname,
                     BirthYearFrom = d.BirthYearFrom,
                     BirthYearTo = d.BirthYearTo,
-                    FirstName = d.ChristianName,
+                    FirstName = d.FirstName,
                     Ident = d.Ident,
                     Location = d.Location,
                     PersonId = d.PersonId

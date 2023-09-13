@@ -39,9 +39,9 @@ public class ApplicationServiceTests
             .Setup(s => s.GetComparisonPersons(0))
             .Returns(new List<PersonIdentifier>()
             {
-                PersonIdentifier.Create(3,1798,1798,"|22.5|Ketchum","Sleaford","Waterson","William"),
-                PersonIdentifier.Create(1173,1795,1795,"|00|Ballam|wakerley","Sleaford","Watterson","William"),
-                PersonIdentifier.Create(31961,1861,1861,"|22|saritajones","Grantham","Gosling","Robert"),
+                PersonIdentifier.Create(3,1798,1798,"|22.5|Ketchum","lincolnshire",0,0,"Waterson","William"),
+                PersonIdentifier.Create(1173,1795,1795,"|00|Ballam|wakerley","lincolnshire",0,0,"Watterson","William"),
+                PersonIdentifier.Create(31961,1861,1861,"|22|saritajones","nottinghamshire",0,0,"Gosling","Robert"),
                 
             });
 
@@ -88,10 +88,10 @@ public class ApplicationServiceTests
             .Setup(s => s.GetComparisonPersons(0))
             .Returns(new List<PersonIdentifier>()
             {
-                PersonIdentifier.Create(1,1500,1600,"a1","Sleaford","Jones","John"),
-                PersonIdentifier.Create(2,1500,1600,"a2","Sleaford","Jones","John"),
-                PersonIdentifier.Create(2,1500,1600,"o1","Grantham","Smith","John"),
-                PersonIdentifier.Create(2,1500,1600,"o2","Grantham","Smitz","John")
+                PersonIdentifier.Create(1,1500,1600,"a1","Lincolnshire",0,0,"Jones","John"),
+                PersonIdentifier.Create(2,1500,1600,"a2","Lincolnshire",0,0,"Jones","John"),
+                PersonIdentifier.Create(2,1500,1600,"o1","Nottinghamshire",0,0,"Smith","John"),
+                PersonIdentifier.Create(2,1500,1600,"o2","Nottinghamshire",0,0,"Smitz","John")
             });
 
         var d = new DuplicateIgnoreList(new List<IgnoreList>()

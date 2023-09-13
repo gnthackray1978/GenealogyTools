@@ -167,7 +167,7 @@ namespace FTMContextNet.Data.Repositories
             var comparisonPersons = this._persistedCacheContext.FTMPersonView
                 .Where(ValidData(importId))
              .Select(s => PersonIdentifier.Create(s.Id,
-                 s.BirthFrom, s.BirthTo, s.Origin, "",s.BirthLat,s.BirthLong,
+                 s.BirthFrom, s.BirthTo, s.Origin, EnglishHistoricCounties.Match(string.IsNullOrEmpty(s.BirthLocation)? s.AltLocation : s.BirthLocation),s.BirthLong, s.BirthLat,
                  s.Surname, s.FirstName)).ToList();
 
             return comparisonPersons;
@@ -215,7 +215,7 @@ namespace FTMContextNet.Data.Repositories
                     BirthYearTo = fpvPerson.BirthTo,
                     Origin = fpvPerson.Origin,
                     Location = Location.FormatPlace(fpvPerson.BirthLocation),
-                    ChristianName = fpvPerson.FirstName,
+                    FirstName = fpvPerson.FirstName,
                     Surname = fpvPerson.Surname,
                     UserId = userId,
                     ImportId = fpvPerson.ImportId

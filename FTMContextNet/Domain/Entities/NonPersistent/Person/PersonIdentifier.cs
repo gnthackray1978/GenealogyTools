@@ -1,6 +1,8 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using GeoCoordinatePortable;
+using GoogleMapsHelpers;
 
 namespace FTMContextNet.Domain.Entities.NonPersistent.Person
 {
@@ -25,6 +27,9 @@ namespace FTMContextNet.Domain.Entities.NonPersistent.Person
 
         public bool Equals(PersonIdentifier other)
         {
+            bool? validBirthDates = null;
+            bool? validLocations = null;
+
             if (other == null) 
                 return false;
 
@@ -37,13 +42,30 @@ namespace FTMContextNet.Domain.Entities.NonPersistent.Person
             if (this.SurnameKey != other.SurnameKey)
                 return false;
 
-            if (!MatchBirthYear(other))
-                return false;
- 
-            if (!MatchLocations(other))
-                return false;
+            //if we have valid birth dates for comparison
+            if (this.BirthYearFrom > 0 && this.BirthYearTo > 0 
+                                       && other.BirthYearFrom > 0 && other.BirthYearTo > 0)
+            {
+                validBirthDates = MatchBirthYear(other);
 
-            return false;
+                if (!validBirthDates.Value)
+                    return false;
+            }
+
+            // we need either a valid county or valid coords for both
+            if ((other.IsValidCoords() && this.IsValidCoords()) ||
+                (other.IsValidCounty() && this.IsValidCounty()))
+            {
+                validLocations = MatchLocations(other);
+
+                if (!validLocations.Value)
+                    return false;
+            }
+
+          
+            //if the name and the origin match then we'll say they're equal at this point.
+
+            return true;
         }
 
         public static PersonIdentifier Create(int id, int birthFrom, int birthTo, string origin, 
@@ -91,14 +113,30 @@ namespace FTMContextNet.Domain.Entities.NonPersistent.Person
 
         public bool MatchLocations(PersonIdentifier p2)
         {
-            //foreach (var p2C in p2.AssociatedLocations) {
-            //    foreach (var p1C in this.AssociatedLocations) {
-            //        if (p2C == p1C)
-            //            return true;
-            //    }
-            //}
- 
-            return false;
+            if (p2.IsValidCoords() && this.IsValidCoords())
+            {
+                var d = Point.CalcDistance(p2.Lat, p2.Lng, this.Lat, this.Lng);
+
+                return d <=5 ;
+            }
+
+            if (p2.IsValidCounty() && this.IsValidCounty())
+            {
+                return this.County == p2.County;
+            }
+           
+            return true;
         }
+
+        public bool IsValidCoords()
+        {
+            return (this.Lat != 0 && this.Lng != 0);
+        }
+
+        public bool IsValidCounty()
+        {
+            return !string.IsNullOrEmpty(this.County);
+        }
+
     }
 }
