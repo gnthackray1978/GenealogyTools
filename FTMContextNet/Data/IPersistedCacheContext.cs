@@ -13,7 +13,7 @@ public interface IPersistedCacheContext
     DbSet<DupeEntry> DupeEntries { get; set; }
     DbSet<FTMPersonView> FTMPersonView { get; set; }
     DbSet<FTMMarriage> FTMMarriages { get; set; }
-    DbSet<FTMImport> FTMImport { get; set; }
+    DbSet<TreeImport> TreeImport { get; set; }
     DbSet<IgnoreList> IgnoreList { get; set; }
 
 

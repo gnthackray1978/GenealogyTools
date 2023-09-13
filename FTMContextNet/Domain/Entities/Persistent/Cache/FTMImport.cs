@@ -1,6 +1,6 @@
 ﻿namespace FTMContextNet.Domain.Entities.Persistent.Cache;
 
-public partial class FTMImport
+public partial class TreeImport
 {
     public int Id { get; set; }
     public string DateImported { get; set; }

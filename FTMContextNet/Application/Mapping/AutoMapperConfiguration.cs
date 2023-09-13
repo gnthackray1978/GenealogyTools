@@ -16,7 +16,7 @@ namespace FTMContextNet.Application.Mapping
         {
             this.CreateMap<Info, InfoModel>();
             this.CreateMap<IEnumerable<PlaceLookup>, IEnumerable<PlaceModel>>().ConvertUsing(new PlaceConverter());
-            this.CreateMap<IEnumerable<FTMImport>, IEnumerable<ImportModel>>().ConvertUsing(new GedFileInfoConverter());
+            this.CreateMap<IEnumerable<TreeImport>, IEnumerable<ImportModel>>().ConvertUsing(new GedFileInfoConverter());
         }
     }
 
@@ -36,9 +36,9 @@ namespace FTMContextNet.Application.Mapping
         }
     }
 
-    class GedFileInfoConverter : ITypeConverter<IEnumerable<FTMImport>, IEnumerable<ImportModel>>
+    class GedFileInfoConverter : ITypeConverter<IEnumerable<TreeImport>, IEnumerable<ImportModel>>
     {
-        public IEnumerable<ImportModel> Convert(IEnumerable<FTMImport> source, IEnumerable<ImportModel> destination, ResolutionContext context)
+        public IEnumerable<ImportModel> Convert(IEnumerable<TreeImport> source, IEnumerable<ImportModel> destination, ResolutionContext context)
         {
             return source
                 .Select(item =>

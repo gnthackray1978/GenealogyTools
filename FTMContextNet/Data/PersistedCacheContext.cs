@@ -52,7 +52,7 @@ namespace FTMContextNet.Data
         public virtual DbSet<FTMPersonView> FTMPersonView { get; set; }
         public virtual DbSet<FTMMarriage> FTMMarriages { get; set; }
 
-        public virtual DbSet<FTMImport> FTMImport { get; set; }
+        public virtual DbSet<TreeImport> TreeImport { get; set; }
 
         public virtual DbSet<IgnoreList> IgnoreList { get; set; }
 
@@ -406,7 +406,7 @@ namespace FTMContextNet.Data
 
         public void DeleteImports(int importId)
         {
-            RunCommand("DELETE FROM FTMImport WHERE Id = " + importId); ;
+            RunCommand("DELETE FROM TreeImport WHERE Id = " + importId); ;
         }
 
         public void DeleteTreeGroups(int importId)

@@ -18,7 +18,7 @@ public interface IPersistedImportCacheRepository
 
     void DeleteImport(int importId);
 
-    List<FTMImport> GetImportData();
+    List<TreeImport> GetImportData();
 
     string GedFileName();
 }

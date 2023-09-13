@@ -27,36 +27,36 @@ public class PersistedImportCacheRepository : IPersistedImportCacheRepository
     
     public bool ImportExists(string fileName, double fileSize, int userId)
     {
-        return _persistedCacheContext.FTMImport.Any(a => a.FileSize == fileSize && a.FileName == fileName && a.UserId == userId);
+        return _persistedCacheContext.TreeImport.Any(a => a.FileSize == fileSize && a.FileName == fileName && a.UserId == userId);
     }
 
     public bool ImportExists(int importId)
     {
-        return _persistedCacheContext.FTMImport.Any(a => a.Id == importId);
+        return _persistedCacheContext.TreeImport.Any(a => a.Id == importId);
     }
 
     public string SelectImport(int importId, int userId)
     {
-        foreach (var imp in _persistedCacheContext.FTMImport.Where(w => w.UserId == userId))
+        foreach (var imp in _persistedCacheContext.TreeImport.Where(w => w.UserId == userId))
         {
             imp.Selected = false;
         }
 
-        _persistedCacheContext.FTMImport.First(f => f.Id == importId).Selected = true;
+        _persistedCacheContext.TreeImport.First(f => f.Id == importId).Selected = true;
 
         _persistedCacheContext.SaveChanges();
         
         return "";
     }
      
-    public List<FTMImport> GetImportData()
+    public List<TreeImport> GetImportData()
     {
-        return _persistedCacheContext.FTMImport.ToList();
+        return _persistedCacheContext.TreeImport.ToList();
     }
 
     public string GedFileName()
     {
-        var path = _persistedCacheContext.FTMImport.FirstOrDefault(f => f.Selected)?.FileName ?? "";
+        var path = _persistedCacheContext.TreeImport.FirstOrDefault(f => f.Selected)?.FileName ?? "";
 
         return path;
     }
@@ -68,12 +68,12 @@ public class PersistedImportCacheRepository : IPersistedImportCacheRepository
 
         var importData = new ImportData() { CurrentId = new List<int>() };
 
-        importData.CurrentId = _persistedCacheContext.FTMImport.Where(w => w.FileName == fileName).Select(s => s.Id).ToList();
+        importData.CurrentId = _persistedCacheContext.TreeImport.Where(w => w.FileName == fileName).Select(s => s.Id).ToList();
 
 
-        var newId = _persistedCacheContext.FTMImport.Max(m => m.Id) + 1;
+        var newId = _persistedCacheContext.TreeImport.Max(m => m.Id) + 1;
 
-        var import = new FTMImport()
+        var import = new TreeImport()
         {
             Id = newId,
             FileName = fileName,
@@ -83,7 +83,7 @@ public class PersistedImportCacheRepository : IPersistedImportCacheRepository
             UserId = userId
         };
 
-        _persistedCacheContext.FTMImport.Add(import);
+        _persistedCacheContext.TreeImport.Add(import);
 
         _persistedCacheContext.SaveChanges();
 
@@ -94,6 +94,6 @@ public class PersistedImportCacheRepository : IPersistedImportCacheRepository
 
     public int GetCurrentImportId()
     {
-        return _persistedCacheContext.FTMImport.FirstOrDefault(f => f.Selected)?.Id ?? -1;
+        return _persistedCacheContext.TreeImport.FirstOrDefault(f => f.Selected)?.Id ?? -1;
     }
 }
