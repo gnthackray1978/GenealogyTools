@@ -123,7 +123,7 @@ namespace AzureContext
 
             _console.WriteCounter("Adding new marriages");
 
-            foreach (var d in a.FTMMarriages)
+            foreach (var d in a.Relationshipss)
             {
                 destination.Relationships.Add(new Models.Relationships()
                 {

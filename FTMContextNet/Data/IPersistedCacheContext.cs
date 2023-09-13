@@ -12,12 +12,12 @@ public interface IPersistedCacheContext
     DbSet<TreeRecordMapGroup> TreeRecordMapGroup { get; set; }
     DbSet<DupeEntry> DupeEntries { get; set; }
     DbSet<FTMPersonView> FTMPersonView { get; set; }
-    DbSet<FTMMarriage> FTMMarriages { get; set; }
+    DbSet<Relationships> Relationshipss { get; set; }
     DbSet<TreeImport> TreeImport { get; set; }
     DbSet<IgnoreList> IgnoreList { get; set; }
 
 
-    int BulkInsertMarriages(int nextId, int importId,int userId, List<FTMMarriage> marriages);
+    int BulkInsertMarriages(int nextId, int importId,int userId, List<Relationships> marriages);
     int BulkInsertFTMPersonView(int nextId, int importId, int userId, List<FTMPersonView> ftmPersonViews);
     int BulkInsertFTMPersonOrigins(int nextId, int userId, List<FTMPersonOrigin> origins);
 

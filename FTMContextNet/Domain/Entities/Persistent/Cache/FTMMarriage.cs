@@ -2,11 +2,11 @@
 
 namespace FTMContextNet.Domain.Entities.Persistent.Cache
 {
-    public partial class FTMMarriage
+    public partial class Relationships
     {
-        public static FTMMarriage Create(RelationSubSet r)
+        public static Relationships Create(RelationSubSet r)
         {
-            return new FTMMarriage()
+            return new Relationships()
             {
                 BrideId = r.Person1Id.GetValueOrDefault(),
                 GroomId = r.Person2Id.GetValueOrDefault(),

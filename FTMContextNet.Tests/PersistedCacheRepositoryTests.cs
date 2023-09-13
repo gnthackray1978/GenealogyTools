@@ -33,7 +33,7 @@ namespace FTMContextNet.Tests
 
             };
 
-            var relations = new List<FTMMarriage>
+            var relations = new List<Relationships>
             {
                 new(){Id = 1,GroomId = 0,BrideId = 2,ImportId = 1},
                 new(){Id = 2,GroomId = 1,BrideId = 2, ImportId = 1},
@@ -44,7 +44,7 @@ namespace FTMContextNet.Tests
                 .ReturnsDbSet(testData);
 
             this._mockPersistedCacheContext
-                .Setup(s => s.FTMMarriages)
+                .Setup(s => s.Relationshipss)
                 .ReturnsDbSet(relations);
 
             var cacheRepository =
@@ -163,7 +163,7 @@ namespace FTMContextNet.Tests
 
             };
 
-            var relations = new List<FTMMarriage>
+            var relations = new List<Relationships>
             {
                 new(){Id = 1,GroomId = 0,BrideId = 2, ImportId = 1},
                 new(){Id = 2,GroomId = 1,BrideId = 2, ImportId = 1},
@@ -174,7 +174,7 @@ namespace FTMContextNet.Tests
                 .ReturnsDbSet(testData);
 
             this._mockPersistedCacheContext
-                .Setup(s => s.FTMMarriages)
+                .Setup(s => s.Relationshipss)
                 .ReturnsDbSet(relations);
 
 

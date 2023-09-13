@@ -245,7 +245,7 @@ namespace FTMContextNet.Data.Repositories
         public Info GetInfo(int userId) {
             
             var pCount = _persistedCacheContext.FTMPersonView.Count();
-            var mcount = _persistedCacheContext.FTMMarriages.Count();
+            var mcount = _persistedCacheContext.Relationshipss.Count();
             var originsCount =  _persistedCacheContext.FTMPersonOrigins.Count();
             
             return new Info() { 
@@ -307,9 +307,9 @@ namespace FTMContextNet.Data.Repositories
 
         public void InsertMarriages(int importId,int userId, List<RelationSubSet> marriages)
         {
-            var nextId = _persistedCacheContext.FTMMarriages.Max(m => m.Id) + 1;
+            var nextId = _persistedCacheContext.Relationshipss.Max(m => m.Id) + 1;
              
-            var ftmPersons = marriages.Select(person => FTMMarriage.Create(person)).ToList();
+            var ftmPersons = marriages.Select(person => Relationships.Create(person)).ToList();
 
             _persistedCacheContext.BulkInsertMarriages(nextId, importId,userId, ftmPersons);
         }
@@ -375,7 +375,7 @@ namespace FTMContextNet.Data.Repositories
         }
         private List<RelationSubSet> GetRelationships(int importId)
         {
-            var tp = this._persistedCacheContext.FTMMarriages.Where(w=>w.ImportId == importId)
+            var tp = this._persistedCacheContext.Relationshipss.Where(w=>w.ImportId == importId)
                 .Select(s => new RelationSubSet() { Person1Id = s.GroomId, Person2Id = s.BrideId }).ToList();
             return tp;
         }

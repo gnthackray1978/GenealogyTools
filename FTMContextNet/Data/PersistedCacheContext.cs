@@ -50,7 +50,7 @@ namespace FTMContextNet.Data
         public virtual DbSet<TreeRecordMapGroup> TreeRecordMapGroup { get; set; }
         public virtual DbSet<DupeEntry> DupeEntries { get; set; }
         public virtual DbSet<FTMPersonView> FTMPersonView { get; set; }
-        public virtual DbSet<FTMMarriage> FTMMarriages { get; set; }
+        public virtual DbSet<Relationships> Relationshipss { get; set; }
 
         public virtual DbSet<TreeImport> TreeImport { get; set; }
 
@@ -58,7 +58,7 @@ namespace FTMContextNet.Data
 
         #endregion
 
-        public int BulkInsertMarriages(int nextId, int importId,int userId, List<FTMMarriage> marriages)
+        public int BulkInsertMarriages(int nextId, int importId,int userId, List<Relationships> marriages)
         {
             var connectionString = this.Database.GetDbConnection().ConnectionString;
 
@@ -66,7 +66,7 @@ namespace FTMContextNet.Data
             using var connection = new SqliteConnection(connectionString);
 
             var command = connection.CreateCommand();
-            command.CommandText = "INSERT INTO FTMMarriages(Id, MarriageLocation, Origin, GroomId, BrideId, Notes, MarriageDateStr, MarriageYear, ImportId, UserId)" +
+            command.CommandText = "INSERT INTO Relationshipss(Id, MarriageLocation, Origin, GroomId, BrideId, Notes, MarriageDateStr, MarriageYear, ImportId, UserId)" +
                                   " VALUES ($Id, $MarriageLocation, $Origin, $GroomId, $BrideId, $Notes, $MarriageDateStr, $MarriageYear, $ImportId, $UserId);";
             
 
@@ -401,7 +401,7 @@ namespace FTMContextNet.Data
 
         public void DeleteMarriages(int importId)
         {
-            RunCommand("DELETE FROM FTMMarriages WHERE ImportId = " + importId); ;
+            RunCommand("DELETE FROM Relationshipss WHERE ImportId = " + importId); ;
         }
 
         public void DeleteImports(int importId)
