@@ -55,7 +55,7 @@ namespace FTMContextNet.Application.UserServices.DeleteImport
             _persistedCacheRepository.DeleteTreeGroups(importId);
             _ilog.WriteLine("Deleting tree groups for import id: " + importId);
             //treerecords
-            _persistedCacheRepository.DeleteTreeRecords(importId);
+            _persistedCacheRepository.DeleteTreeRecord(importId);
             _ilog.WriteLine("Deleting tree records for import id: " + importId);
             //import
             _persistedImportCacheRepository.DeleteImport(importId);

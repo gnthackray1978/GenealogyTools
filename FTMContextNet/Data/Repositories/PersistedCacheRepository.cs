@@ -68,9 +68,9 @@ namespace FTMContextNet.Data.Repositories
             _persistedCacheContext.DeletePersons(importId);
         }
 
-        public void DeleteTreeRecords(int importId)
+        public void DeleteTreeRecord(int importId)
         {
-            _persistedCacheContext.DeleteTreeRecords(importId);
+            _persistedCacheContext.DeleteTreeRecord(importId);
         }
 
         public void DeleteMarriages(int importId)
@@ -253,7 +253,7 @@ namespace FTMContextNet.Data.Repositories
                 PersonViewCount = pCount,
                 OriginMappingCount = originsCount,
                 DupeEntryCount = _persistedCacheContext.DupeEntries.Count(),
-                TreeRecordCount = _persistedCacheContext.TreeRecords.Count()
+                TreeRecordCount = _persistedCacheContext.TreeRecord.Count()
             };
         }
 
@@ -264,7 +264,7 @@ namespace FTMContextNet.Data.Repositories
         /// stores number of people in tree.
         /// tree name etc
         /// </summary>
-        public void PopulateTreeRecordsFromCache(int importId)
+        public void PopulateTreeRecordFromCache(int importId)
         {
             var treeRecords = new List<TreeRecord>();
 
@@ -281,7 +281,7 @@ namespace FTMContextNet.Data.Repositories
                  
             }
 
-            _iLog.WriteLine("Created " + _persistedCacheContext.BulkInsertTreeRecords(treeRecords)+ " tree records");
+            _iLog.WriteLine("Created " + _persistedCacheContext.BulkInsertTreeRecord(treeRecords)+ " tree records");
         }
 
         #region inserts

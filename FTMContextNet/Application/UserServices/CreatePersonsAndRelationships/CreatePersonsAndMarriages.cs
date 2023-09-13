@@ -52,7 +52,7 @@ namespace FTMContextNet.Application.UserServices.CreatePersonsAndRelationships
             //check if tree has been imported already if so then abort.
 
 
-            await AddTreeRecords(cancellationToken);
+            await AddTreeRecord(cancellationToken);
 
             AddTreeMetaData();
 
@@ -68,7 +68,7 @@ namespace FTMContextNet.Application.UserServices.CreatePersonsAndRelationships
             return _persistedCacheRepository.ImportPresent(importId);
         }
 
-        private async Task AddTreeRecords(CancellationToken cancellationToken)
+        private async Task AddTreeRecord(CancellationToken cancellationToken)
         {
             _ilog.WriteLine("Executing CreatePersonsAndMarriages");
 
@@ -128,7 +128,7 @@ namespace FTMContextNet.Application.UserServices.CreatePersonsAndRelationships
         {
             _ilog.WriteLine("Creating Tree Records");
 
-            _persistedCacheRepository.PopulateTreeRecordsFromCache(_persistedImportCacheRepository.GetCurrentImportId());
+            _persistedCacheRepository.PopulateTreeRecordFromCache(_persistedImportCacheRepository.GetCurrentImportId());
         }
     }
 }

@@ -9,9 +9,9 @@
 //using LoggingLib;
 //using MediatR;
 
-//namespace FTMContextNet.Application.UserServices.CreateTreeRecords
+//namespace FTMContextNet.Application.UserServices.CreateTreeRecord
 //{
-//    public class CreateTreeRecords : IRequestHandler<CreateTreeRecordsCommand, CommandResult>
+//    public class CreateTreeRecord : IRequestHandler<CreateTreeRecordCommand, CommandResult>
 //    {
 //        private static readonly SemaphoreSlim RateLimit = new SemaphoreSlim(1, 1);
 //        private readonly IPersistedCacheRepository _persistedCacheRepository;
@@ -19,7 +19,7 @@
 //        private readonly Ilog _ilog;
 //        private readonly IAuth _auth;
 
-//        public CreateTreeRecords(IPersistedCacheRepository persistedCacheRepository,
+//        public CreateTreeRecord(IPersistedCacheRepository persistedCacheRepository,
 //            IPersistedImportCacheRepository persistedImportCacheRepository, IAuth auth, Ilog outputHandler)
 //        {
 //            _persistedCacheRepository = persistedCacheRepository;
@@ -32,7 +32,7 @@
 //        { 
 //            _ilog.WriteLine("Creating Tree Records");
 
-//            _persistedCacheRepository.PopulateTreeRecordsFromCache(_persistedImportCacheRepository.GetCurrentImportId());
+//            _persistedCacheRepository.PopulateTreeRecordFromCache(_persistedImportCacheRepository.GetCurrentImportId());
 
 //            _ilog.WriteLine("Creating Tree Groups");
 
@@ -68,7 +68,7 @@
 //            }
 //        }
 
-//        public async Task<CommandResult> Handle(CreateTreeRecordsCommand request, CancellationToken cancellationToken)
+//        public async Task<CommandResult> Handle(CreateTreeRecordCommand request, CancellationToken cancellationToken)
 //        {
 //            if (_auth.GetUser() == -1)
 //            {

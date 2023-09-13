@@ -15,7 +15,7 @@ public interface IPersistedCacheRepository
     void DeleteDupes(int importId);
     void DeleteDupes();
     void DeletePersons(int importId);
-    void DeleteTreeRecords(int importId);
+    void DeleteTreeRecord(int importId);
     void DeleteMarriages(int importId);
     void DeleteTreeGroups(int importId);
     void DeleteRecordMapGroups(int importId);
@@ -36,7 +36,7 @@ public interface IPersistedCacheRepository
     /// stores number of people in tree.
     /// tree name etc
     /// </summary>
-    void PopulateTreeRecordsFromCache(int importId);
+    void PopulateTreeRecordFromCache(int importId);
     int InsertTreeGroups(int nextId, string treeGroup, int importId, int userId);
     int InsertTreeRecordMapGroup(int nextId, string treeGroup, string treeName,int importId, int userId);
     void InsertPersons(int importId,int userId, List<Person> persons);

@@ -45,7 +45,7 @@ namespace FTMContextNet.Data
         #region tables
 
         public virtual DbSet<FTMPersonOrigin> FTMPersonOrigins { get; set; }
-        public virtual DbSet<TreeRecord> TreeRecords { get; set; }
+        public virtual DbSet<TreeRecord> TreeRecord { get; set; }
         public virtual DbSet<TreeGroups> TreeGroups { get; set; }
         public virtual DbSet<TreeRecordMapGroup> TreeRecordMapGroup { get; set; }
         public virtual DbSet<DupeEntry> DupeEntries { get; set; }
@@ -285,11 +285,11 @@ namespace FTMContextNet.Data
             return idx;
         }
 
-        public int BulkInsertTreeRecords(List<TreeRecord> treeRecords)
+        public int BulkInsertTreeRecord(List<TreeRecord> treeRecords)
         {
             if (treeRecords.Count <= 0) return 0;
             
-            int idx = TreeRecords.Count() + 1;
+            int idx = TreeRecord.Count() + 1;
             
             foreach (var tr in treeRecords)
             {
@@ -297,7 +297,7 @@ namespace FTMContextNet.Data
                 idx++;
             }
 
-            this.TreeRecords.AddRange(treeRecords);
+            this.TreeRecord.AddRange(treeRecords);
             
             return this.SaveChanges();
         }
@@ -394,9 +394,9 @@ namespace FTMContextNet.Data
             RunCommand("DELETE FROM FTMPersonView WHERE ImportId = " + importId);
         }
 
-        public void DeleteTreeRecords(int importId)
+        public void DeleteTreeRecord(int importId)
         {
-            RunCommand("DELETE FROM TreeRecords WHERE Id = " + importId);
+            RunCommand("DELETE FROM TreeRecord WHERE Id = " + importId);
         }
 
         public void DeleteMarriages(int importId)

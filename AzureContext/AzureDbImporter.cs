@@ -28,7 +28,7 @@ namespace AzureContext
 
             var a = PersistedCacheContext.Create(_imsgConfigHelper, _console);
 
-            var originDictionary = a.TreeRecords.ToDictionary(p => p.Name, p => p.Id);
+            var originDictionary = a.TreeRecord.ToDictionary(p => p.Name, p => p.Id);
 
             _console.WriteCounter("Emptying TreeRecord FTMPersonView and DupeEntries");
 
@@ -105,7 +105,7 @@ namespace AzureContext
 
             _console.WriteCounter("Adding new tree records");
 
-            foreach (var d in a.TreeRecords)
+            foreach (var d in a.TreeRecord)
             {
                 destination.TreeRecord.Add(new Models.TreeRecord()
                 {

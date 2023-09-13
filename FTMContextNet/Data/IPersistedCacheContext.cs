@@ -7,7 +7,7 @@ namespace FTMContextNet.Data;
 public interface IPersistedCacheContext
 {
     DbSet<FTMPersonOrigin> FTMPersonOrigins { get; set; }
-    DbSet<TreeRecord> TreeRecords { get; set; }
+    DbSet<TreeRecord> TreeRecord { get; set; }
     DbSet<TreeGroups> TreeGroups { get; set; }
     DbSet<TreeRecordMapGroup> TreeRecordMapGroup { get; set; }
     DbSet<DupeEntry> DupeEntries { get; set; }
@@ -21,14 +21,14 @@ public interface IPersistedCacheContext
     int BulkInsertFTMPersonView(int nextId, int importId, int userId, List<FTMPersonView> ftmPersonViews);
     int BulkInsertFTMPersonOrigins(int nextId, int userId, List<FTMPersonOrigin> origins);
 
-    int BulkInsertTreeRecords(List<TreeRecord> treeRecords);
+    int BulkInsertTreeRecord(List<TreeRecord> treeRecords);
     int InsertGroups(int nextId, string groupName,int importId, int userId);
     int InsertRecordMapGroup(int nextId, string groupName, string treeName,int importId,int userId);
     void DeleteOrigins(int importId);
     void DeleteDupes(int importId);
     void DeleteDupes();
     void DeletePersons(int importId);
-    void DeleteTreeRecords(int importId);
+    void DeleteTreeRecord(int importId);
     void DeleteMarriages(int importId);
     void DeleteImports(int importId);
     void DeleteTreeGroups(int importId);

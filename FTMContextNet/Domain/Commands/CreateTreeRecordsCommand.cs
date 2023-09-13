@@ -3,4 +3,4 @@ using MSG.CommonTypes;
 
 namespace FTMContextNet.Domain.Commands;
 
-public class CreateTreeRecordsCommand : IRequest<CommandResult> { }
+public class CreateTreeRecordCommand : IRequest<CommandResult> { }
