@@ -44,7 +44,7 @@ namespace FTMContextNet.Tests
                 .ReturnsDbSet(testData);
 
             this._mockPersistedCacheContext
-                .Setup(s => s.Relationshipss)
+                .Setup(s => s.Relationships)
                 .ReturnsDbSet(relations);
 
             var cacheRepository =
@@ -174,7 +174,7 @@ namespace FTMContextNet.Tests
                 .ReturnsDbSet(testData);
 
             this._mockPersistedCacheContext
-                .Setup(s => s.Relationshipss)
+                .Setup(s => s.Relationships)
                 .ReturnsDbSet(relations);
 
 

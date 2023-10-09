@@ -83,7 +83,12 @@ namespace AzureContext.Models
         public virtual DbSet<Tokens> Tokens { get; set; }
 
         public virtual DbSet<FTMPersonView> FTMPersonView { get; set; }
+        
         public virtual DbSet<DupeEntry> DupeEntries { get; set; }
+
+        public virtual DbSet<PersonOrigin> PersonOrigins { get; set; }
+
+        public virtual DbSet<IgnoreList> IgnoreList { get; set; }
 
         public virtual DbSet<TreeRecord> TreeRecord { get; set; }
 
@@ -642,8 +647,26 @@ namespace AzureContext.Models
                 entity.Property(e => e.Url).IsUnicode(false);
             });
 
+            modelBuilder.Entity<IgnoreList>(entity =>
+            {
+                entity.ToTable("IgnoreList", "DNA");
 
+                entity.Property(e => e.Id).ValueGeneratedNever();
 
+                entity.Property(e => e.Person1).HasMaxLength(500);
+
+                entity.Property(e => e.Person1).HasMaxLength(500);
+
+            });
+
+            modelBuilder.Entity<PersonOrigin>(entity =>
+            {
+                entity.ToTable("PersonOrigin", "DNA");
+
+                entity.Property(e => e.Id).ValueGeneratedNever();
+
+                entity.Property(e => e.Origin).HasMaxLength(500);
+            });
 
             modelBuilder.Entity<DupeEntry>(entity =>
             {
@@ -989,7 +1012,7 @@ namespace AzureContext.Models
 
                 entity.Property(e => e.MarriageCounty).HasMaxLength(500);
 
-                entity.Property(e => e.MarriageLocation)
+                entity.Property(e => e.Location)
                     .HasMaxLength(50)
                     .IsUnicode(false);
 

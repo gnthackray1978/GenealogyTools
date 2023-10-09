@@ -123,17 +123,17 @@ namespace AzureContext
 
             _console.WriteCounter("Adding new marriages");
 
-            foreach (var d in a.Relationshipss)
+            foreach (var d in a.Relationships)
             {
                 destination.Relationships.Add(new Models.Relationships()
                 {
                     Id = d.Id, 
                     BrideId = d.BrideId,
-                    DateStr = d.MarriageDateStr,
+                    DateStr = d.DateStr,
                     GroomId = d.GroomId,
-                    Location = d.MarriageLocation,
+                    Location = d.Location,
                     Notes = d.Notes,
-                    Year = d.MarriageYear,
+                    Year = d.Year,
                     Origin = d.Origin
                     
                 });

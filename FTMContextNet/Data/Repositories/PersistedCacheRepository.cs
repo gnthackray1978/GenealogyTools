@@ -153,7 +153,7 @@ namespace FTMContextNet.Data.Repositories
                     ImportId = s.ImportId
                 }).ToList();
  
-            _persistedCacheContext.BulkInsertFTMPersonOrigins(1,  userId, recordsToSave.OrderBy(o => o.Origin).ToList());
+            _persistedCacheContext.BulkInsertPersonOrigins(1,  userId, recordsToSave.OrderBy(o => o.Origin).ToList());
         
         }
 
@@ -232,7 +232,7 @@ namespace FTMContextNet.Data.Repositories
 
         public int OriginPersonCount() 
         {
-            return _persistedCacheContext.FTMPersonOrigins.Count() + 1;
+            return _persistedCacheContext.PersonOrigins.Count() + 1;
         }
 
         public void UpdatePersons(int personId, string lat, string lng, string altLat, string altLng)
@@ -245,8 +245,8 @@ namespace FTMContextNet.Data.Repositories
         public Info GetInfo(int userId) {
             
             var pCount = _persistedCacheContext.FTMPersonView.Count();
-            var mcount = _persistedCacheContext.Relationshipss.Count();
-            var originsCount =  _persistedCacheContext.FTMPersonOrigins.Count();
+            var mcount = _persistedCacheContext.Relationships.Count();
+            var originsCount =  _persistedCacheContext.PersonOrigins.Count();
             
             return new Info() { 
                 MarriagesCount = mcount,
@@ -307,7 +307,7 @@ namespace FTMContextNet.Data.Repositories
 
         public void InsertMarriages(int importId,int userId, List<RelationSubSet> marriages)
         {
-            var nextId = _persistedCacheContext.Relationshipss.Max(m => m.Id) + 1;
+            var nextId = _persistedCacheContext.Relationships.Max(m => m.Id) + 1;
              
             var ftmPersons = marriages.Select(person => Relationships.Create(person)).ToList();
 
@@ -375,7 +375,7 @@ namespace FTMContextNet.Data.Repositories
         }
         private List<RelationSubSet> GetRelationships(int importId)
         {
-            var tp = this._persistedCacheContext.Relationshipss.Where(w=>w.ImportId == importId)
+            var tp = this._persistedCacheContext.Relationships.Where(w=>w.ImportId == importId)
                 .Select(s => new RelationSubSet() { Person1Id = s.GroomId, Person2Id = s.BrideId }).ToList();
             return tp;
         }

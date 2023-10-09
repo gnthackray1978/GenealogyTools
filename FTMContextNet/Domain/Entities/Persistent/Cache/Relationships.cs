@@ -10,11 +10,11 @@ namespace FTMContextNet.Domain.Entities.Persistent.Cache
             {
                 BrideId = r.Person1Id.GetValueOrDefault(),
                 GroomId = r.Person2Id.GetValueOrDefault(),
-                MarriageDateStr = r.DateStr,
-                MarriageYear = r.DateYear,
+                DateStr = r.DateStr,
+                Year = r.DateYear,
                 Notes = r.Text,
                 Origin = r.Origin,
-                MarriageLocation = r.PlaceName
+                Location = r.PlaceName
             };
         }
 
@@ -25,13 +25,13 @@ namespace FTMContextNet.Domain.Entities.Persistent.Cache
 
         public string Origin { get; set; }
 
-        public string MarriageLocation { get; set; }
+        public string Location { get; set; }
 
         public string Notes { get; set; }
 
-        public string MarriageDateStr { get; set; }
+        public string DateStr { get; set; }
 
-        public int MarriageYear { get; set; }
+        public int Year { get; set; }
 
         public int ImportId { get; set; }
 

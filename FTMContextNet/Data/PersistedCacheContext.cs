@@ -44,13 +44,13 @@ namespace FTMContextNet.Data
 
         #region tables
 
-        public virtual DbSet<FTMPersonOrigin> FTMPersonOrigins { get; set; }
+        public virtual DbSet<FTMPersonOrigin> PersonOrigins { get; set; }
         public virtual DbSet<TreeRecord> TreeRecord { get; set; }
         public virtual DbSet<TreeGroups> TreeGroups { get; set; }
         public virtual DbSet<TreeRecordMapGroup> TreeRecordMapGroup { get; set; }
         public virtual DbSet<DupeEntry> DupeEntries { get; set; }
         public virtual DbSet<FTMPersonView> FTMPersonView { get; set; }
-        public virtual DbSet<Relationships> Relationshipss { get; set; }
+        public virtual DbSet<Relationships> Relationships { get; set; }
 
         public virtual DbSet<TreeImport> TreeImport { get; set; }
 
@@ -66,18 +66,18 @@ namespace FTMContextNet.Data
             using var connection = new SqliteConnection(connectionString);
 
             var command = connection.CreateCommand();
-            command.CommandText = "INSERT INTO Relationshipss(Id, MarriageLocation, Origin, GroomId, BrideId, Notes, MarriageDateStr, MarriageYear, ImportId, UserId)" +
-                                  " VALUES ($Id, $MarriageLocation, $Origin, $GroomId, $BrideId, $Notes, $MarriageDateStr, $MarriageYear, $ImportId, $UserId);";
+            command.CommandText = "INSERT INTO Relationships(Id, Location, Origin, GroomId, BrideId, Notes, DateStr, Year, ImportId, UserId)" +
+                                  " VALUES ($Id, $Location, $Origin, $GroomId, $BrideId, $Notes, $DateStr, $Year, $ImportId, $UserId);";
             
 
             command.Parameters.Add("$Id", SqliteType.Integer);
-            command.Parameters.Add("$MarriageLocation", SqliteType.Text);
+            command.Parameters.Add("$Location", SqliteType.Text);
             command.Parameters.Add("$Origin", SqliteType.Text);
             command.Parameters.Add("$GroomId", SqliteType.Integer);
             command.Parameters.Add("$BrideId", SqliteType.Integer);
             command.Parameters.Add("$Notes", SqliteType.Text);
-            command.Parameters.Add("$MarriageDateStr", SqliteType.Text);
-            command.Parameters.Add("$MarriageYear", SqliteType.Integer);
+            command.Parameters.Add("$DateStr", SqliteType.Text);
+            command.Parameters.Add("$Year", SqliteType.Integer);
             command.Parameters.Add("$ImportId", SqliteType.Integer);
             command.Parameters.Add("$UserId", SqliteType.Integer);
 
@@ -95,13 +95,13 @@ namespace FTMContextNet.Data
             foreach (var row in marriages)
             {
                 command.Parameters["$Id"].Value = idx;
-                command.Parameters["$MarriageLocation"].Value = row.MarriageLocation;
+                command.Parameters["$Location"].Value = row.Location;
                 command.Parameters["$Origin"].Value = row.Origin??"";
                 command.Parameters["$GroomId"].Value = row.GroomId;
                 command.Parameters["$BrideId"].Value = row.BrideId;
                 command.Parameters["$Notes"].Value = row.Notes??"";
-                command.Parameters["$MarriageDateStr"].Value = row.MarriageDateStr;
-                command.Parameters["$MarriageYear"].Value = row.MarriageYear;
+                command.Parameters["$DateStr"].Value = row.DateStr;
+                command.Parameters["$Year"].Value = row.Year;
                 command.Parameters["$ImportId"].Value = importId;
                 command.Parameters["$UserId"].Value = userId;
                 command.ExecuteNonQuery();
@@ -242,7 +242,7 @@ namespace FTMContextNet.Data
             throw new System.NotImplementedException();
         }
 
-        public int BulkInsertFTMPersonOrigins(int nextId,int userId, List<FTMPersonOrigin> origins)
+        public int BulkInsertPersonOrigins(int nextId,int userId, List<FTMPersonOrigin> origins)
         {
 
             var connectionString = this.Database.GetDbConnection().ConnectionString;
@@ -251,7 +251,7 @@ namespace FTMContextNet.Data
             using var connection = new SqliteConnection(connectionString);
 
             var command = connection.CreateCommand();
-            command.CommandText = "INSERT INTO FTMPersonOrigins(Id, PersonId,Origin, DirectAncestor,ImportId,UserId)" +
+            command.CommandText = "INSERT INTO PersonOrigins(Id, PersonId,Origin, DirectAncestor,ImportId,UserId)" +
                                   " VALUES ($Id,$PersonId,$Origin, $DirectAncestor,$ImportId, $UserId);";
 
             command.Parameters.Add("$Id", SqliteType.Integer);
@@ -375,7 +375,7 @@ namespace FTMContextNet.Data
 
         public void DeleteOrigins(int importId)
         {
-            RunCommand("DELETE FROM FTMPersonOrigins WHERE ImportId = " + importId);
+            RunCommand("DELETE FROM PersonOrigins WHERE ImportId = " + importId);
         }
 
         public void DeleteDupes(int importId)
@@ -401,7 +401,7 @@ namespace FTMContextNet.Data
 
         public void DeleteMarriages(int importId)
         {
-            RunCommand("DELETE FROM Relationshipss WHERE ImportId = " + importId); ;
+            RunCommand("DELETE FROM Relationships WHERE ImportId = " + importId); ;
         }
 
         public void DeleteImports(int importId)

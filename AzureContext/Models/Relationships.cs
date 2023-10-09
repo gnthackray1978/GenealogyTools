@@ -21,5 +21,9 @@ namespace AzureContext.Models
         public string Location { get; set; }
 
         public string Origin { get; set; }
+
+        public int UserId { get; set; }
+
+        public int ImportId { get; set; }
     }
 }

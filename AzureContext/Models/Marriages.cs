@@ -15,7 +15,7 @@ namespace AzureContext.Models
         public string FemaleLocation { get; set; }
         public string FemaleInfo { get; set; }
         public string Date { get; set; }
-        public string MarriageLocation { get; set; }
+        public string Location { get; set; }
         public int? YearIntVal { get; set; }
         public string MarriageCounty { get; set; }
         public string Source { get; set; }
@@ -33,7 +33,7 @@ namespace AzureContext.Models
         public bool? MaleIsKnownWidower { get; set; }
         public bool? IsBanns { get; set; }
         public bool? IsLicence { get; set; }
-        public Guid? MarriageLocationId { get; set; }
+        public Guid? LocationId { get; set; }
         public Guid? MaleLocationId { get; set; }
         public Guid? FemaleLocationId { get; set; }
         public int? MaleBirthYear { get; set; }
