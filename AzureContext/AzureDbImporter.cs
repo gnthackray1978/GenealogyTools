@@ -26,7 +26,7 @@ namespace AzureContext
             
 
 
-            var a = PersistedCacheContext.Create(_imsgConfigHelper, _console);
+            var a = SQLitePersistedCacheContext.Create(_imsgConfigHelper, _console);
 
             var originDictionary = a.TreeRecord.ToDictionary(p => p.Name, p => p.Id);
 

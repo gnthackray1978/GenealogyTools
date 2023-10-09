@@ -10,7 +10,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FTMContextNet.Data
 {
-    public partial class PersistedCacheContext : DbContext, IPersistedCacheContext
+
+
+    public partial class SQLitePersistedCacheContext : DbContext, IPersistedCacheContext
     {
 
         private IMSGConfigHelper _configObj { get; set; }
@@ -18,18 +20,18 @@ namespace FTMContextNet.Data
 
         private Ilog _logger { get; set; }
 
-        public PersistedCacheContext(IMSGConfigHelper config, Ilog ilog)
+        public SQLitePersistedCacheContext(IMSGConfigHelper config, Ilog ilog)
         {
             _configObj = config;
             _logger = ilog;
         }
 
-        public PersistedCacheContext(DbContextOptions<PersistedCacheContext> options)
+        public SQLitePersistedCacheContext(DbContextOptions<SQLitePersistedCacheContext> options)
             : base(options)
         {
         }
 
-        public static PersistedCacheContext Create(IMSGConfigHelper imsgConfigHelper, Ilog logger)
+        public static SQLitePersistedCacheContext Create(IMSGConfigHelper imsgConfigHelper, Ilog logger)
         {
             //var a = new FTMakerCacheContext(new ConfigObj
             //{
@@ -39,7 +41,7 @@ namespace FTMContextNet.Data
             //});
 
 
-            return new PersistedCacheContext(imsgConfigHelper,logger);
+            return new SQLitePersistedCacheContext(imsgConfigHelper,logger);
         }
 
         #region tables

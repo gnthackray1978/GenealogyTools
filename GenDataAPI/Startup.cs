@@ -64,7 +64,7 @@ namespace GenDataAPI
                     .AddTransient<IGedRepository, GedRepository>()
                     .AddTransient<IPlacesContext,PlacesContext>()
                     .AddTransient<IPersonPlaceCache,PersonPlaceCache>()
-                    .AddTransient<IPersistedCacheContext, PersistedCacheContext>()
+                    .AddTransient<IPersistedCacheContext, SQLitePersistedCacheContext>()
                     .AddTransient<IPersistedImportCacheRepository, PersistedImportCacheRepository>()
                     .AddTransient<IPersistedCacheRepository, PersistedCacheRepository>()
                     .AddTransient<IPlaceLibCoordCache, PlaceLibCoordCache>()

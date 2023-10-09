@@ -117,7 +117,7 @@ namespace FTMContextNet
         {
             var placeRepository = new PlaceRepository(new PlacesContext(_iMSGConfigHelper), _outputHandler);
 
-            var persistedCacheRepository = new PersistedCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
+            var persistedCacheRepository = new PersistedCacheRepository(SQLitePersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
 
             var service = new UpdatePersonLocations(placeRepository, persistedCacheRepository, _outputHandler, new Auth());
 
@@ -140,8 +140,8 @@ namespace FTMContextNet
         public CommandResult ImportSavedGed()
         {  
             //dependencies
-            var persistedCacheRepository = new PersistedCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
-            var persistedImportedCacheRepository = new PersistedImportCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
+            var persistedCacheRepository = new PersistedCacheRepository(SQLitePersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
+            var persistedImportedCacheRepository = new PersistedImportCacheRepository(SQLitePersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
             var placeRepository = new PlaceRepository(new PlacesContext(_iMSGConfigHelper), _outputHandler);
             
             var personPlaceCache = new PersonPlaceCache(persistedCacheRepository, persistedImportedCacheRepository, new PlaceNameFormatter());
@@ -175,7 +175,7 @@ namespace FTMContextNet
         
         public InfoModel GetInfo() 
         {
-            var persistedCacheRepository = new PersistedCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
+            var persistedCacheRepository = new PersistedCacheRepository(SQLitePersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
             var auth = new Auth();
 
             var tp = new GetInfoService(persistedCacheRepository, _outputHandler, _mapper,auth);
@@ -185,7 +185,7 @@ namespace FTMContextNet
 
         public IEnumerable<ImportModel> ReadImports()
         {
-            var persistedCacheRepository = new PersistedImportCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
+            var persistedCacheRepository = new PersistedImportCacheRepository(SQLitePersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
 
             var tp = new GetGedFiles(persistedCacheRepository, _outputHandler, _mapper);
 
@@ -194,7 +194,7 @@ namespace FTMContextNet
 
         public CommandResult CreateImport(CreateImportModel createImportModel)
         {
-            var persistedCacheRepository = new PersistedImportCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
+            var persistedCacheRepository = new PersistedImportCacheRepository(SQLitePersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
  
             var tp = new CreateImport(persistedCacheRepository, _outputHandler, new Auth());
 
@@ -205,7 +205,7 @@ namespace FTMContextNet
 
         public CommandResult SelectImport(int importId)
         {
-            var persistedCacheRepository = new PersistedImportCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
+            var persistedCacheRepository = new PersistedImportCacheRepository(SQLitePersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
 
             var tp = new UpdateImportStatus(persistedCacheRepository, _outputHandler, new Auth());
 
@@ -214,9 +214,9 @@ namespace FTMContextNet
 
         public CommandResult DeleteImport(int importId)
         {
-            var persistedCacheRepository = new PersistedCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
+            var persistedCacheRepository = new PersistedCacheRepository(SQLitePersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
           
-            var persistedImportedCacheRepository = new PersistedImportCacheRepository(PersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
+            var persistedImportedCacheRepository = new PersistedImportCacheRepository(SQLitePersistedCacheContext.Create(_iMSGConfigHelper, _outputHandler), _outputHandler);
           
             var auth = new Auth();
 

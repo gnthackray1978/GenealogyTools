@@ -41,7 +41,7 @@ namespace FTMConsole2
                     .AddSingleton<IMSGConfigHelper>(new MSGConfigHelper())
                     .AddSingleton<IMapper>(config.CreateMapper())
                     .AddSingleton<IAuth>(new Auth())
-                    .AddTransient<IPersistedCacheContext, PersistedCacheContext>()
+                    .AddTransient<IPersistedCacheContext, SQLitePersistedCacheContext>()
                     .AddTransient<IPersistedCacheRepository, PersistedCacheRepository>()
                     
                     .BuildServiceProvider();
