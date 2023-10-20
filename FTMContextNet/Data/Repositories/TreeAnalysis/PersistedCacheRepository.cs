@@ -12,27 +12,27 @@ using LoggingLib;
 using Microsoft.EntityFrameworkCore;
 using QuickGed.Types;
 
-namespace FTMContextNet.Data.Repositories
+namespace FTMContextNet.Data.Repositories.TreeAnalysis
 {
     //todo sort this out, but do we really need 10 extra files(with interfaces) 1 for each table?
     public class PersistedCacheRepository : IPersistedCacheRepository
-    {        
+    {
         private readonly IPersistedCacheContext _persistedCacheContext;
         private readonly Ilog _iLog;
-        
+
         public PersistedCacheRepository(IPersistedCacheContext persistedCacheContext, Ilog iLog)
         {
             _persistedCacheContext = persistedCacheContext;
             _iLog = iLog;
         }
-        
+
         public List<string> DumpCount()
         {
 
             List<string> results = new List<string>();
 
             DumpRecordCount(results, _persistedCacheContext.FTMPersonView, "FTMPersonView");
-          //  DumpRecordCount(results, _persistedCacheContext.FTMPlaceCache, "FTMPlaceCache");
+            //  DumpRecordCount(results, _persistedCacheContext.FTMPlaceCache, "FTMPlaceCache");
             DumpRecordCount(results, _persistedCacheContext.DupeEntries, "DupeEntries");
 
             return results;
@@ -50,9 +50,9 @@ namespace FTMContextNet.Data.Repositories
             if (result != "")
                 results.Add(result);
         }
-        
+
         #region deletes
-    
+
         public void DeleteDupes(int importId)
         {
             _persistedCacheContext.DeleteDupes(importId);
@@ -77,7 +77,7 @@ namespace FTMContextNet.Data.Repositories
         {
             _persistedCacheContext.DeleteMarriages(importId);
         }
-        
+
         public void DeleteTreeGroups(int importId)
         {
             _persistedCacheContext.DeleteTreeGroups(importId);
@@ -96,12 +96,12 @@ namespace FTMContextNet.Data.Repositories
         public bool ImportPresent(int importId)
         {
             //throw new NotImplementedException();
-            return this._persistedCacheContext.FTMPersonView.Any(a => a.ImportId == importId);
+            return _persistedCacheContext.FTMPersonView.Any(a => a.ImportId == importId);
         }
 
         #endregion
 
-         
+
         #region Valid Data
         private static Expression<Func<FTMPersonView, bool>> ValidData(int importId)
         {
@@ -121,20 +121,20 @@ namespace FTMContextNet.Data.Repositories
                 && !w.FirstName.ToLower().Contains("group")
                 && !string.IsNullOrEmpty(w.Surname)
                 && !string.IsNullOrEmpty(w.Origin)
-                && w.Origin != "Thackray" ;
+                && w.Origin != "Thackray";
         }
 
         #endregion
 
         public List<string> MakePlaceRecordCache(int importId)
         {
-            var comparisonPersons = this._persistedCacheContext
-                .FTMPersonView.Where(w=>!w.LocationsCached && w.BirthLocation!=null && w.ImportId == importId).Select(s=>s.BirthLocation).ToList();
+            var comparisonPersons = _persistedCacheContext
+                .FTMPersonView.Where(w => !w.LocationsCached && w.BirthLocation != null && w.ImportId == importId).Select(s => s.BirthLocation).ToList();
 
-            comparisonPersons.AddRange(this._persistedCacheContext.FTMPersonView.Where(w => !w.LocationsCached 
+            comparisonPersons.AddRange(_persistedCacheContext.FTMPersonView.Where(w => !w.LocationsCached
                 && w.AltLocation != null && w.ImportId == importId).Select(s => s.AltLocation).ToList());
 
-          
+
             return comparisonPersons;
         }
 
@@ -144,30 +144,31 @@ namespace FTMContextNet.Data.Repositories
 
             var recordsToSave = _persistedCacheContext
                 .FTMPersonView
-                .Where(w=>w.Origin!="" && w.UserId == userId)
-                .Select(s=> new FTMPersonOrigin()
+                .Where(w => w.Origin != "" && w.UserId == userId)
+                .Select(s => new PersonOrigin()
                 {
-                    Id  = s.Id,
+                    Id = s.Id,
                     Origin = s.Surname.ToLower().Contains("group") ? s.Surname : s.Origin,
                     DirectAncestor = s.DirectAncestor,
                     ImportId = s.ImportId
                 }).ToList();
- 
-            _persistedCacheContext.BulkInsertPersonOrigins(1,  userId, recordsToSave.OrderBy(o => o.Origin).ToList());
-        
+
+            _persistedCacheContext.BulkInsertPersonOrigins(1, userId, recordsToSave.OrderBy(o => o.Origin).ToList());
+
         }
 
         public DuplicateIgnoreList GetIgnoreList()
         {
-            return new DuplicateIgnoreList(this._persistedCacheContext.IgnoreList.ToList());
+            return new DuplicateIgnoreList(_persistedCacheContext.IgnoreList.ToList());
         }
 
-        public List<PersonIdentifier> GetComparisonPersons(int importId) {
+        public List<PersonIdentifier> GetComparisonPersons(int importId)
+        {
 
-            var comparisonPersons = this._persistedCacheContext.FTMPersonView
+            var comparisonPersons = _persistedCacheContext.FTMPersonView
                 .Where(ValidData(importId))
              .Select(s => PersonIdentifier.Create(s.Id,
-                 s.BirthFrom, s.BirthTo, s.Origin, EnglishHistoricCounties.Match(string.IsNullOrEmpty(s.BirthLocation)? s.AltLocation : s.BirthLocation),s.BirthLong, s.BirthLat,
+                 s.BirthFrom, s.BirthTo, s.Origin, EnglishHistoricCounties.Match(string.IsNullOrEmpty(s.BirthLocation) ? s.AltLocation : s.BirthLocation), s.BirthLong, s.BirthLat,
                  s.Surname, s.FirstName)).ToList();
 
             return comparisonPersons;
@@ -176,8 +177,8 @@ namespace FTMContextNet.Data.Repositories
         public List<PersonLocation> GetPersonMapLocations()
         {
 
-            var comparisonPersons = this
-                ._persistedCacheContext.FTMPersonView.Where(ValidData(0))
+            var comparisonPersons = 
+                _persistedCacheContext.FTMPersonView.Where(ValidData(0))
                 .Select(s => new PersonLocation()
                 {
                     Id = s.PersonId,
@@ -191,16 +192,16 @@ namespace FTMContextNet.Data.Repositories
 
             return comparisonPersons;
         }
-        
+
 
 
         public void AddDupeEntrys(List<KeyValuePair<int, string>> dupes, int userId)
         {
-           var dupeId = (_persistedCacheContext.DupeEntries.Max(a => (int?)a.Id) ?? 1)+1;
+            var dupeId = (_persistedCacheContext.DupeEntries.Max(a => (int?)a.Id) ?? 1) + 1;
 
-         
-           foreach (var pair in dupes)
-           {
+
+            foreach (var pair in dupes)
+            {
 
                 var personId = pair.Key;
                 var ident = pair.Value;
@@ -224,31 +225,33 @@ namespace FTMContextNet.Data.Repositories
                 _persistedCacheContext.DupeEntries.Add(dupeEntry);
 
                 dupeId++;
-           }
+            }
 
-           _persistedCacheContext.SaveChanges();
+            _persistedCacheContext.SaveChanges();
 
         }
 
-        public int OriginPersonCount() 
+        public int OriginPersonCount()
         {
             return _persistedCacheContext.PersonOrigins.Count() + 1;
         }
 
         public void UpdatePersons(int personId, string lat, string lng, string altLat, string altLng)
         {
-            _persistedCacheContext.UpdatePersonLocations(personId,lng,lat,altLng,altLat);
+            _persistedCacheContext.UpdatePersonLocations(personId, lng, lat, altLng, altLat);
         }
-        
+
         #region debug data
 
-        public Info GetInfo(int userId) {
-            
+        public Info GetInfo(int userId)
+        {
+
             var pCount = _persistedCacheContext.FTMPersonView.Count();
             var mcount = _persistedCacheContext.Relationships.Count();
-            var originsCount =  _persistedCacheContext.PersonOrigins.Count();
-            
-            return new Info() { 
+            var originsCount = _persistedCacheContext.PersonOrigins.Count();
+
+            return new Info()
+            {
                 MarriagesCount = mcount,
                 PersonViewCount = pCount,
                 OriginMappingCount = originsCount,
@@ -258,7 +261,7 @@ namespace FTMContextNet.Data.Repositories
         }
 
         #endregion
-        
+
         /// <summary>
         /// Updates treerecords table in cache. 
         /// stores number of people in tree.
@@ -268,50 +271,50 @@ namespace FTMContextNet.Data.Repositories
         {
             var treeRecords = new List<TreeRecord>();
 
-            var locationsMapOrigin =_persistedCacheContext.FTMPersonView.Select(s => new { s.Origin, s.LinkedLocations }).ToList();
+            var locationsMapOrigin = _persistedCacheContext.FTMPersonView.Select(s => new { s.Origin, s.LinkedLocations }).ToList();
 
-            foreach (var tree in this.GetRootNameDictionary(importId).Values)
+            foreach (var tree in GetRootNameDictionary(importId).Values)
             {
                 var treeLocations = locationsMapOrigin.Where(c => c.Origin == tree)
-                    .Select(s=>s.LinkedLocations).ToArray();
- 
+                    .Select(s => s.LinkedLocations).ToArray();
+
                 treeRecords.Add(TreeRecord.CreateFromOrigin(tree,
                     string.Join(",", EnglishHistoricCounties.FromPlaceList(treeLocations)),
                     treeLocations.Length, 0));
-                 
+
             }
 
-            _iLog.WriteLine("Created " + _persistedCacheContext.BulkInsertTreeRecord(treeRecords)+ " tree records");
+            _iLog.WriteLine("Created " + _persistedCacheContext.BulkInsertTreeRecord(treeRecords) + " tree records");
         }
 
         #region inserts
 
-        public int InsertTreeGroups(int nextId, string treeGroup,int importId, int userId)
+        public int InsertTreeGroups(int nextId, string treeGroup, int importId, int userId)
         {
             return _persistedCacheContext.InsertGroups(nextId, treeGroup, importId, userId);
         }
-        
-        public int InsertTreeRecordMapGroup(int nextId, string treeGroup, string treeName,int importId, int userId)
+
+        public int InsertTreeRecordMapGroup(int nextId, string treeGroup, string treeName, int importId, int userId)
         {
-            return _persistedCacheContext.InsertRecordMapGroup(nextId, treeGroup, treeName,importId, userId);
+            return _persistedCacheContext.InsertRecordMapGroup(nextId, treeGroup, treeName, importId, userId);
         }
 
-        public void InsertPersons(int importId,int userId, List<Person> persons)
+        public void InsertPersons(int importId, int userId, List<Person> persons)
         {
-            var nextId = _persistedCacheContext.FTMPersonView.Max(m=>m.Id)+1;
-            
+            var nextId = _persistedCacheContext.FTMPersonView.Max(m => m.Id) + 1;
+
             var ftmPersons = persons.Select(person => FTMPersonView.Create(person)).ToList();
 
-            _persistedCacheContext.BulkInsertFTMPersonView(nextId, importId,userId, ftmPersons);
+            _persistedCacheContext.BulkInsertFTMPersonView(nextId, importId, userId, ftmPersons);
         }
 
-        public void InsertMarriages(int importId,int userId, List<RelationSubSet> marriages)
+        public void InsertMarriages(int importId, int userId, List<RelationSubSet> marriages)
         {
             var nextId = _persistedCacheContext.Relationships.Max(m => m.Id) + 1;
-             
+
             var ftmPersons = marriages.Select(person => Relationships.Create(person)).ToList();
 
-            _persistedCacheContext.BulkInsertMarriages(nextId, importId,userId, ftmPersons);
+            _persistedCacheContext.BulkInsertMarriages(nextId, importId, userId, ftmPersons);
         }
 
         #endregion
@@ -331,7 +334,7 @@ namespace FTMContextNet.Data.Repositories
             foreach (var treeId in treeIds)
             {
                 var groupMembers = tp.Where(t => t.MatchEither(treeId)).Select(s => s.GetOtherSide(treeId)).Distinct().ToList();
-                 
+
                 results.Add(nameDict[treeId], (from gm in groupMembers where groupNames.ContainsKey(gm) select groupNames[gm]).ToList());
             }
 
@@ -340,7 +343,7 @@ namespace FTMContextNet.Data.Repositories
         public Dictionary<int, string> GetGroupPerson(int importId)
         {
 
-            var gps = this._persistedCacheContext
+            var gps = _persistedCacheContext
                 .FTMPersonView
                 .Where(x => x.LinkNode && x.ImportId == importId)
                 .ToDictionary(s => s.PersonId, x => x.FirstName + " " + x.Surname);
@@ -351,7 +354,7 @@ namespace FTMContextNet.Data.Repositories
 
         private Dictionary<int, string> GetRootNameDictionary(int importId)
         {
-            var nameDict = this._persistedCacheContext
+            var nameDict = _persistedCacheContext
                 .FTMPersonView
                 .Where(w => w.RootPerson && w.ImportId == importId)
                 .ToDictionary(i => i.Id, i => (i.FirstName + " " + i.Surname).Trim());
@@ -359,7 +362,7 @@ namespace FTMContextNet.Data.Repositories
         }
         private List<int> GetTreeIds(int importId)
         {
-            var treeIds = this._persistedCacheContext
+            var treeIds = _persistedCacheContext
                 .FTMPersonView
                 .Where(w => w.RootPerson && w.ImportId == importId)
                 .Select(s => s.Id).ToList();
@@ -367,19 +370,19 @@ namespace FTMContextNet.Data.Repositories
         }
         private Dictionary<int, string> GetGroupNamesDictionary(int importId)
         {
-            var groupNames = this._persistedCacheContext
+            var groupNames = _persistedCacheContext
                 .FTMPersonView
-                .Where(p => p.LinkNode && p.ImportId== importId)
+                .Where(p => p.LinkNode && p.ImportId == importId)
                 .ToDictionary(i => i.Id, i => i.FirstName + " " + i.Surname);
             return groupNames;
         }
         private List<RelationSubSet> GetRelationships(int importId)
         {
-            var tp = this._persistedCacheContext.Relationships.Where(w=>w.ImportId == importId)
+            var tp = _persistedCacheContext.Relationships.Where(w => w.ImportId == importId)
                 .Select(s => new RelationSubSet() { Person1Id = s.GroomId, Person2Id = s.BrideId }).ToList();
             return tp;
         }
-        
+
 
     }
 }

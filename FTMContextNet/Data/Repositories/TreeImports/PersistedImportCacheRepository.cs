@@ -25,7 +25,7 @@ public class PersistedImportCacheRepository : IPersistedImportCacheRepository
         _persistedCacheContext.DeleteImports(importId);
     }
     
-    public bool ImportExists(string fileName, double fileSize, int userId)
+    public bool ImportExists(string fileName, long fileSize, int userId)
     {
         return _persistedCacheContext.TreeImport.Any(a => a.FileSize == fileSize && a.FileName == fileName && a.UserId == userId);
     }
@@ -61,7 +61,7 @@ public class PersistedImportCacheRepository : IPersistedImportCacheRepository
         return path;
     }
 
-    public ImportData AddImportRecord(string fileName, double fileSize, bool selected, int userId)
+    public ImportData AddImportRecord(string fileName, long fileSize, bool selected, int userId)
     {
         // if there has been a previous import with this filename 
         // we want to overwrite it. 

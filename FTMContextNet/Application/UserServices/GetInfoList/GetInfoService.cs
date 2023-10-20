@@ -3,10 +3,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using LoggingLib;
 using FTMContextNet.Application.Models.Read;
-using FTMContextNet.Data.Repositories;
 using AutoMapper;
 using MSGIdent;
-using MediatR; 
+using MediatR;
+using FTMContextNet.Data.Repositories.TreeAnalysis;
 
 namespace FTMContextNet.Application.UserServices.GetInfoList
 {

@@ -2,8 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using FTMContextNet.Data.Repositories;
 using FTMContextNet.Data.Repositories.GedImports;
+using FTMContextNet.Data.Repositories.TreeAnalysis;
 using FTMContextNet.Domain.Entities.NonPersistent.Person;
 using PlaceLibNet.Domain;
 

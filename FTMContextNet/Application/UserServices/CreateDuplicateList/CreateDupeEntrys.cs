@@ -3,7 +3,6 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using FTMContextNet.Data.Repositories;
 using FTMContextNet.Data.Repositories.GedImports;
 using MSGIdent;
 using FTMContextNet.Domain.Collections.Grouping;
@@ -13,6 +12,7 @@ using LoggingLib;
 using MediatR;
 using MSGIdent;
 using MSG.CommonTypes;
+using FTMContextNet.Data.Repositories.TreeAnalysis;
 
 namespace FTMContextNet.Application.UserServices.CreateDuplicateList
 {

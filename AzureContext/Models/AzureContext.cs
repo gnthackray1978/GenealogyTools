@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using FTMContextNet.Domain.Entities.Persistent.Cache;
 using Microsoft.Data.SqlClient;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -721,6 +722,13 @@ namespace AzureContext.Models
                 entity.Property(e => e.ID).ValueGeneratedNever();
                 entity.Property(e => e.Name);
                 entity.Property(e => e.Origin).HasMaxLength(250);
+            });
+
+            modelBuilder.Entity<TreeImport>(entity =>
+            {
+                entity.ToTable("TreeImport", "DNA");
+                entity.Property(e => e.Id).ValueGeneratedNever();
+                entity.Property(e => e.FileName).HasMaxLength(100);
             });
 
             modelBuilder.Entity<TreeGroups>(entity =>

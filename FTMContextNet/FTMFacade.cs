@@ -28,6 +28,8 @@ using FTMContextNet.Application.UserServices.GetInfoList;
 using FTMContextNet.Application.UserServices.UpdateImportStatus;
 using FTMContextNet.Application.UserServices.UpdatePersonLocations;
 using FTMContextNet.Data.Repositories.GedImports;
+using FTMContextNet.Data.Repositories.GedProcessing;
+using FTMContextNet.Data.Repositories.TreeAnalysis;
 using FTMContextNet.Domain.Caching;
 using PlaceLibNet.Domain;
 using PlaceLibNet.Domain.Caching;

@@ -2,14 +2,13 @@
 
 namespace FTMContextNet.Domain.Entities.Persistent.Cache
 {
-    public partial class TreeGroups: IEquatable<TreeGroups>
+    public partial class PersonOrigin: IEquatable<PersonOrigin>
     {
         public int Id { get; set; }
-
-        public string GroupName { get; set; }
-
+        public int PersonId { get; set; }
+        public string Origin { get; set; }
+        public bool DirectAncestor { get; set; }
         public int ImportId { get; set; }
-
         public int UserId { get; set; }
 
         //Function to implement getHashCode
@@ -19,7 +18,9 @@ namespace FTMContextNet.Domain.Entities.Persistent.Cache
             {
                 int hash = 17;
                 hash = hash * 23 + Id.GetHashCode();
-                hash = hash * 23 + GroupName.GetHashCode();
+                hash = hash * 23 + PersonId.GetHashCode();
+                hash = hash * 23 + Origin.GetHashCode();
+                hash = hash * 23 + DirectAncestor.GetHashCode();
                 hash = hash * 23 + ImportId.GetHashCode();
                 hash = hash * 23 + UserId.GetHashCode();
                 return hash;
@@ -27,10 +28,12 @@ namespace FTMContextNet.Domain.Entities.Persistent.Cache
         }
 
         //Function to implement Equals
-        public bool Equals(TreeGroups other)
+        public bool Equals(PersonOrigin other)
         {
             if (this.Id != other.Id) return false;
-            if (this.GroupName != other.GroupName) return false;
+            if (this.PersonId != other.PersonId) return false;
+            if (this.Origin != other.Origin) return false;
+            if (this.DirectAncestor != other.DirectAncestor) return false;
             if (this.ImportId != other.ImportId) return false;
             if (this.UserId != other.UserId) return false;
 
@@ -40,7 +43,7 @@ namespace FTMContextNet.Domain.Entities.Persistent.Cache
         //Function to implement Equals
         public override bool Equals(object obj)
         {
-            return this.Equals(obj as TreeGroups);
+            return this.Equals(obj as PersonOrigin);
         }
     }
 }

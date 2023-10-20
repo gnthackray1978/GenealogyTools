@@ -1,5 +1,6 @@
 using FTMContextNet.Data;
 using FTMContextNet.Data.Repositories;
+using FTMContextNet.Data.Repositories.TreeAnalysis;
 using FTMContextNet.Domain.Entities.Persistent.Cache;
 using FTMContextNet.Domain.ExtensionMethods;
 using LoggingLib;

@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using FTMContextNet.Data.Repositories;
 using FTMContextNet.Data.Repositories.GedImports;
+using FTMContextNet.Data.Repositories.TreeAnalysis;
 using LoggingLib;
 using MediatR;
 

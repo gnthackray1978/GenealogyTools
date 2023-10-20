@@ -10,8 +10,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FTMContextNet.Data
 {
-
-
     public partial class SQLitePersistedCacheContext : DbContext, IPersistedCacheContext
     {
 
@@ -46,7 +44,7 @@ namespace FTMContextNet.Data
 
         #region tables
 
-        public virtual DbSet<FTMPersonOrigin> PersonOrigins { get; set; }
+        public virtual DbSet<PersonOrigin> PersonOrigins { get; set; }
         public virtual DbSet<TreeRecord> TreeRecord { get; set; }
         public virtual DbSet<TreeGroups> TreeGroups { get; set; }
         public virtual DbSet<TreeRecordMapGroup> TreeRecordMapGroup { get; set; }
@@ -244,7 +242,7 @@ namespace FTMContextNet.Data
             throw new System.NotImplementedException();
         }
 
-        public int BulkInsertPersonOrigins(int nextId,int userId, List<FTMPersonOrigin> origins)
+        public int BulkInsertPersonOrigins(int nextId,int userId, List<PersonOrigin> origins)
         {
 
             var connectionString = this.Database.GetDbConnection().ConnectionString;

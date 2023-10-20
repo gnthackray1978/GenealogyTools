@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using FTMContextNet.Data.Repositories;
 using MSGIdent;
 using FTMContextNet.Domain.Commands;
 using LoggingLib;
@@ -10,6 +9,7 @@ using PlaceLibNet.Data.Repositories;
 using PlaceLibNet.Domain;
 using PlaceLibNet.Domain.Caching;
 using MSG.CommonTypes;
+using FTMContextNet.Data.Repositories.TreeAnalysis;
 
 namespace FTMContextNet.Application.UserServices.UpdatePersonLocations;
 

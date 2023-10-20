@@ -1,8 +1,9 @@
 ﻿using System.Text.RegularExpressions;
+using System;
 
 namespace FTMContextNet.Domain.Entities.Persistent.Cache
 {
-    public partial class TreeRecord
+    public partial class TreeRecord: IEquatable<TreeRecord>
     {
         public static TreeRecord CreateFromOrigin(string origin, string locationCsv, int personCount, int importId)
         {
@@ -44,5 +45,44 @@ namespace FTMContextNet.Domain.Entities.Persistent.Cache
         public int ImportId { get; set; }
 
         public int UserId { get; set; }
+
+        //Function to implement getHashCode
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = hash * 23 + Id.GetHashCode();
+                hash = hash * 23 + PersonCount.GetHashCode();
+                hash = hash * 23 + Origin.GetHashCode();
+                hash = hash * 23 + Name.GetHashCode();
+                hash = hash * 23 + CM.GetHashCode();
+                hash = hash * 23 + Located.GetHashCode();
+                hash = hash * 23 + ImportId.GetHashCode();
+                hash = hash * 23 + UserId.GetHashCode();
+                return hash;
+            }
+        }
+
+        //Function to implement Equals
+        public bool Equals(TreeRecord other)
+        {
+            if (this.Id != other.Id) return false;
+            if (this.PersonCount != other.PersonCount) return false;
+            if (this.Origin != other.Origin) return false;
+            if (this.Name != other.Name) return false;
+            if (this.CM != other.CM) return false;
+            if (this.Located != other.Located) return false;
+            if (this.ImportId != other.ImportId) return false;
+            if (this.UserId != other.UserId) return false;
+
+            return true;
+        }
+
+        //Function to implement Equals
+        public override bool Equals(object obj)
+        {
+            return this.Equals(obj as TreeRecord);
+        }
     }
 }

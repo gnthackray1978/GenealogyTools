@@ -8,14 +8,14 @@ using FTMContextNet;
 using FTMContextNet.Application.Mapping;
 using FTMContextNet.Application.UserServices.GetInfoList;
 using FTMContextNet.Data;
-using FTMContextNet.Data.Repositories;
 using MSGIdent;
 using LoggingLib;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using FTMContextNet.Data.Repositories.TreeAnalysis;
 
 namespace FTMConsole2
-{ 
+{
     class Program
     {
         static void Main()

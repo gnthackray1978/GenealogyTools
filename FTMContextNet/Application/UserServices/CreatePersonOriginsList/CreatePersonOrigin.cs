@@ -1,12 +1,12 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using FTMContextNet.Data.Repositories;
 using FTMContextNet.Data.Repositories.GedImports;
 using MSGIdent;
 using FTMContextNet.Domain.Commands;
 using LoggingLib;
 using MSG.CommonTypes;
 using MediatR;
+using FTMContextNet.Data.Repositories.TreeAnalysis;
 
 namespace FTMContextNet.Application.UserServices.CreatePersonOriginsList;
 

@@ -4,7 +4,6 @@ using AutoMapper;
 using ConfigHelper;
 using FTMContextNet.Application.Mapping;
 using FTMContextNet.Data;
-using FTMContextNet.Data.Repositories;
 using FTMContextNet.Data.Repositories.GedImports;
 using FTMContextNet.Domain.Caching;
 using GenDataAPI.Controllers;
@@ -23,6 +22,8 @@ using PlaceLibNet.Domain;
 using PlaceLibNet.Domain.Caching;
 using QuickGed.Domain;
 using QuickGed.Services;
+using FTMContextNet.Data.Repositories.GedProcessing;
+using FTMContextNet.Data.Repositories.TreeAnalysis;
 
 namespace GenDataAPI
 {

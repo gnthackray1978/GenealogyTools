@@ -4,7 +4,6 @@ using FTMContextNet.Application.UserServices.CreateDuplicateList;
 using FTMContextNet.Application.UserServices.GetGedList;
 using FTMContextNet.Application.UserServices.GetInfoList;
 using FTMContextNet.Data;
-using FTMContextNet.Data.Repositories;
 using FTMContextNet.Data.Repositories.GedImports;
 using MSGIdent;
 using FTMContextNet.Domain.Collections;
@@ -13,6 +12,7 @@ using FTMContextNet.Domain.Entities.NonPersistent;
 using FTMContextNet.Domain.Entities.NonPersistent.Person;
 using FTMContextNet.Domain.Entities.Persistent.Cache;
 using LoggingLib;
+using FTMContextNet.Data.Repositories.TreeAnalysis;
 
 namespace FTMContextNet.Tests;
 

@@ -8,7 +8,7 @@ using QuickGed.Services;
 using QuickGed.Types;
 
 
-namespace FTMContextNet.Data.Repositories
+namespace FTMContextNet.Data.Repositories.GedProcessing
 {
     public class GedRepository : IGedRepository
     {
@@ -17,8 +17,8 @@ namespace FTMContextNet.Data.Repositories
 
         public GedRepository(Ilog logger, IGedParser gedParser)
         {
-            this._logger = logger;
-            this._gedParser = gedParser;
+            _logger = logger;
+            _gedParser = gedParser;
         }
 
         #region GetGroups unused for now
@@ -29,7 +29,7 @@ namespace FTMContextNet.Data.Repositories
             var results = new Dictionary<string, List<string>>();
 
             var treeIds = gedDb.Persons.Where(w => w.IsRootPerson).Select(s => s.Id).ToList();
-            
+
             var tp = gedDb.Relationships
                 .Select(s => new RelationSubSet() { Person1Id = s.Person1Id, Person2Id = s.Person2Id }).ToList();
 
@@ -45,7 +45,7 @@ namespace FTMContextNet.Data.Repositories
 
                 var groupMembers = tp.Where(t => t.MatchEither(treeId)).Select(s => s.GetOtherSide(treeId)).Distinct().ToList();
 
-                
+
                 results.Add(nameDict[treeId], (from gm in groupMembers where groupNames.ContainsKey(gm) select groupNames[gm]).ToList());
             }
 
@@ -63,7 +63,7 @@ namespace FTMContextNet.Data.Repositories
         public GedDb ParseLabelledTree(string path)
         {
             var gedDb = _gedParser.Parse(path);
-            
+
             var rootPersons = gedDb.Persons.Where(w => w.IsRootPerson).ToList();
             // if there are no root persons then we need to 
             // give all people in the ged the same label
@@ -80,8 +80,8 @@ namespace FTMContextNet.Data.Repositories
             {
                 TreeLabeller.LabelTree(gedDb.ParentDictionary, rp, rp.FullName);
 
-                _logger.ProgressUpdate(idx,total,"labelled trees");
-             
+                _logger.ProgressUpdate(idx, total, "labelled trees");
+
 
                 idx++;
             }
