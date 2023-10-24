@@ -8,11 +8,11 @@ public interface IPersistedImportCacheRepository
 {
     int GetCurrentImportId();
 
-    ImportData AddImportRecord(string fileName, long fileSize, bool selected, int userId);
+    ImportData AddImportRecord(string fileName, string fileSize, bool selected, int userId);
 
     string SelectImport(int importId, int userId);
 
-    bool ImportExists(string fileName, long fileSize, int userId);
+    bool ImportExists(string fileName, string fileSize, int userId);
 
     bool ImportExists(int importId);
 

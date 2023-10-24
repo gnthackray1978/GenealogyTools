@@ -169,8 +169,8 @@ public class ApplicationServiceTests
 
         var imports = new List<TreeImport>
         {
-            new (){UserId =1, Selected =false, DateImported = "1 Jan 2023", FileName = "x", FileSize = 1, Id = 2},
-            new (){UserId =2, Selected =true,DateImported = "2 Jan 2023", FileName = "x", FileSize = 1, Id = 1}
+            new (){UserId =1, Selected =false, DateImported = "1 Jan 2023", FileName = "x", FileSize = "1", Id = 2},
+            new (){UserId =2, Selected =true,DateImported = "2 Jan 2023", FileName = "x", FileSize = "1", Id = 1}
         };
 
         _mockPersistedImportCacheRepository

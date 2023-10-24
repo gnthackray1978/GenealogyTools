@@ -305,7 +305,7 @@ namespace FTMContextNet.Tests
                 Id = 999999,
                 DateImported = "dateImported",
                 FileName = "fileName",
-                FileSize = 1,
+                FileSize = "1",
                 Selected = true,
                 UserId = 1
             };

@@ -6,7 +6,7 @@ public class ImportModel
 {
     public string FileName { get; set; }
 
-    public double FileSize { get; set; }
+    public string FileSize { get; set; }
 
     public int Id { get; set; }
 

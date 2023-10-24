@@ -14,9 +14,9 @@ public partial class GedController
         public IFormFile[] Files { get; set; }
         public string Tags { get; set; }
 
-        public static long ExtractFile(FilePayload filePayload,string extractionPath, out string n)
+        public static string ExtractFile(FilePayload filePayload,string extractionPath, out string n)
         {
-            long size = filePayload.Files.Sum(f => f.Length);
+            string size = filePayload.Files.Sum(f => f.Length).ToString();
 
 
             var f = filePayload.Files.FirstOrDefault();

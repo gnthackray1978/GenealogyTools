@@ -10,7 +10,7 @@ namespace FTMContextNet.Application.Models.Create
     {
         public string FileName { get; set; }
 
-        public long FileSize { get; set; }
+        public string FileSize { get; set; }
 
         public bool Selected { get; set; }
         

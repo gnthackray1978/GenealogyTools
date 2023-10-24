@@ -6,7 +6,7 @@ public partial class TreeImport: IEquatable<TreeImport>
     public int Id { get; set; }
     public string DateImported { get; set; }
 
-    public long FileSize { get; set; }
+    public string FileSize { get; set; }
 
     public string FileName { get; set; }
 

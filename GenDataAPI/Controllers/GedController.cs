@@ -33,7 +33,7 @@ public partial class GedController : ControllerBase
     [Route("/ged/add")]
     public async Task<IActionResult> UploadFiles([FromForm] FilePayload filePayload)
     {
-        long size = 0;
+        string size = "0";
         string fileName = "";
         
         try
@@ -45,7 +45,7 @@ public partial class GedController : ControllerBase
             return NotFound(e.Message);
         }
         
-        if (size == 0)
+        if (size == "0")
         {
             return NoContent();
         }
