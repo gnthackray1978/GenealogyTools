@@ -7,6 +7,7 @@ using FTMContextNet.Domain.Collections;
 using FTMContextNet.Domain.Entities.NonPersistent;
 using FTMContextNet.Domain.Entities.NonPersistent.Person;
 using FTMContextNet.Domain.Entities.Persistent.Cache;
+using FTMContextNet.Domain.ExtensionMethods;
 using GoogleMapsHelpers;
 using LoggingLib;
 using Microsoft.EntityFrameworkCore;
@@ -168,7 +169,7 @@ namespace FTMContextNet.Data.Repositories.TreeAnalysis
             var comparisonPersons = _persistedCacheContext.FTMPersonView
                 .Where(ValidData(importId))
              .Select(s => PersonIdentifier.Create(s.Id,
-                 s.BirthFrom, s.BirthTo, s.Origin, EnglishHistoricCounties.Match(string.IsNullOrEmpty(s.BirthLocation) ? s.AltLocation : s.BirthLocation), s.BirthLong, s.BirthLat,
+                 s.BirthFrom, s.BirthTo, s.Origin, EnglishHistoricCounties.Match(string.IsNullOrEmpty(s.BirthLocation) ? s.AltLocation : s.BirthLocation), s.BirthLong.ToDouble(), s.BirthLat.ToDouble(),
                  s.Surname, s.FirstName)).ToList();
 
             return comparisonPersons;

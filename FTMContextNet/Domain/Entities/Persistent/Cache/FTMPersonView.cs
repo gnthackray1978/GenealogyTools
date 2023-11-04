@@ -12,13 +12,13 @@ namespace FTMContextNet.Domain.Entities.Persistent.Cache
                 PersonId = person.Id,
                 BirthFrom = person.BirthYearFrom,
                 BirthTo = person.BirthYearTo,
-                AltLat = 0.0,
+                AltLat = "0",
                 AltLocation = !string.IsNullOrEmpty(person.DeathLocation) ? person.DeathLocation : person.Residence,
                 AltLocationDesc = !string.IsNullOrEmpty(person.DeathLocation) ? "Burial" : person.ResidenceDescription,
-                AltLong = 0.0,
+                AltLong = "0",
                 BirthLocation = person.BirthLocation,
-                BirthLat = 0.0,
-                BirthLong = 0.0,
+                BirthLat = "0",
+                BirthLong = "0",
                 FirstName = person.Forename,
                 Surname = person.FamilyName,
                 Origin = person.Origin?? "",
@@ -42,13 +42,13 @@ namespace FTMContextNet.Domain.Entities.Persistent.Cache
         public int BirthTo { get; set; }
 
         public string BirthLocation { get; set; }
-        public double BirthLat { get; set; }
-        public double BirthLong { get; set; }
+        public string BirthLat { get; set; }
+        public string BirthLong { get; set; }
 
         public string AltLocationDesc { get; set; }
         public string AltLocation { get; set; }
-        public double AltLat { get; set; }
-        public double AltLong { get; set; }
+        public string AltLat { get; set; }
+        public string AltLong { get; set; }
 
         public string Origin { get; set; }
 
