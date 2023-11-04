@@ -61,7 +61,7 @@ namespace FTMContextNet.Tests
 
             var c = new AzurePersistedCacheContext(iconfig, new Log());
 
-            var person = new PersonOrigin()
+            var person = new PersonOrigins()
             {
                 Id = 999999,
                 PersonId = 1,

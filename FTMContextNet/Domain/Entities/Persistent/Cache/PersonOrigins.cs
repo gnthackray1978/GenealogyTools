@@ -2,7 +2,7 @@
 
 namespace FTMContextNet.Domain.Entities.Persistent.Cache
 {
-    public partial class PersonOrigin: IEquatable<PersonOrigin>
+    public partial class PersonOrigins: IEquatable<PersonOrigins>
     {
         public int Id { get; set; }
         public int PersonId { get; set; }
@@ -28,7 +28,7 @@ namespace FTMContextNet.Domain.Entities.Persistent.Cache
         }
 
         //Function to implement Equals
-        public bool Equals(PersonOrigin other)
+        public bool Equals(PersonOrigins other)
         {
             if (this.Id != other.Id) return false;
             if (this.PersonId != other.PersonId) return false;
@@ -43,7 +43,7 @@ namespace FTMContextNet.Domain.Entities.Persistent.Cache
         //Function to implement Equals
         public override bool Equals(object obj)
         {
-            return this.Equals(obj as PersonOrigin);
+            return this.Equals(obj as PersonOrigins);
         }
     }
 }

@@ -87,11 +87,13 @@ namespace AzureContext.Models
         
         public virtual DbSet<DupeEntry> DupeEntries { get; set; }
 
-        public virtual DbSet<PersonOrigin> PersonOrigins { get; set; }
+        public virtual DbSet<PersonOrigins> PersonOrigins { get; set; }
 
         public virtual DbSet<IgnoreList> IgnoreList { get; set; }
 
         public virtual DbSet<TreeRecord> TreeRecord { get; set; }
+
+        public virtual DbSet<TreeImport> TreeImport { get; set; }
 
         public virtual DbSet<TreeGroups> TreeGroups { get; set; }
 
@@ -660,9 +662,9 @@ namespace AzureContext.Models
 
             });
 
-            modelBuilder.Entity<PersonOrigin>(entity =>
+            modelBuilder.Entity<PersonOrigins>(entity =>
             {
-                entity.ToTable("PersonOrigin", "DNA");
+                entity.ToTable("PersonOrigins", "DNA");
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
@@ -719,7 +721,7 @@ namespace AzureContext.Models
             modelBuilder.Entity<TreeRecord>(entity =>
             {
                 entity.ToTable("TreeRecord", "DNA");
-                entity.Property(e => e.ID).ValueGeneratedNever();
+                entity.Property(e => e.Id).ValueGeneratedNever();
                 entity.Property(e => e.Name);
                 entity.Property(e => e.Origin).HasMaxLength(250);
             });
@@ -755,6 +757,15 @@ namespace AzureContext.Models
                 entity.Property(e => e.TreeUrl).HasColumnName("TreeURL");
             });
 
+            modelBuilder.Entity<PlaceCache>(entity =>
+            {
+                entity.ToTable("PlaceCache", "UKP");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("Id")
+                    .ValueGeneratedNever();
+
+            });
 
             modelBuilder.Entity<Places>(entity =>
             {
@@ -1330,10 +1341,18 @@ namespace AzureContext.Models
                     FatherId = 0,
                     Id = 0,
                     MotherId = 0,
-                    Origin = 0,
+                    Origin = "",
                     PersonId = 0,
                     Surname = "x",
-                    DirectAncestor = false
+                    DirectAncestor = false,
+                    LinkNode = false,
+                    ImportId = 0,
+                    UserId = 0,
+                    LinkedLocations = "",
+                    LocationsCached = false,
+                    RootPerson = false,
+                    
+
                 });
 
                 executor.SaveChanges();
@@ -1359,7 +1378,21 @@ namespace AzureContext.Models
                     row.BirthLat, 
                     row.BirthLong, 
                     row.AltLocationDesc, 
-                    row.AltLocation, row.AltLat, row.AltLong, row.Origin, row.PersonId, row.FatherId, row.MotherId,row.DirectAncestor);
+                    row.AltLocation, 
+                    row.AltLat, 
+                    row.AltLong, 
+                    row.Origin, 
+                    row.PersonId, 
+                    row.FatherId, 
+                    row.MotherId,
+                    row.DirectAncestor,
+                    row.LocationsCached,
+                    row.RootPerson,
+                    row.LinkNode,
+                    row.UserId,
+                    row.ImportId,
+                    row.LinkedLocations
+                    );
  
                 idx++;
             }
@@ -1371,7 +1404,7 @@ namespace AzureContext.Models
 
                 copy.DestinationTableName = "dna.FTMPersonView";
                 copy.BulkCopyTimeout = 600;
-                copy.ColumnMappings.Add("ID", "ID");
+                copy.ColumnMappings.Add("Id", "ID");
                 copy.ColumnMappings.Add("FirstName", "FirstName");
                 copy.ColumnMappings.Add("Surname", "Surname");
                 copy.ColumnMappings.Add("BirthFrom", "BirthFrom");
@@ -1384,10 +1417,16 @@ namespace AzureContext.Models
                 copy.ColumnMappings.Add("AltLat", "AltLat");
                 copy.ColumnMappings.Add("AltLong", "AltLong");
                 copy.ColumnMappings.Add("Origin", "Origin");
-                copy.ColumnMappings.Add("PersonID", "PersonID");
+                copy.ColumnMappings.Add("PersonId", "PersonId");
                 copy.ColumnMappings.Add("FatherId", "FatherId");
                 copy.ColumnMappings.Add("MotherId", "MotherId");
                 copy.ColumnMappings.Add("DirectAncestor", "DirectAncestor");
+                copy.ColumnMappings.Add("LocationsCached", "LocationsCached");
+                copy.ColumnMappings.Add("RootPerson", "RootPerson");
+                copy.ColumnMappings.Add("LinkNode", "LinkNode");
+                copy.ColumnMappings.Add("UserId", "UserId");
+                copy.ColumnMappings.Add("ImportId", "ImportId");
+                copy.ColumnMappings.Add("LinkedLocations", "LinkedLocations");
                 copy.WriteToServer(dt);
             }
         }

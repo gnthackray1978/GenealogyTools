@@ -6,7 +6,7 @@ namespace FTMContextNet.Data;
 
 public interface IPersistedCacheContext
 {
-    DbSet<PersonOrigin> PersonOrigins { get; set; }
+    DbSet<PersonOrigins> PersonOrigins { get; set; }
     DbSet<TreeRecord> TreeRecord { get; set; }
     DbSet<TreeGroups> TreeGroups { get; set; }
     DbSet<TreeRecordMapGroup> TreeRecordMapGroup { get; set; }
@@ -19,7 +19,7 @@ public interface IPersistedCacheContext
 
     int BulkInsertMarriages(int nextId, int importId,int userId, List<Relationships> marriages);
     int BulkInsertFTMPersonView(int nextId, int importId, int userId, List<FTMPersonView> ftmPersonViews);
-    int BulkInsertPersonOrigins(int nextId, int userId, List<PersonOrigin> origins);
+    int BulkInsertPersonOrigins(int nextId, int userId, List<PersonOrigins> origins);
 
     int BulkInsertTreeRecord(List<TreeRecord> treeRecords);
     int InsertGroups(int nextId, string groupName,int importId, int userId);

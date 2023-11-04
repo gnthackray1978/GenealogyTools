@@ -44,7 +44,7 @@ namespace FTMContextNet.Data
 
         #region tables
 
-        public virtual DbSet<PersonOrigin> PersonOrigins { get; set; }
+        public virtual DbSet<PersonOrigins> PersonOrigins { get; set; }
         public virtual DbSet<TreeRecord> TreeRecord { get; set; }
         public virtual DbSet<TreeGroups> TreeGroups { get; set; }
         public virtual DbSet<TreeRecordMapGroup> TreeRecordMapGroup { get; set; }
@@ -242,7 +242,7 @@ namespace FTMContextNet.Data
             throw new System.NotImplementedException();
         }
 
-        public int BulkInsertPersonOrigins(int nextId,int userId, List<PersonOrigin> origins)
+        public int BulkInsertPersonOrigins(int nextId,int userId, List<PersonOrigins> origins)
         {
 
             var connectionString = this.Database.GetDbConnection().ConnectionString;

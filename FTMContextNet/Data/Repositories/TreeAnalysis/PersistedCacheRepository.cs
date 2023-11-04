@@ -146,7 +146,7 @@ namespace FTMContextNet.Data.Repositories.TreeAnalysis
             var recordsToSave = _persistedCacheContext
                 .FTMPersonView
                 .Where(w => w.Origin != "" && w.UserId == userId)
-                .Select(s => new PersonOrigin()
+                .Select(s => new PersonOrigins()
                 {
                     Id = s.Id,
                     Origin = s.Surname.ToLower().Contains("group") ? s.Surname : s.Origin,

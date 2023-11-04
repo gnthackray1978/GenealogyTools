@@ -38,7 +38,7 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
 
     #region tables
 
-    public virtual DbSet<PersonOrigin> PersonOrigins { get; set; }
+    public virtual DbSet<PersonOrigins> PersonOrigins { get; set; }
     public virtual DbSet<TreeRecord> TreeRecord { get; set; }
     public virtual DbSet<TreeGroups> TreeGroups { get; set; }
     public virtual DbSet<TreeRecordMapGroup> TreeRecordMapGroup { get; set; }
@@ -238,7 +238,7 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
         throw new System.NotImplementedException();
     }
 
-    public int BulkInsertPersonOrigins(int nextId, int userId, List<PersonOrigin> origins)
+    public int BulkInsertPersonOrigins(int nextId, int userId, List<PersonOrigins> origins)
     {
 
         var connectionString = this.Database.GetDbConnection().ConnectionString;
@@ -465,7 +465,7 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
             
         });
 
-        modelBuilder.Entity<PersonOrigin>(entity =>
+        modelBuilder.Entity<PersonOrigins>(entity =>
         {
             entity.ToTable("PersonOrigins", "DNA");
 

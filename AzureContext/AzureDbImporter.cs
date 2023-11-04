@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using AzureContext.Models;
 using ConfigHelper;
 using FTMContextNet.Data;
+using FTMContextNet.Domain.ExtensionMethods;
 using LoggingLib;
 using FTMPersonView = AzureContext.Models.FTMPersonView;
 
@@ -22,10 +24,6 @@ namespace AzureContext
 
         public void Import()
         {
-
-            
-
-
             var a = SQLitePersistedCacheContext.Create(_imsgConfigHelper, _console);
 
             var originDictionary = a.TreeRecord.ToDictionary(p => p.Name, p => p.Id);
@@ -34,12 +32,16 @@ namespace AzureContext
 
             using (var executor = new AzureDBContext(_imsgConfigHelper.MSGGenDB01))
             {
-                executor.ExecuteCommand("TRUNCATE TABLE DNA.TreeGroups");
-                executor.ExecuteCommand("TRUNCATE TABLE DNA.TreeRecordMapGroup");
-                executor.ExecuteCommand("TRUNCATE TABLE DNA.TreeRecord");
-                executor.ExecuteCommand("TRUNCATE TABLE DNA.FTMPersonView");
-                executor.ExecuteCommand("TRUNCATE TABLE DNA.DupeEntries");
+                executor.ExecuteCommand("TRUNCATE TABLE DNA.TreeGroups");//
+                executor.ExecuteCommand("TRUNCATE TABLE DNA.TreeRecordMapGroup");//
+                executor.ExecuteCommand("TRUNCATE TABLE DNA.TreeRecord");//
+                executor.ExecuteCommand("TRUNCATE TABLE DNA.TreeImport");//
+                executor.ExecuteCommand("TRUNCATE TABLE DNA.FTMPersonView");//
+                executor.ExecuteCommand("TRUNCATE TABLE DNA.DupeEntries");//
+                executor.ExecuteCommand("TRUNCATE TABLE DNA.IgnoreList");//
+                executor.ExecuteCommand("TRUNCATE TABLE DNA.PersonOrigins");//
                 executor.ExecuteCommand("TRUNCATE TABLE DNA.Relationships");
+                executor.ExecuteCommand("TRUNCATE TABLE UKP.PlaceCache");//
             }
 
             _console.WriteCounter("Adding new dupes");
@@ -58,7 +60,9 @@ namespace AzureContext
                     FirstName = d.FirstName,
                     Ident = d.Ident,
                     Location = d.Location,
-                    PersonId = d.PersonId
+                    PersonId = d.PersonId,
+                    ImportId = d.ImportId,
+                    UserId = d.UserId
                 });
 
             }
@@ -73,32 +77,43 @@ namespace AzureContext
 
             foreach (var d in a.FTMPersonView)
             {
+                 
                 var id = 0;
 
                 if (!string.IsNullOrEmpty(d.Origin) && originDictionary.ContainsKey(d.Origin))
                     id = originDictionary[d.Origin];
+                
+                if (d.Id == 815)
+                {
+                    Debug.WriteLine("test: " + d.Id);
+                }
 
                 ftmPersonViews.Add(new FTMPersonView()
-                {
-                    Id = d.Id,
-                    Origin = id,
-                    Surname = d.Surname,
-                    FirstName = d.FirstName,
-                    PersonId = d.PersonId,
-                    FatherId = d.FatherId,
-                    MotherId = d.MotherId,
-                    AltLat = d.AltLat,
-                    AltLocation = d.AltLocation,
-                    AltLocationDesc = d.AltLocationDesc,
-                    AltLong = d.AltLong,
-                    BirthFrom = d.BirthFrom,
-                    BirthLat = d.BirthLat,
-                    BirthLocation = d.BirthLocation,
-                    BirthLong = d.BirthLong,
-                    BirthTo = d.BirthTo,
-                    DirectAncestor = d.DirectAncestor
-                });
-                
+                    {
+                        Id = d.Id,
+                        Origin = d.Origin,
+                        Surname = d.Surname,
+                        FirstName = d.FirstName,
+                        PersonId = d.PersonId,
+                        FatherId = d.FatherId,
+                        MotherId = d.MotherId,
+                        AltLat = d.AltLat.ToDecimal(),
+                        AltLocation = d.AltLocation,
+                        AltLocationDesc = d.AltLocationDesc,
+                        AltLong = d.AltLong.ToDecimal(),
+                        BirthFrom = d.BirthFrom,
+                        BirthLat = d.BirthLat.ToDecimal(),
+                        BirthLocation = d.BirthLocation,
+                        BirthLong = d.BirthLong.ToDecimal(),
+                        BirthTo = d.BirthTo,
+                        DirectAncestor = d.DirectAncestor,
+                        LinkedLocations = d.LinkedLocations,
+                        ImportId = d.ImportId,
+                        LinkNode = d.LinkNode,
+                        RootPerson = d.RootPerson,
+                        UserId = d.UserId,
+                    });
+               
             }
 
             AzureDBContext.BulkInsert(_imsgConfigHelper.MSGGenDB01, ftmPersonViews);
@@ -109,12 +124,14 @@ namespace AzureContext
             {
                 destination.TreeRecord.Add(new Models.TreeRecord()
                 {
-                    ID = d.Id,
+                    Id = d.Id,
                     Origin = d.Origin??"",
                     CM = d.CM,
                     Name = d.Name,
                     PersonCount = d.PersonCount,
-                    Located = d.Located
+                    Located = d.Located,
+                    UserId = d.UserId,
+                    ImportId = d.ImportId
                 });
 
             }
@@ -134,8 +151,9 @@ namespace AzureContext
                     Location = d.Location,
                     Notes = d.Notes,
                     Year = d.Year,
-                    Origin = d.Origin
-                    
+                    Origin = d.Origin,
+                    ImportId = d.ImportId,
+                    UserId = d.UserId
                 });
 
             }
@@ -146,16 +164,17 @@ namespace AzureContext
 
             foreach (var d in a.TreeGroups)
             {
-                var id = 0;
+               // var id = 0;
 
-                if (!string.IsNullOrEmpty(d.GroupName) && originDictionary.ContainsKey(d.GroupName))
-                    id = originDictionary[d.GroupName];
-
+                //if (!string.IsNullOrEmpty(d.GroupName) && originDictionary.ContainsKey(d.GroupName))
+                //    id = originDictionary[d.GroupName];
+                Debug.WriteLine(d.Id);
                 destination.TreeGroups.Add(new Models.TreeGroups()
                 {
                     Id = d.Id,
                     GroupName = d.GroupName,
-                    GroupId = id
+                    ImportId = d.ImportId,
+                    UserId = d.UserId
                 });
 
             }
@@ -179,13 +198,41 @@ namespace AzureContext
                 destination.TreeRecordMapGroup.Add(new Models.TreeRecordMapGroup()
                 {
                     Id = d.Id, 
-                    GroupId = groupId,
-                    TreeId = treeId
+                    GroupName = d.GroupName, 
+                    TreeName = d.TreeName,
+                    ImportId = d.ImportId,
+                    UserId = d.UserId
                 });
 
             }
 
             destination.SaveChanges();
+ 
+            foreach(var d in a.PersonOrigins)
+            {
+                destination.PersonOrigins.Add(new Models.PersonOrigins()
+                {
+                    Id = d.Id,
+                    Origin = d.Origin,
+                    PersonId = d.PersonId,
+                    ImportId = d.ImportId,
+                    UserId = d.UserId
+                });
+
+            }
+
+            destination.SaveChanges();
+
+            _console.WriteCounter("Adding new tree import records");
+
+            foreach(var d in a.TreeImport){
+                destination.TreeImport.Add(new Models.TreeImport()
+                {
+                    Id = d.Id, 
+                    DateImported = d.DateImported, 
+                    UserId = d.UserId
+                    });
+            }
 
         }
 
