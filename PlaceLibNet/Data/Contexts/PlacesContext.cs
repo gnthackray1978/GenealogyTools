@@ -2,7 +2,7 @@
 using ConfigHelper;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using PlaceLibNet.Domain.Entities;
+using PlaceLibNet.Domain.Entities.Persistent;
 
 namespace PlaceLibNet.Data.Contexts
 {

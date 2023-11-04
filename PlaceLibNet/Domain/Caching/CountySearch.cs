@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 using PlaceLibNet.Domain.Entities;
+using PlaceLibNet.Domain.Entities.Persistent;
 
 namespace PlaceLibNet.Domain.Caching
 {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace PlaceLibNet.Domain.Entities
+namespace PlaceLibNet.Domain.Entities.Persistent
 {
     public partial class Places
     {

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using PlaceLibNet.Domain.Entities;
+using PlaceLibNet.Domain.Entities.Persistent;
 
 namespace PlaceLibNet.Data.Repositories;
 

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace PlaceLibNet.Domain.Entities
+namespace PlaceLibNet.Domain.Entities.Persistent
 {
     public partial class PlaceCache
     {

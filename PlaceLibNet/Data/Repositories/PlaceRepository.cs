@@ -9,6 +9,7 @@ using PlaceLibNet.Data.Contexts;
 using PlaceLibNet.Domain;
 using PlaceLibNet.Domain.Caching;
 using PlaceLibNet.Domain.Entities;
+using PlaceLibNet.Domain.Entities.Persistent;
 
 namespace PlaceLibNet.Data.Repositories
 {
