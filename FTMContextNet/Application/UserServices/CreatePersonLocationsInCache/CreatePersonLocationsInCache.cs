@@ -12,6 +12,7 @@ using MSG.CommonTypes;
 using PlaceLibNet.Data.Repositories;
 using PlaceLibNet.Domain.Caching;
 using PlaceLibNet.Domain.Entities;
+using PlaceLibNet.Domain.Entities.Persistent;
 
 namespace FTMContextNet.Application.UserServices.CreatePersonLocationsInCache;
 
