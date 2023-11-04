@@ -362,7 +362,7 @@ namespace FTMContextNet.Data
             command.Parameters["$GroupName"].Value = groupName;
             command.Parameters["$TreeName"].Value = treeName;
             command.Parameters["$UserId"].Value = userId;
-            command.Parameters["$ImportId"].Value = userId;
+            command.Parameters["$ImportId"].Value = importId;
             command.ExecuteNonQuery();
 
             transaction.Commit();
@@ -482,6 +482,25 @@ namespace FTMContextNet.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
+            //modelBuilder.Entity<FTMPersonView>().Property(e => e.BirthLat)
+            //    .HasConversion<double>().
+
+            //modelBuilder.Entity<FTMPersonView>().Property(e => e.BirthLat)
+            //    .HasConversion<string>()
+            //    .HasColumnType("NUMERIC");
+
+            //modelBuilder.Entity<FTMPersonView>().Property(e => e.BirthLong)
+            //    .HasConversion<string>()
+            //    .HasColumnType("NUMERIC");
+
+            //modelBuilder.Entity<FTMPersonView>().Property(e => e.AltLat)
+            //    .HasConversion<string>()
+            //    .HasColumnType("Decimal");
+
+            //modelBuilder.Entity<FTMPersonView>().Property(e => e.AltLong)
+            //    .HasConversion<string>()
+            //    .HasColumnType("NUMERIC");
 
             OnModelCreatingPartial(modelBuilder);
         }
