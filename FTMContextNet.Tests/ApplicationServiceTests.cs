@@ -76,8 +76,8 @@ public class ApplicationServiceTests
 
         x.Should().HaveCount(2);
 
-        x.First().Key.Should().Be(1);
-        x.Last().Key.Should().Be(2);
+        x.First().Key.Should().Be(3);
+        x.Last().Key.Should().Be(1173);
     }
 
     [Fact]

@@ -1,4 +1,5 @@
-﻿using QuickGed.Types;
+﻿using FTMContextNet.Domain.ExtensionMethods;
+using QuickGed.Types;
 using System;
 
 namespace FTMContextNet.Domain.Entities.Persistent.Cache
@@ -114,12 +115,12 @@ namespace FTMContextNet.Domain.Entities.Persistent.Cache
             if (this.BirthFrom != other.BirthFrom) return false;
             if (this.BirthTo != other.BirthTo) return false;
             if (this.BirthLocation != other.BirthLocation) return false;
-            if (this.BirthLat != other.BirthLat) return false;
-            if (this.BirthLong != other.BirthLong) return false;
+            if (this.BirthLat.ToDecimal() != other.BirthLat.ToDecimal()) return false;
+            if (this.BirthLong.ToDecimal() != other.BirthLong.ToDecimal()) return false;
             if (this.AltLocationDesc != other.AltLocationDesc) return false;
             if (this.AltLocation != other.AltLocation) return false;
-            if (this.AltLat != other.AltLat) return false;
-            if (this.AltLong != other.AltLong) return false;
+            if (this.AltLat.ToDecimal() != other.AltLat.ToDecimal()) return false;
+            if (this.AltLong.ToDecimal() != other.AltLong.ToDecimal()) return false;
             if (this.Origin != other.Origin) return false;
             if (this.DirectAncestor != other.DirectAncestor) return false;
             if (this.PersonId != other.PersonId) return false;

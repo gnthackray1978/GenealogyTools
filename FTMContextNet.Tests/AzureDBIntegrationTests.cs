@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Castle.Components.DictionaryAdapter;
 using FTMContextNet.Data;
 using LoggingLib;
 using ConfigHelper;
@@ -218,7 +219,64 @@ namespace FTMContextNet.Tests
 
             Assert.Null(pclone);
         }
-         
+
+        [Fact]
+        public void TestFTMPersonViewBulkInsert()
+        {
+            var iconfig = new MSGConfigHelper();
+
+            var c = new AzurePersistedCacheContext(iconfig, new Log());
+
+            var nextId = c.FTMPersonView.Max(f => f.Id) + 1;
+
+            var person = new FTMPersonView()
+            {
+                ImportId = 5,
+                AltLat = "1",
+                AltLong = "1",
+                AltLocation = "altLocation",
+                AltLocationDesc = "altLocationDesc",
+                BirthFrom = 1500,
+                BirthTo = 1600,
+                BirthLat = "1",
+                BirthLocation = "birthLocation",
+                BirthLong = "1",
+                DirectAncestor = true,
+                FatherId = 1,
+                FirstName = "George",
+                Id = nextId,
+                UserId = 1,
+                LinkNode = false,
+                LinkedLocations = "linkedLocations",
+                LocationsCached = false,
+                MotherId = 1,
+                Origin = "origin",
+                PersonId = 1,
+                RootPerson = true,
+                Surname = "surname"
+                
+            };
+            
+            var persons = new EditableList<FTMPersonView> { person };
+
+            c.BulkInsertFTMPersonView(nextId, 1, 1, persons);
+
+            var pclone = c.FTMPersonView.FirstOrDefault(f => f.Id == person.Id);
+
+            Assert.NotNull(pclone);
+
+
+            Assert.True(person.Equals(pclone));
+
+            c.FTMPersonView.Remove(pclone);
+
+            c.SaveChanges();
+
+            pclone = c.FTMPersonView.FirstOrDefault(f => f.Id == person.Id);
+
+            Assert.Null(pclone);
+        }
+
         //Test to check we can read and write to the Relationships table
         [Fact]
         public void TestRelationshipsReadWrite(){
@@ -329,35 +387,7 @@ namespace FTMContextNet.Tests
 
             Assert.Null(ticlone);
         }
-
-        [Fact]
-        public void QueryTable_DataReturned_WhenMethodCalled()
-        {
-            var iconfig = new MSGConfigHelper();
-
-            var c = new AzurePersistedCacheContext(iconfig, new Log());
-
-            var r = c.FTMPersonView.FirstOrDefault();
-
-
-          var d = c.DupeEntries.FirstOrDefault();
-
-     //   var i = c.IgnoreList.FirstOrDefault();
-
-
-          //  var p = c.PersonOrigins.FirstOrDefault();
-
-          //var r = c.Relationships.FirstOrDefault();
-
-         // var tr = c.TreeGroups.FirstOrDefault();
-
-        // var ti = c.TreeImport.FirstOrDefault();
-
-       // var tr = c.TreeRecord.FirstOrDefault();
-
-            var trm =c.TreeRecordMapGroup.FirstOrDefault();
-
-        }
-    
+        
+      
     }
 }
