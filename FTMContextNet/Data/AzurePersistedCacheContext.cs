@@ -5,10 +5,12 @@ using System.Data.SQLite;
 using System.Linq;
 using ConfigHelper;
 using FTMContextNet.Domain.Entities.Persistent.Cache;
+using FTMContextNet.Domain.ExtensionMethods;
 using LoggingLib;
 using Microsoft.Data.SqlClient;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace FTMContextNet.Data;
 
@@ -115,87 +117,112 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
 
     public int BulkInsertFTMPersonView(int nextId, int importId, int userId, List<FTMPersonView> ftmPersonViews)
     {
-
-        var connectionString = this.Database.GetDbConnection().ConnectionString;
-
-
-        using var connection = new SqliteConnection(connectionString);
-
-        var command = connection.CreateCommand();
-        command.CommandText = "INSERT INTO FTMPersonView(Id, FirstName, Surname, BirthFrom, BirthTo, BirthLocation, BirthLat, BirthLong, AltLocationDesc, AltLocation, AltLat, AltLong, Origin, PersonId, LinkedLocations, FatherId, MotherId, LocationsCached, ImportId, DirectAncestor, RootPerson,LinkNode, UserId)" +
-                              " VALUES ($Id, $FirstName, $Surname, $BirthFrom, $BirthTo, $BirthLocation, $BirthLat, $BirthLong, $AltLocationDesc, $AltLocation, $AltLat, $AltLong, $Origin, $PersonId, $LinkedLocations, $FatherId, $MotherId, $LocationsCached, $ImportId, $DirectAncestor, $RootPerson,$LinkNode, $UserId);";
-
-        command.Parameters.Add("$Id", SqliteType.Integer);
-        command.Parameters.Add("$FirstName", SqliteType.Text);
-        command.Parameters.Add("$Surname", SqliteType.Text);
-        command.Parameters.Add("$BirthFrom", SqliteType.Text);
-        command.Parameters.Add("$BirthTo", SqliteType.Text);
-        command.Parameters.Add("$BirthLocation", SqliteType.Text);
-        command.Parameters.Add("$BirthLat", SqliteType.Text);
-        command.Parameters.Add("$BirthLong", SqliteType.Text);
-        command.Parameters.Add("$AltLocationDesc", SqliteType.Text);
-        command.Parameters.Add("$AltLocation", SqliteType.Text);
-        command.Parameters.Add("$AltLat", SqliteType.Text);
-        command.Parameters.Add("$AltLong", SqliteType.Text);
-        command.Parameters.Add("$Origin", SqliteType.Text);
-        command.Parameters.Add("$PersonId", SqliteType.Integer);
-        command.Parameters.Add("$LinkedLocations", SqliteType.Text);
-        command.Parameters.Add("$FatherId", SqliteType.Integer);
-        command.Parameters.Add("$MotherId", SqliteType.Integer);
-        command.Parameters.Add("$LocationsCached", SqliteType.Integer);
-        command.Parameters.Add("$ImportId", SqliteType.Integer);
-        command.Parameters.Add("$DirectAncestor", SqliteType.Integer);
-        command.Parameters.Add("$RootPerson", SqliteType.Integer);
-        command.Parameters.Add("$LinkNode", SqliteType.Integer);
-        command.Parameters.Add("$UserId", SqliteType.Integer);
-
-        connection.Open();
-
-        using var transaction = connection.BeginTransaction();
-
-        command.Transaction = transaction;
-        command.Prepare();
-        var idx = nextId;
-
-        var total = ftmPersonViews.Count;
-        var counter = 1;
-
+        var dt = CreateDataTable(this.Database.GetConnectionString(), "select top 1 * from dna.FTMPersonView");
+        
+        int idx = nextId;
         foreach (var row in ftmPersonViews)
         {
-            command.Parameters["$Id"].Value = idx;
-            command.Parameters["$FirstName"].Value = row.FirstName;
-            command.Parameters["$Surname"].Value = row.Surname;
-            command.Parameters["$BirthFrom"].Value = row.BirthFrom;
-            command.Parameters["$BirthTo"].Value = row.BirthTo;
-            command.Parameters["$BirthLocation"].Value = row.BirthLocation;
-            command.Parameters["$BirthLat"].Value = row.BirthLat;
-            command.Parameters["$BirthLong"].Value = row.BirthLong;
-            command.Parameters["$AltLocationDesc"].Value = row.AltLocationDesc;
-            command.Parameters["$AltLocation"].Value = row.AltLocation;
-            command.Parameters["$AltLat"].Value = row.AltLat;
-            command.Parameters["$AltLong"].Value = row.AltLong;
-            command.Parameters["$Origin"].Value = row.Origin;
-            command.Parameters["$PersonId"].Value = row.PersonId;
-            command.Parameters["$LinkedLocations"].Value = row.LinkedLocations;
-            command.Parameters["$FatherId"].Value = row.FatherId;
-            command.Parameters["$MotherId"].Value = row.MotherId;
-            command.Parameters["$LocationsCached"].Value = row.LocationsCached;
-            command.Parameters["$ImportId"].Value = importId;
-            command.Parameters["$DirectAncestor"].Value = row.DirectAncestor;
-            command.Parameters["$RootPerson"].Value = row.RootPerson;
-            command.Parameters["$LinkNode"].Value = row.LinkNode;
-            command.Parameters["$UserId"].Value = userId;
-            command.ExecuteNonQuery();
-
-            if (counter % 500 == 0)
-                _logger.ProgressUpdate(counter, total, "Inserting Persons");
+            dt.Rows.Add(idx,
+                row.FirstName,
+                row.Surname,
+                row.BirthFrom,
+                row.BirthTo,
+                row.BirthLocation,
+                row.BirthLat,
+                row.BirthLong,
+                row.AltLocationDesc,
+                row.AltLocation,
+                row.AltLat,
+                row.AltLong,
+                row.Origin,
+                row.PersonId,
+                row.FatherId,
+                row.MotherId,
+                row.DirectAncestor,
+                row.LocationsCached,
+                row.ImportId,
+                row.RootPerson,
+                row.LinkNode,
+                
+                
+                row.UserId,
+                
+                row.LinkedLocations
+            );
 
             idx++;
         }
 
-        transaction.Commit();
 
-        return idx;
+        using var copy = new SqlBulkCopy(this.Database.GetConnectionString());
+
+        copy.DestinationTableName = "dna.FTMPersonView";
+        copy.BulkCopyTimeout = 600;
+        copy.ColumnMappings.Add("Id", "ID");
+        copy.ColumnMappings.Add("FirstName", "FirstName");
+        copy.ColumnMappings.Add("Surname", "Surname");
+        copy.ColumnMappings.Add("BirthFrom", "BirthFrom");
+        copy.ColumnMappings.Add("BirthTo", "BirthTo");
+        copy.ColumnMappings.Add("BirthLocation", "BirthLocation");
+        copy.ColumnMappings.Add("BirthLat", "BirthLat");
+        copy.ColumnMappings.Add("BirthLong", "BirthLong");
+        copy.ColumnMappings.Add("AltLocationDesc", "AltLocationDesc");
+        copy.ColumnMappings.Add("AltLocation", "AltLocation");
+        copy.ColumnMappings.Add("AltLat", "AltLat");
+        copy.ColumnMappings.Add("AltLong", "AltLong");
+        copy.ColumnMappings.Add("Origin", "Origin");
+        copy.ColumnMappings.Add("PersonId", "PersonId");
+        copy.ColumnMappings.Add("FatherId", "FatherId");
+        copy.ColumnMappings.Add("MotherId", "MotherId");
+        copy.ColumnMappings.Add("DirectAncestor", "DirectAncestor");
+        copy.ColumnMappings.Add("LocationsCached", "LocationsCached");
+        copy.ColumnMappings.Add("ImportId", "ImportId");
+        copy.ColumnMappings.Add("RootPerson", "RootPerson");
+        copy.ColumnMappings.Add("LinkNode", "LinkNode");
+        copy.ColumnMappings.Add("UserId", "UserId");
+        copy.ColumnMappings.Add("LinkedLocations", "LinkedLocations");
+        copy.WriteToServer(dt);
+
+        return 1;
+    }
+
+
+
+    private static DataTable CreateDataTable(string connectionString, string sqlString)
+    {
+        DataColumnCollection Columns;
+
+        using SqlConnection con = new SqlConnection(connectionString);
+        
+        con.Open();
+        
+        using SqlCommand command = new SqlCommand(sqlString, con);
+        
+        using (var r = command.ExecuteReader())
+        {
+            using (var dt = new DataTable())
+            {
+                dt.Load(r);
+                Columns = dt.Columns;
+            }
+        }
+
+        con.Close();
+
+
+        DataTable dataTable = new DataTable();
+
+        while (Columns.Count > 0)
+        {
+            DataColumn c = Columns[0];
+            c.Table.Columns.Remove(c);
+
+            dataTable.Columns.Add(c);
+        }
+        Columns = dataTable.Columns;
+
+        return dataTable;
+
     }
 
     public void UpdatePersonLocations(int personId, string lng, string lat, string altLng, string altLat)
@@ -504,11 +531,25 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
 
             entity.Property(e => e.BirthLat).HasColumnType("decimal(14, 10)");
 
-            entity.Property(e => e.BirthLong).HasColumnType("decimal(14, 10)");
+            entity.Property(e => e.BirthLat).HasColumnType("decimal(14, 10)").HasConversion(
+                v => v.ToDecimal(),
+                v => v.ToString()
+            );
 
-            entity.Property(e => e.AltLat).HasColumnType("decimal(14, 10)");
+            entity.Property(e => e.BirthLong).HasColumnType("decimal(14, 10)").HasConversion(
+                v => v.ToDecimal(),
+                v => v.ToString()
+            );
 
-            entity.Property(e => e.AltLong).HasColumnType("decimal(14, 10)");
+            entity.Property(e => e.AltLat).HasColumnType("decimal(14, 10)").HasConversion(
+                v => v.ToDecimal(),
+                v => v.ToString()
+            );
+
+            entity.Property(e => e.AltLong).HasColumnType("decimal(14, 10)").HasConversion(
+                v => v.ToDecimal(),
+                v => v.ToString()
+            );
 
         });
 
