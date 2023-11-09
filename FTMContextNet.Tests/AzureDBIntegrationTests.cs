@@ -220,6 +220,7 @@ namespace FTMContextNet.Tests
             Assert.Null(pclone);
         }
 
+        // function to test BulkInsertFTMPersonView method
         [Fact]
         public void TestFTMPersonViewBulkInsert()
         {

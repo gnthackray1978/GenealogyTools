@@ -56,7 +56,7 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
 
     #region writes
 
-    public int BulkInsertMarriages(int nextId, int importId, int userId, List<Relationships> marriages)
+    public int BulkInsertMarriages2(int nextId, int importId, int userId, List<Relationships> marriages)
     {
         var connectionString = this.Database.GetDbConnection().ConnectionString;
 
@@ -114,6 +114,48 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
 
         return idx;
     }
+
+    public int BulkInsertMarriages(int nextId, int importId, int userId, List<Relationships> marriages)
+    {
+        var dt = CreateDataTable(this.Database.GetConnectionString(), "select top 1 * from dna.Relationships");
+
+        int idx = nextId;
+        foreach (var row in marriages)
+        {
+            dt.Rows.Add(idx,
+                row.GroomId,
+                row.BrideId,
+                row.Notes,
+                row.DateStr,
+                row.Year,
+                row.Location,
+                row.Origin,
+                row.ImportId,
+                row.UserId
+            );
+
+            idx++;
+        }
+
+        using var copy = new SqlBulkCopy(this.Database.GetConnectionString());
+
+        copy.DestinationTableName = "dna.Relationships";
+        copy.BulkCopyTimeout = 600;
+        copy.ColumnMappings.Add("Id", "Id");
+        copy.ColumnMappings.Add("GroomId", "GroomId");
+        copy.ColumnMappings.Add("BrideId", "BrideId");
+        copy.ColumnMappings.Add("Notes", "Notes");
+        copy.ColumnMappings.Add("DateStr", "DateStr");
+        copy.ColumnMappings.Add("Year", "Year");
+        copy.ColumnMappings.Add("Location", "Location");
+        copy.ColumnMappings.Add("Origin", "Origin");
+        copy.ColumnMappings.Add("ImportId", "ImportId");
+        copy.ColumnMappings.Add("UserId", "UserId");
+        copy.WriteToServer(dt);
+
+        return 1;
+    }
+
 
     public int BulkInsertFTMPersonView(int nextId, int importId, int userId, List<FTMPersonView> ftmPersonViews)
     {
@@ -229,16 +271,10 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
     {
         var connectionString = this.Database.GetDbConnection().ConnectionString;
 
-        using var connection = new SqliteConnection(connectionString);
+        using var connection = new SqlConnection(connectionString);
 
         var command = connection.CreateCommand();
-        command.CommandText = "UPDATE FTMPersonView SET BirthLat = $BirthLat, BirthLong = $BirthLong, AltLat = $AltLat, AltLong = $AltLong WHERE Id = $Id";
-
-        command.Parameters.Add("$Id", SqliteType.Integer);
-        command.Parameters.Add("$BirthLat", SqliteType.Text);
-        command.Parameters.Add("$BirthLong", SqliteType.Text);
-        command.Parameters.Add("$AltLat", SqliteType.Text);
-        command.Parameters.Add("$AltLong", SqliteType.Text);
+        command.CommandText = "UPDATE FTMPersonView SET BirthLat = @BirthLat, BirthLong = @BirthLong, AltLat = @AltLat, AltLong = @AltLong WHERE Id = @Id";
 
         connection.Open();
 
@@ -247,17 +283,16 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
         command.Transaction = transaction;
         command.Prepare();
 
+        command.Parameters.Add(new SqlParameter { ParameterName = "@Id", Value = personId });
+        command.Parameters.Add(new SqlParameter { ParameterName = "@BirthLat", Value = lat });
+        command.Parameters.Add(new SqlParameter { ParameterName = "@BirthLong", Value = lng });
+        command.Parameters.Add(new SqlParameter { ParameterName = "@AltLat", Value = altLat });
+        command.Parameters.Add(new SqlParameter { ParameterName = "@AltLong", Value = altLng });
 
-        command.Parameters["$Id"].Value = personId;
-        command.Parameters["$BirthLat"].Value = lat;
-        command.Parameters["$BirthLong"].Value = lng;
-        command.Parameters["$AltLat"].Value = altLat;
-        command.Parameters["$AltLong"].Value = altLng;
         command.ExecuteNonQuery();
 
-
         transaction.Commit();
-
+       
     }
 
     public bool ImportExistsInPersons(int importId)
@@ -265,48 +300,40 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
         throw new System.NotImplementedException();
     }
 
+  
     public int BulkInsertPersonOrigins(int nextId, int userId, List<PersonOrigins> origins)
     {
+        var dt = CreateDataTable(this.Database.GetConnectionString(), "select top 1 * from dna.PersonOrigins");
 
-        var connectionString = this.Database.GetDbConnection().ConnectionString;
-
-
-        using var connection = new SqliteConnection(connectionString);
-
-        var command = connection.CreateCommand();
-        command.CommandText = "INSERT INTO PersonOrigins(Id, PersonId,Origin, DirectAncestor,ImportId,UserId)" +
-                              " VALUES ($Id,$PersonId,$Origin, $DirectAncestor,$ImportId, $UserId);";
-
-        command.Parameters.Add("$Id", SqliteType.Integer);
-        command.Parameters.Add("$PersonId", SqliteType.Integer);
-        command.Parameters.Add("$Origin", SqliteType.Text);
-        command.Parameters.Add("$ImportId", SqliteType.Integer);
-        command.Parameters.Add("$DirectAncestor", SqliteType.Integer);
-        command.Parameters.Add("$UserId", SqliteType.Integer);
-
-        connection.Open();
-
-        using var transaction = connection.BeginTransaction();
-
-        command.Transaction = transaction;
-        command.Prepare();
-        var idx = nextId;
+        int idx = nextId;
         foreach (var row in origins)
         {
-            command.Parameters["$Id"].Value = idx;
-            command.Parameters["$PersonId"].Value = row.Id;
-            command.Parameters["$Origin"].Value = row.Origin;
-            command.Parameters["$ImportId"].Value = row.ImportId;
-            command.Parameters["$DirectAncestor"].Value = row.DirectAncestor;
-            command.Parameters["$UserId"].Value = userId;
-            command.ExecuteNonQuery();
+            dt.Rows.Add(idx,
+                row.PersonId,
+                row.DirectAncestor,
+                row.Origin,
+                row.ImportId,
+                row.UserId
+            );
+
             idx++;
         }
 
-        transaction.Commit();
+        using var copy = new SqlBulkCopy(this.Database.GetConnectionString());
 
-        return idx;
+        copy.DestinationTableName = "dna.PersonOrigins";
+        copy.BulkCopyTimeout = 600;
+        copy.ColumnMappings.Add("Id", "Id");
+        copy.ColumnMappings.Add("PersonId", "PersonId");
+        copy.ColumnMappings.Add("DirectAncestor", "DirectAncestor");
+        copy.ColumnMappings.Add("Origin", "Origin");
+        copy.ColumnMappings.Add("ImportId", "ImportId");
+        copy.ColumnMappings.Add("UserId", "UserId");
+        copy.WriteToServer(dt);
+
+        return 1;
     }
+
 
     public int BulkInsertTreeRecord(List<TreeRecord> treeRecords)
     {
@@ -327,53 +354,43 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
 
     public int InsertGroups(int nextId, string groupName, int importId, int userId)
     {
-
         var connectionString = this.Database.GetDbConnection().ConnectionString;
 
 
-        using var connection = new SqliteConnection(connectionString);
+        using var connection = new SqlConnection(connectionString);
 
         var command = connection.CreateCommand();
-        command.CommandText = "INSERT INTO TreeGroups(Id, GroupName,ImportId, UserId) VALUES ($Id,$GroupName,$ImportId,$UserId);";
-
-        command.Parameters.Add("$Id", SqliteType.Integer);
-        command.Parameters.Add("$GroupName", SqliteType.Text);
-        command.Parameters.Add("$UserId", SqliteType.Integer);
-        command.Parameters.Add("$ImportId", SqliteType.Integer);
-
+        command.CommandText = "INSERT INTO TreeGroups(Id, GroupName,ImportId, UserId) VALUES (@Id,@GroupName,@ImportId,@UserId);";
+         
         connection.Open();
 
         using var transaction = connection.BeginTransaction();
 
         command.Transaction = transaction;
         command.Prepare();
-
-        command.Parameters["$Id"].Value = nextId;
-        command.Parameters["$GroupName"].Value = groupName;
-        command.Parameters["$UserId"].Value = userId;
-        command.Parameters["$ImportId"].Value = importId;
+        
+        command.Parameters.Add(new SqlParameter {ParameterName = "@Id", Value = nextId });
+        command.Parameters.Add(new SqlParameter {ParameterName = "@GroupName", Value = groupName });
+        command.Parameters.Add(new SqlParameter {ParameterName = "@UserId", Value = userId });
+        command.Parameters.Add(new SqlParameter {ParameterName = "@ImportId", Value = importId });
+        
         command.ExecuteNonQuery();
 
         transaction.Commit();
+
+        nextId++;
 
         return nextId;
     }
     public int InsertRecordMapGroup(int nextId, string groupName, string treeName, int importId, int userId)
     {
-
         var connectionString = this.Database.GetDbConnection().ConnectionString;
 
-
-        using var connection = new SqliteConnection(connectionString);
+        using var connection = new SqlConnection(connectionString);
 
         var command = connection.CreateCommand();
-        command.CommandText = "INSERT INTO TreeRecordMapGroup(Id, TreeName, GroupName,ImportId, UserId) VALUES ($Id,$TreeName,$GroupName,$ImportId, $UserId);";
+        command.CommandText = "INSERT INTO TreeRecordMapGroup(Id, TreeName, GroupName,ImportId, UserId) VALUES (@Id,@TreeName,@GroupName,@ImportId, @UserId);";
 
-        command.Parameters.Add("$Id", SqliteType.Integer);
-        command.Parameters.Add("$TreeName", SqliteType.Text);
-        command.Parameters.Add("$GroupName", SqliteType.Text);
-        command.Parameters.Add("$UserId", SqliteType.Integer);
-        command.Parameters.Add("$ImportId", SqliteType.Integer);
         connection.Open();
 
         using var transaction = connection.BeginTransaction();
@@ -381,16 +398,19 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
         command.Transaction = transaction;
         command.Prepare();
 
-        command.Parameters["$Id"].Value = nextId;
-        command.Parameters["$GroupName"].Value = groupName;
-        command.Parameters["$TreeName"].Value = treeName;
-        command.Parameters["$UserId"].Value = userId;
-        command.Parameters["$ImportId"].Value = userId;
+        command.Parameters.Add(new SqlParameter { ParameterName = "@Id", Value = nextId });
+        command.Parameters.Add(new SqlParameter { ParameterName = "@TreeName", Value = treeName });
+        command.Parameters.Add(new SqlParameter { ParameterName = "@GroupName", Value = groupName });
+        command.Parameters.Add(new SqlParameter { ParameterName = "@UserId", Value = userId });
+        command.Parameters.Add(new SqlParameter { ParameterName = "@ImportId", Value = importId });
+
         command.ExecuteNonQuery();
 
         transaction.Commit();
 
-        return nextId;
+        nextId++;
+
+        return nextId; 
     }
 
     #endregion
