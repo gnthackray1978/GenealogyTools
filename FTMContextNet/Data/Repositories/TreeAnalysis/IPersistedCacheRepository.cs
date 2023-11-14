@@ -3,7 +3,6 @@ using FTMContext;
 using FTMContextNet.Domain.Collections;
 using FTMContextNet.Domain.Entities.NonPersistent;
 using FTMContextNet.Domain.Entities.NonPersistent.Person;
-using FTMContextNet.Domain.Entities.Persistent.Cache;
 using QuickGed.Types;
 
 namespace FTMContextNet.Data.Repositories.TreeAnalysis;
@@ -36,9 +35,9 @@ public interface IPersistedCacheRepository
     /// stores number of people in tree.
     /// tree name etc
     /// </summary>
-    void PopulateTreeRecordFromCache(int importId);
-    int InsertTreeGroups(int nextId, string treeGroup, int importId, int userId);
-    int InsertTreeRecordMapGroup(int nextId, string treeGroup, string treeName, int importId, int userId);
+    void PopulateTreeRecordFromCache(int userId, int importId);
+    int InsertTreeGroups(int id, string treeGroup, int importId, int userId);
+    int InsertTreeRecordMapGroup(string treeGroup, string treeName, int importId, int userId);
     void InsertPersons(int importId, int userId, List<Person> persons);
     void InsertMarriages(int importId, int userId, List<RelationSubSet> marriages);
     Dictionary<string, List<string>> GetGroups(int importId);

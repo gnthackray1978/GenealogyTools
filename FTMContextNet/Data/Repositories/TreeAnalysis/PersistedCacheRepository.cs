@@ -154,7 +154,7 @@ namespace FTMContextNet.Data.Repositories.TreeAnalysis
                     ImportId = s.ImportId
                 }).ToList();
 
-            _persistedCacheContext.BulkInsertPersonOrigins(1, userId, recordsToSave.OrderBy(o => o.Origin).ToList());
+            _persistedCacheContext.BulkInsertPersonOrigins( userId, recordsToSave.OrderBy(o => o.Origin).ToList());
 
         }
 
@@ -268,7 +268,7 @@ namespace FTMContextNet.Data.Repositories.TreeAnalysis
         /// stores number of people in tree.
         /// tree name etc
         /// </summary>
-        public void PopulateTreeRecordFromCache(int importId)
+        public void PopulateTreeRecordFromCache(int userId, int importId)
         {
             var treeRecords = new List<TreeRecord>();
 
@@ -285,19 +285,19 @@ namespace FTMContextNet.Data.Repositories.TreeAnalysis
 
             }
 
-            _iLog.WriteLine("Created " + _persistedCacheContext.BulkInsertTreeRecord(treeRecords) + " tree records");
+            _iLog.WriteLine("Created " + _persistedCacheContext.BulkInsertTreeRecord(userId, treeRecords) + " tree records");
         }
 
         #region inserts
 
-        public int InsertTreeGroups(int nextId, string treeGroup, int importId, int userId)
+        public int InsertTreeGroups(int id, string treeGroup, int importId, int userId)
         {
-            return _persistedCacheContext.InsertGroups(nextId, treeGroup, importId, userId);
+            return _persistedCacheContext.InsertGroups(id, treeGroup, importId, userId);
         }
 
-        public int InsertTreeRecordMapGroup(int nextId, string treeGroup, string treeName, int importId, int userId)
+        public int InsertTreeRecordMapGroup(string treeGroup, string treeName, int importId, int userId)
         {
-            return _persistedCacheContext.InsertRecordMapGroup(nextId, treeGroup, treeName, importId, userId);
+            return _persistedCacheContext.InsertRecordMapGroup(treeGroup, treeName, importId, userId);
         }
 
         public void InsertPersons(int importId, int userId, List<Person> persons)
@@ -306,7 +306,7 @@ namespace FTMContextNet.Data.Repositories.TreeAnalysis
 
             var ftmPersons = persons.Select(person => FTMPersonView.Create(person)).ToList();
 
-            _persistedCacheContext.BulkInsertFTMPersonView(nextId, importId, userId, ftmPersons);
+            _persistedCacheContext.BulkInsertFTMPersonView( importId, userId, ftmPersons);
         }
 
         public void InsertMarriages(int importId, int userId, List<RelationSubSet> marriages)
@@ -315,7 +315,7 @@ namespace FTMContextNet.Data.Repositories.TreeAnalysis
 
             var ftmPersons = marriages.Select(person => Relationships.Create(person)).ToList();
 
-            _persistedCacheContext.BulkInsertMarriages(nextId, importId, userId, ftmPersons);
+            _persistedCacheContext.BulkInsertMarriages( importId, userId, ftmPersons);
         }
 
         #endregion

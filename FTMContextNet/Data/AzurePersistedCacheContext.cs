@@ -1,16 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Data.SQLite;
 using System.Linq;
 using ConfigHelper;
 using FTMContextNet.Domain.Entities.Persistent.Cache;
 using FTMContextNet.Domain.ExtensionMethods;
 using LoggingLib;
 using Microsoft.Data.SqlClient;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace FTMContextNet.Data;
 
@@ -18,14 +14,15 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
 {
 
     private IMSGConfigHelper _configObj { get; set; }
-    private SQLiteConnection _sqlConnection { get; set; }
+    private readonly IAzureDBHelpers _azureDbHelpers;
 
     private Ilog _logger { get; set; }
 
-    public AzurePersistedCacheContext(IMSGConfigHelper config, Ilog ilog)
+    public AzurePersistedCacheContext(IAzureDBHelpers azureDbHelpers, IMSGConfigHelper config, Ilog ilog)
     {
         _configObj = config;
         _logger = ilog;
+        _azureDbHelpers = azureDbHelpers;
     }
 
     public AzurePersistedCacheContext(DbContextOptions<SQLitePersistedCacheContext> options)
@@ -33,9 +30,9 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
     {
     }
 
-    public static AzurePersistedCacheContext Create(IMSGConfigHelper imsgConfigHelper, Ilog logger)
+    public static AzurePersistedCacheContext Create(IAzureDBHelpers azureDbHelpers, IMSGConfigHelper imsgConfigHelper, Ilog logger)
     {
-        return new AzurePersistedCacheContext(imsgConfigHelper, logger);
+        return new AzurePersistedCacheContext(azureDbHelpers, imsgConfigHelper, logger);
     }
 
     #region tables
@@ -56,73 +53,29 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
 
     #region writes
 
-    public int BulkInsertMarriages2(int nextId, int importId, int userId, List<Relationships> marriages)
+    public int BulkInsertMarriages(int importId, int userId, List<Relationships> marriages)
     {
-        var connectionString = this.Database.GetDbConnection().ConnectionString;
+        var connectionString = this.Database.GetConnectionString();
+
+        var nextId = _azureDbHelpers.GetNextId("Relationships");
+        
+        var dt = _azureDbHelpers.CreateDataTable( "select top 1 * from dna.Relationships");
 
 
-        using var connection = new SqliteConnection(connectionString);
 
-        var command = connection.CreateCommand();
-        command.CommandText = "INSERT INTO Relationships(Id, Location, Origin, GroomId, BrideId, Notes, DateStr, Year, ImportId, UserId)" +
-                              " VALUES ($Id, $Location, $Origin, $GroomId, $BrideId, $Notes, $DateStr, $Year, $ImportId, $UserId);";
-
-
-        command.Parameters.Add("$Id", SqliteType.Integer);
-        command.Parameters.Add("$Location", SqliteType.Text);
-        command.Parameters.Add("$Origin", SqliteType.Text);
-        command.Parameters.Add("$GroomId", SqliteType.Integer);
-        command.Parameters.Add("$BrideId", SqliteType.Integer);
-        command.Parameters.Add("$Notes", SqliteType.Text);
-        command.Parameters.Add("$DateStr", SqliteType.Text);
-        command.Parameters.Add("$Year", SqliteType.Integer);
-        command.Parameters.Add("$ImportId", SqliteType.Integer);
-        command.Parameters.Add("$UserId", SqliteType.Integer);
-
-        connection.Open();
-
-        using var transaction = connection.BeginTransaction();
-
-        command.Transaction = transaction;
-        command.Prepare();
-        var idx = nextId;
-
-        var total = marriages.Count;
-        var counter = 1;
+        int idx = nextId;
 
         foreach (var row in marriages)
         {
-            command.Parameters["$Id"].Value = idx;
-            command.Parameters["$Location"].Value = row.Location;
-            command.Parameters["$Origin"].Value = row.Origin ?? "";
-            command.Parameters["$GroomId"].Value = row.GroomId;
-            command.Parameters["$BrideId"].Value = row.BrideId;
-            command.Parameters["$Notes"].Value = row.Notes ?? "";
-            command.Parameters["$DateStr"].Value = row.DateStr;
-            command.Parameters["$Year"].Value = row.Year;
-            command.Parameters["$ImportId"].Value = importId;
-            command.Parameters["$UserId"].Value = userId;
-            command.ExecuteNonQuery();
-
-            if (counter % 500 == 0)
-                _logger.ProgressUpdate(counter, total, "Inserting Marriage");
-
+            row.Id = idx;
+            row.ImportId = importId;
+            row.UserId = userId;
             idx++;
         }
 
-        transaction.Commit();
-
-        return idx;
-    }
-
-    public int BulkInsertMarriages(int nextId, int importId, int userId, List<Relationships> marriages)
-    {
-        var dt = CreateDataTable(this.Database.GetConnectionString(), "select top 1 * from dna.Relationships");
-
-        int idx = nextId;
         foreach (var row in marriages)
         {
-            dt.Rows.Add(idx,
+            dt.Rows.Add(row.Id,
                 row.GroomId,
                 row.BrideId,
                 row.Notes,
@@ -137,7 +90,7 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
             idx++;
         }
 
-        using var copy = new SqlBulkCopy(this.Database.GetConnectionString());
+        using var copy = new SqlBulkCopy(connectionString);
 
         copy.DestinationTableName = "dna.Relationships";
         copy.BulkCopyTimeout = 600;
@@ -155,16 +108,29 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
 
         return 1;
     }
-
-
-    public int BulkInsertFTMPersonView(int nextId, int importId, int userId, List<FTMPersonView> ftmPersonViews)
+    
+    public int BulkInsertFTMPersonView(int importId, int userId, List<FTMPersonView> ftmPersonViews)
     {
-        var dt = CreateDataTable(this.Database.GetConnectionString(), "select top 1 * from dna.FTMPersonView");
+        var connectionString = this.Database.GetConnectionString();
+
+        var nextId = _azureDbHelpers.GetNextId("FTMPersonView");
+
+        var dt = _azureDbHelpers.CreateDataTable( "SELECT TOP 1 * FROM dna.FTMPersonView");
         
         int idx = nextId;
+
         foreach (var row in ftmPersonViews)
         {
-            dt.Rows.Add(idx,
+            row.Id = idx;
+            row.ImportId = importId;
+            row.UserId = userId;
+            idx++;
+        }
+
+
+        foreach (var row in ftmPersonViews)
+        {
+            dt.Rows.Add(row.Id,
                 row.FirstName,
                 row.Surname,
                 row.BirthFrom,
@@ -191,12 +157,11 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
                 
                 row.LinkedLocations
             );
-
-            idx++;
+            
         }
 
 
-        using var copy = new SqlBulkCopy(this.Database.GetConnectionString());
+        using var copy = new SqlBulkCopy(connectionString);
 
         copy.DestinationTableName = "dna.FTMPersonView";
         copy.BulkCopyTimeout = 600;
@@ -227,46 +192,8 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
 
         return 1;
     }
-
-
-
-    private static DataTable CreateDataTable(string connectionString, string sqlString)
-    {
-        DataColumnCollection Columns;
-
-        using SqlConnection con = new SqlConnection(connectionString);
-        
-        con.Open();
-        
-        using SqlCommand command = new SqlCommand(sqlString, con);
-        
-        using (var r = command.ExecuteReader())
-        {
-            using (var dt = new DataTable())
-            {
-                dt.Load(r);
-                Columns = dt.Columns;
-            }
-        }
-
-        con.Close();
-
-
-        DataTable dataTable = new DataTable();
-
-        while (Columns.Count > 0)
-        {
-            DataColumn c = Columns[0];
-            c.Table.Columns.Remove(c);
-
-            dataTable.Columns.Add(c);
-        }
-        Columns = dataTable.Columns;
-
-        return dataTable;
-
-    }
-
+    
+   
     public void UpdatePersonLocations(int personId, string lng, string lat, string altLng, string altLat)
     {
         var connectionString = this.Database.GetDbConnection().ConnectionString;
@@ -274,7 +201,7 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
         using var connection = new SqlConnection(connectionString);
 
         var command = connection.CreateCommand();
-        command.CommandText = "UPDATE FTMPersonView SET BirthLat = @BirthLat, BirthLong = @BirthLong, AltLat = @AltLat, AltLong = @AltLong WHERE Id = @Id";
+        command.CommandText = "UPDATE dna.FTMPersonView SET BirthLat = @BirthLat, BirthLong = @BirthLong, AltLat = @AltLat, AltLong = @AltLong WHERE Id = @Id";
 
         connection.Open();
 
@@ -300,18 +227,32 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
         throw new System.NotImplementedException();
     }
 
-  
-    public int BulkInsertPersonOrigins(int nextId, int userId, List<PersonOrigins> origins)
+    public int BulkInsertPersonOrigins(int userId, List<PersonOrigins> origins)
     {
-        var dt = CreateDataTable(this.Database.GetConnectionString(), "select top 1 * from dna.PersonOrigins");
+        var connectionString = this.Database.GetDbConnection().ConnectionString;
+
+        var nextId = _azureDbHelpers.GetNextId("PersonOrigins");
+
+        var dt = _azureDbHelpers.CreateDataTable( "SELECT TOP 1 * FROM dna.PersonOrigins");
+
 
         int idx = nextId;
+        
+
         foreach (var row in origins)
         {
-            dt.Rows.Add(idx,
+            row.Id = idx;
+            row.UserId = userId;
+            idx++;
+        }
+
+
+        foreach (var row in origins)
+        {
+            dt.Rows.Add(row.Id,
                 row.PersonId,
-                row.DirectAncestor,
                 row.Origin,
+                row.DirectAncestor,
                 row.ImportId,
                 row.UserId
             );
@@ -325,8 +266,8 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
         copy.BulkCopyTimeout = 600;
         copy.ColumnMappings.Add("Id", "Id");
         copy.ColumnMappings.Add("PersonId", "PersonId");
-        copy.ColumnMappings.Add("DirectAncestor", "DirectAncestor");
         copy.ColumnMappings.Add("Origin", "Origin");
+        copy.ColumnMappings.Add("DirectAncestor", "DirectAncestor");
         copy.ColumnMappings.Add("ImportId", "ImportId");
         copy.ColumnMappings.Add("UserId", "UserId");
         copy.WriteToServer(dt);
@@ -334,16 +275,16 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
         return 1;
     }
 
-
-    public int BulkInsertTreeRecord(List<TreeRecord> treeRecords)
+    public int BulkInsertTreeRecord(int userId, List<TreeRecord> treeRecords)
     {
         if (treeRecords.Count <= 0) return 0;
 
-        int idx = TreeRecord.Count() + 1;
+        int idx = TreeRecord.Max(m=>m.Id) + 1;
 
         foreach (var tr in treeRecords)
         {
             tr.Id = idx;
+            tr.UserId = userId;
             idx++;
         }
 
@@ -352,7 +293,7 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
         return this.SaveChanges();
     }
 
-    public int InsertGroups(int nextId, string groupName, int importId, int userId)
+    public int InsertGroups(int id, string groupName, int importId, int userId)
     {
         var connectionString = this.Database.GetDbConnection().ConnectionString;
 
@@ -360,7 +301,7 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
         using var connection = new SqlConnection(connectionString);
 
         var command = connection.CreateCommand();
-        command.CommandText = "INSERT INTO TreeGroups(Id, GroupName,ImportId, UserId) VALUES (@Id,@GroupName,@ImportId,@UserId);";
+        command.CommandText = "INSERT INTO dna.TreeGroups(Id, GroupName,ImportId, UserId) VALUES (@Id,@GroupName,@ImportId,@UserId);";
          
         connection.Open();
 
@@ -369,7 +310,7 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
         command.Transaction = transaction;
         command.Prepare();
         
-        command.Parameters.Add(new SqlParameter {ParameterName = "@Id", Value = nextId });
+        command.Parameters.Add(new SqlParameter {ParameterName = "@Id", Value = id });
         command.Parameters.Add(new SqlParameter {ParameterName = "@GroupName", Value = groupName });
         command.Parameters.Add(new SqlParameter {ParameterName = "@UserId", Value = userId });
         command.Parameters.Add(new SqlParameter {ParameterName = "@ImportId", Value = importId });
@@ -378,18 +319,19 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
 
         transaction.Commit();
 
-        nextId++;
-
-        return nextId;
+        return id;
     }
-    public int InsertRecordMapGroup(int nextId, string groupName, string treeName, int importId, int userId)
+
+    public int InsertRecordMapGroup(string groupName, string treeName, int importId, int userId)
     {
         var connectionString = this.Database.GetDbConnection().ConnectionString;
 
+        var nextId = _azureDbHelpers.GetNextId("TreeRecordMapGroup");
+        
         using var connection = new SqlConnection(connectionString);
 
         var command = connection.CreateCommand();
-        command.CommandText = "INSERT INTO TreeRecordMapGroup(Id, TreeName, GroupName,ImportId, UserId) VALUES (@Id,@TreeName,@GroupName,@ImportId, @UserId);";
+        command.CommandText = "INSERT INTO dna.TreeRecordMapGroup(Id, TreeName, GroupName,ImportId, UserId) VALUES (@Id,@TreeName,@GroupName,@ImportId, @UserId);";
 
         connection.Open();
 
@@ -407,9 +349,7 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
         command.ExecuteNonQuery();
 
         transaction.Commit();
-
-        nextId++;
-
+        
         return nextId; 
     }
 
@@ -419,73 +359,50 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
 
     public void DeleteOrigins(int importId)
     {
-        RunCommand("DELETE FROM PersonOrigins WHERE ImportId = " + importId);
+        _azureDbHelpers.RunCommand("DELETE FROM PersonOrigins WHERE ImportId = " + importId);
     }
 
     public void DeleteDupes(int importId)
     {
-        RunCommand("DELETE FROM DupeEntries WHERE ImportId = " + importId);
+        _azureDbHelpers.RunCommand("DELETE FROM DupeEntries WHERE ImportId = " + importId);
     }
 
     public void DeleteDupes()
     {
-        RunCommand("DELETE FROM DupeEntries");
+        _azureDbHelpers.RunCommand("DELETE FROM DupeEntries");
     }
-
 
     public void DeletePersons(int importId)
     {
-        RunCommand("DELETE FROM FTMPersonView WHERE ImportId = " + importId);
+        _azureDbHelpers.RunCommand("DELETE FROM FTMPersonView WHERE ImportId = " + importId);
     }
 
     public void DeleteTreeRecord(int importId)
     {
-        RunCommand("DELETE FROM TreeRecord WHERE Id = " + importId);
+        _azureDbHelpers.RunCommand("DELETE FROM TreeRecord WHERE Id = " + importId);
     }
 
     public void DeleteMarriages(int importId)
     {
-        RunCommand("DELETE FROM Relationships WHERE ImportId = " + importId); ;
+        _azureDbHelpers.RunCommand("DELETE FROM Relationships WHERE ImportId = " + importId);
     }
 
     public void DeleteImports(int importId)
     {
-        RunCommand("DELETE FROM TreeImport WHERE Id = " + importId); ;
+        _azureDbHelpers.RunCommand("DELETE FROM TreeImport WHERE Id = " + importId);
     }
 
     public void DeleteTreeGroups(int importId)
     {
-        RunCommand("DELETE FROM TreeGroups WHERE ImportId = " + importId);
+        _azureDbHelpers.RunCommand("DELETE FROM TreeGroups WHERE ImportId = " + importId);
     }
 
     public void DeleteRecordMapGroups(int importId)
     {
-        RunCommand("DELETE FROM TreeRecordMapGroup WHERE ImportId = " + importId);
+        _azureDbHelpers.RunCommand("DELETE FROM TreeRecordMapGroup WHERE ImportId = " + importId);
     }
 
     #endregion
-
-    public void RunCommand(string queryString)
-    {
-        using SqlConnection connection = new SqlConnection(_configObj.MSGGenDB01);
-
-        var command = new SqlCommand(queryString, connection);
-
-        try
-        {
-            connection.Open();
-
-            command.ExecuteNonQuery();
-
-            connection.Close();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-        }
-    }
-
-
 
 
     #region config

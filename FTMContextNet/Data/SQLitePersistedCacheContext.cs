@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Linq;
 using System.Reflection.Metadata;
@@ -58,9 +59,21 @@ namespace FTMContextNet.Data
 
         #endregion
 
-        public int BulkInsertMarriages(int nextId, int importId,int userId, List<Relationships> marriages)
+        public int BulkInsertMarriages(int importId,int userId, List<Relationships> marriages)
         {
+
+            int nextId = GetNextId("TreeGroups");
+            var idx = nextId;
+
             var connectionString = this.Database.GetDbConnection().ConnectionString;
+
+            foreach (var row in marriages)
+            {
+                row.Id = idx;
+                row.ImportId = importId;
+                row.UserId = userId;
+                idx++;
+            }
 
 
             using var connection = new SqliteConnection(connectionString);
@@ -87,14 +100,13 @@ namespace FTMContextNet.Data
 
             command.Transaction = transaction;
             command.Prepare();
-            var idx = nextId;
-
+           
             var total = marriages.Count;
             var counter = 1;
-
+            
             foreach (var row in marriages)
             {
-                command.Parameters["$Id"].Value = idx;
+                command.Parameters["$Id"].Value = row.Id;
                 command.Parameters["$Location"].Value = row.Location;
                 command.Parameters["$Origin"].Value = row.Origin??"";
                 command.Parameters["$GroomId"].Value = row.GroomId;
@@ -102,8 +114,8 @@ namespace FTMContextNet.Data
                 command.Parameters["$Notes"].Value = row.Notes??"";
                 command.Parameters["$DateStr"].Value = row.DateStr;
                 command.Parameters["$Year"].Value = row.Year;
-                command.Parameters["$ImportId"].Value = importId;
-                command.Parameters["$UserId"].Value = userId;
+                command.Parameters["$ImportId"].Value = row.ImportId;
+                command.Parameters["$UserId"].Value = row.UserId;
                 command.ExecuteNonQuery();
 
                 if (counter % 500 == 0)
@@ -117,8 +129,33 @@ namespace FTMContextNet.Data
             return idx;
         }
 
-        public int BulkInsertFTMPersonView(int nextId, int importId,int userId, List<FTMPersonView> ftmPersonViews)
+        private int GetNextId(string tableName)
         {
+            var connectionString = this.Database.GetDbConnection().ConnectionString;
+
+
+            using var connection = new SqliteConnection(connectionString);
+
+            var command = connection.CreateCommand();
+            command.CommandText = "SELECT MAX(Id) from dna." + tableName + ";";
+
+            connection.Open();
+
+            command.Prepare();
+
+
+            int nextId = Convert.ToInt32(command.ExecuteScalar());
+
+            connection.Close();
+
+            nextId++;
+
+            return nextId;
+        }
+
+        public int BulkInsertFTMPersonView(int importId,int userId, List<FTMPersonView> ftmPersonViews)
+        {
+            int nextId = GetNextId("FTMPersonView");
 
             var connectionString = this.Database.GetDbConnection().ConnectionString;
 
@@ -166,7 +203,16 @@ namespace FTMContextNet.Data
 
             foreach (var row in ftmPersonViews)
             {
-                command.Parameters["$Id"].Value = idx;
+                row.Id = idx;
+                row.ImportId = importId;
+                row.UserId = userId;
+                idx++;
+            }
+
+
+            foreach (var row in ftmPersonViews)
+            {
+                command.Parameters["$Id"].Value = row.Id;
                 command.Parameters["$FirstName"].Value = row.FirstName;
                 command.Parameters["$Surname"].Value = row.Surname;
                 command.Parameters["$BirthFrom"].Value = row.BirthFrom;
@@ -184,11 +230,11 @@ namespace FTMContextNet.Data
                 command.Parameters["$FatherId"].Value = row.FatherId;
                 command.Parameters["$MotherId"].Value = row.MotherId;
                 command.Parameters["$LocationsCached"].Value = row.LocationsCached;
-                command.Parameters["$ImportId"].Value = importId;
+                command.Parameters["$ImportId"].Value = row.ImportId;
                 command.Parameters["$DirectAncestor"].Value = row.DirectAncestor;
                 command.Parameters["$RootPerson"].Value = row.RootPerson;
                 command.Parameters["$LinkNode"].Value = row.LinkNode;
-                command.Parameters["$UserId"].Value = userId;
+                command.Parameters["$UserId"].Value = row.UserId;
                 command.ExecuteNonQuery();
 
                 if(counter % 500 == 0)
@@ -242,8 +288,18 @@ namespace FTMContextNet.Data
             throw new System.NotImplementedException();
         }
 
-        public int BulkInsertPersonOrigins(int nextId,int userId, List<PersonOrigins> origins)
+        public int BulkInsertPersonOrigins(int userId, List<PersonOrigins> origins)
         {
+            int nextId = GetNextId("PersonOrigins");
+            
+            var idx = nextId;
+
+            foreach (var row in origins)
+            {
+                row.Id = idx;
+                row.UserId = userId;
+                idx++;
+            }
 
             var connectionString = this.Database.GetDbConnection().ConnectionString;
 
@@ -267,15 +323,15 @@ namespace FTMContextNet.Data
 
             command.Transaction = transaction;
             command.Prepare();
-            var idx = nextId;
+            
             foreach (var row in origins)
             {
-                command.Parameters["$Id"].Value = idx;
+                command.Parameters["$Id"].Value = row.Id;
                 command.Parameters["$PersonId"].Value = row.Id;
                 command.Parameters["$Origin"].Value = row.Origin;
                 command.Parameters["$ImportId"].Value = row.ImportId;
                 command.Parameters["$DirectAncestor"].Value = row.DirectAncestor;
-                command.Parameters["$UserId"].Value = userId;
+                command.Parameters["$UserId"].Value = row.UserId;
                 command.ExecuteNonQuery();
                 idx++;
             }
@@ -285,7 +341,7 @@ namespace FTMContextNet.Data
             return idx;
         }
 
-        public int BulkInsertTreeRecord(List<TreeRecord> treeRecords)
+        public int BulkInsertTreeRecord(int userId, List<TreeRecord> treeRecords)
         {
             if (treeRecords.Count <= 0) return 0;
             
@@ -294,6 +350,7 @@ namespace FTMContextNet.Data
             foreach (var tr in treeRecords)
             {
                 tr.Id = idx;
+                tr.UserId = userId;
                 idx++;
             }
 
@@ -302,8 +359,9 @@ namespace FTMContextNet.Data
             return this.SaveChanges();
         }
 
-        public int InsertGroups(int nextId, string groupName, int importId, int userId)
+        public int InsertGroups(int id, string groupName, int importId, int userId)
         {
+            //int nextId = GetNextId("TreeGroups");
 
             var connectionString = this.Database.GetDbConnection().ConnectionString;
 
@@ -325,7 +383,7 @@ namespace FTMContextNet.Data
             command.Transaction = transaction;
             command.Prepare();
             
-            command.Parameters["$Id"].Value = nextId;
+            command.Parameters["$Id"].Value = id;
             command.Parameters["$GroupName"].Value = groupName;
             command.Parameters["$UserId"].Value = userId;
             command.Parameters["$ImportId"].Value = importId;
@@ -333,10 +391,11 @@ namespace FTMContextNet.Data
               
             transaction.Commit();
 
-            return nextId;
+            return id;
         }
-        public int InsertRecordMapGroup(int nextId, string groupName, string treeName,int importId, int userId)
+        public int InsertRecordMapGroup(string groupName, string treeName,int importId, int userId)
         {
+            int nextId = GetNextId("TreeGroups");
 
             var connectionString = this.Database.GetDbConnection().ConnectionString;
 

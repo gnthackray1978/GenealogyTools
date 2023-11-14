@@ -17,13 +17,13 @@ public interface IPersistedCacheContext
     DbSet<IgnoreList> IgnoreList { get; set; }
 
 
-    int BulkInsertMarriages(int nextId, int importId,int userId, List<Relationships> marriages);
-    int BulkInsertFTMPersonView(int nextId, int importId, int userId, List<FTMPersonView> ftmPersonViews);
-    int BulkInsertPersonOrigins(int nextId, int userId, List<PersonOrigins> origins);
+    int BulkInsertMarriages( int importId,int userId, List<Relationships> marriages);
+    int BulkInsertFTMPersonView( int importId, int userId, List<FTMPersonView> ftmPersonViews);
+    int BulkInsertPersonOrigins(int userId, List<PersonOrigins> origins);
 
-    int BulkInsertTreeRecord(List<TreeRecord> treeRecords);
-    int InsertGroups(int nextId, string groupName,int importId, int userId);
-    int InsertRecordMapGroup(int nextId, string groupName, string treeName,int importId,int userId);
+    int BulkInsertTreeRecord(int userId, List<TreeRecord> treeRecords);
+    int InsertGroups(int id, string groupName,int importId, int userId);
+    int InsertRecordMapGroup(string groupName, string treeName,int importId,int userId);
     void DeleteOrigins(int importId);
     void DeleteDupes(int importId);
     void DeleteDupes();

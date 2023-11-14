@@ -94,42 +94,31 @@ namespace FTMContextNet.Application.UserServices.CreatePersonsAndRelationships
 
             foreach (var group in _persistedCacheRepository.GetGroupPerson(_persistedImportCacheRepository.GetCurrentImportId()))
             {
-                _persistedCacheRepository.InsertTreeGroups(group.Key, group.Value, _persistedImportCacheRepository.GetCurrentImportId(), _auth.GetUser());
+                _persistedCacheRepository.InsertTreeGroups(group.Key, group.Value,
+                    _persistedImportCacheRepository.GetCurrentImportId(), _auth.GetUser());
             }
+            
+            _ilog.WriteLine("Creating Tree Group Mappings");
 
-
-         //   try
-         //   {
-                _ilog.WriteLine("Creating Tree Group Mappings");
-
-                var groups = _persistedCacheRepository.GetGroups(_persistedImportCacheRepository.GetCurrentImportId());
-
-                var idx = 0;
-
-                foreach (var grp in groups)
+            var groups = _persistedCacheRepository.GetGroups(_persistedImportCacheRepository.GetCurrentImportId());
+        
+            foreach (var grp in groups)
+            {
+                foreach (var mapping in grp.Value)
                 {
-                    foreach (var mapping in grp.Value)
-                    {
-                        _persistedCacheRepository.InsertTreeRecordMapGroup(idx, mapping, grp.Key, _persistedImportCacheRepository.GetCurrentImportId(), _auth.GetUser());
-
-                        idx++;
-                    }
+                    _persistedCacheRepository.InsertTreeRecordMapGroup( mapping, grp.Key, _persistedImportCacheRepository.GetCurrentImportId(), _auth.GetUser());
+                
                 }
-
-                _ilog.WriteLine("Finished Create Tree Group Mappings");
-          // }
-         //  finally
-          //  {
-              //  RateLimit.Release();
-          //  }
-
+            }
+            
+            _ilog.WriteLine("Finished Create Tree Group Mappings");
         }
 
         private void AddTreeMetaData()
         {
             _ilog.WriteLine("Creating Tree Records");
 
-            _persistedCacheRepository.PopulateTreeRecordFromCache(_persistedImportCacheRepository.GetCurrentImportId());
+            _persistedCacheRepository.PopulateTreeRecordFromCache(_auth.GetUser(), _persistedImportCacheRepository.GetCurrentImportId());
         }
     }
 }
