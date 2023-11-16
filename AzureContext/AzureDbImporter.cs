@@ -7,6 +7,7 @@ using ConfigHelper;
 using FTMContextNet.Data;
 using FTMContextNet.Domain.ExtensionMethods;
 using LoggingLib;
+using PlaceLibNet.Data.Contexts;
 using FTMPersonView = AzureContext.Models.FTMPersonView;
 
 namespace AzureContext
@@ -22,13 +23,35 @@ namespace AzureContext
             _imsgConfigHelper = imsgConfigHelper;
         }
 
+        public void ImportPlaceCache()
+        {
+            var p = new PlacesContext(_imsgConfigHelper);
+
+            var a = new AzurePlacesContext(_imsgConfigHelper);
+
+            foreach (var place in p.PlaceCache)
+            {
+                a.InsertPlaceCache(place.Id,
+                                    place.Name,
+                                    place.NameFormatted,
+                                    place.JSONResult,
+                                    place.Country,
+                                    place.County,
+                                    place.Searched,
+                                    place.BadData,
+                                    place.Lat,
+                                    place.Long,
+                                    place.Src);
+            }
+        }
+
         public void Import()
         {
             var a = SQLitePersistedCacheContext.Create(_imsgConfigHelper, _console);
 
             var originDictionary = a.TreeRecord.ToDictionary(p => p.Name, p => p.Id);
 
-            _console.WriteCounter("Emptying TreeRecord FTMPersonView and DupeEntries");
+            _console.WriteCounter("Emptying DB");
 
             using (var executor = new AzureDBContext(_imsgConfigHelper.MSGGenDB01))
             {
@@ -43,6 +66,9 @@ namespace AzureContext
                 executor.ExecuteCommand("TRUNCATE TABLE DNA.Relationships");
                 executor.ExecuteCommand("TRUNCATE TABLE UKP.PlaceCache");//
             }
+
+
+
 
             _console.WriteCounter("Adding new dupes");
 
@@ -230,10 +256,19 @@ namespace AzureContext
                 {
                     Id = d.Id, 
                     DateImported = d.DateImported, 
-                    UserId = d.UserId
+                    UserId = d.UserId,
+                    FileName = d.FileName 
+                               
+                               ?? "",
+                    Selected = d.Selected,
+                    FileSize = d.FileSize??"0"
+
                     });
             }
 
+            destination.SaveChanges();
+
+            _console.WriteCounter("Finished");
         }
 
          
