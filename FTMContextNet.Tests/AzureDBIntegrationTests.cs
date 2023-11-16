@@ -4,7 +4,6 @@ using LoggingLib;
 using ConfigHelper;
 using FTMContextNet.Domain.Entities.Persistent.Cache;
 using FTMContextNet.Domain.ExtensionMethods;
-using Microsoft.EntityFrameworkCore;
 
 namespace FTMContextNet.Tests
 {
