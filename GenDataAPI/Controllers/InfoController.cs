@@ -1,12 +1,9 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using ConfigHelper;
-using FTMContextNet;
 using FTMContextNet.Application.Models.Read;
 using FTMContextNet.Application.UserServices.GetGedList;
 using FTMContextNet.Application.UserServices.GetInfoList;
-using FTMContextNet.Application.UserServices.GetTreeImportStatus;
 using GenDataAPI.Hub;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
