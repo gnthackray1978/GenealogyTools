@@ -26,7 +26,7 @@ public partial class GedController
             {
                 using var stream = new FileStream(Path.Combine(extractionPath, n), FileMode.Create);
 
-                f.CopyToAsync(stream);
+                 f.CopyToAsync(stream).Wait();
             }
 
             return size;
