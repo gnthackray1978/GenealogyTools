@@ -33,8 +33,16 @@ public class AzureDBHelpers : IAzureDBHelpers
         command.Prepare();
 
 
-        int nextId = Convert.ToInt32(command.ExecuteScalar());
+        var r = command.ExecuteScalar();
 
+        int nextId = 0;
+
+
+
+        if (r != null && r.GetType().Name != "DBNull")
+        {
+            nextId = Convert.ToInt32(r);
+        }
         connection.Close();
 
         nextId++;

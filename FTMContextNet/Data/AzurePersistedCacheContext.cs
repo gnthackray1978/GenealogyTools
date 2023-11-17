@@ -279,7 +279,10 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
     {
         if (treeRecords.Count <= 0) return 0;
 
-        int idx = TreeRecord.Max(m=>m.Id) + 1;
+        int idx = 0;
+
+        if(TreeRecord.Any())
+            idx = TreeRecord.Max(m=>m.Id) + 1;
 
         foreach (var tr in treeRecords)
         {
@@ -359,47 +362,47 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
 
     public void DeleteOrigins(int importId)
     {
-        _azureDbHelpers.RunCommand("DELETE FROM PersonOrigins WHERE ImportId = " + importId);
+        _azureDbHelpers.RunCommand("DELETE FROM DNA.PersonOrigins WHERE ImportId = " + importId);
     }
 
     public void DeleteDupes(int importId)
     {
-        _azureDbHelpers.RunCommand("DELETE FROM DupeEntries WHERE ImportId = " + importId);
+        _azureDbHelpers.RunCommand("DELETE FROM DNA.DupeEntries WHERE ImportId = " + importId);
     }
 
     public void DeleteDupes()
     {
-        _azureDbHelpers.RunCommand("DELETE FROM DupeEntries");
+        _azureDbHelpers.RunCommand("DELETE FROM DNA.DupeEntries");
     }
 
     public void DeletePersons(int importId)
     {
-        _azureDbHelpers.RunCommand("DELETE FROM FTMPersonView WHERE ImportId = " + importId);
+        _azureDbHelpers.RunCommand("DELETE FROM DNA.FTMPersonView WHERE ImportId = " + importId);
     }
 
     public void DeleteTreeRecord(int importId)
     {
-        _azureDbHelpers.RunCommand("DELETE FROM TreeRecord WHERE Id = " + importId);
+        _azureDbHelpers.RunCommand("DELETE FROM DNA.TreeRecord WHERE Id = " + importId);
     }
 
     public void DeleteMarriages(int importId)
     {
-        _azureDbHelpers.RunCommand("DELETE FROM Relationships WHERE ImportId = " + importId);
+        _azureDbHelpers.RunCommand("DELETE FROM DNA.Relationships WHERE ImportId = " + importId);
     }
 
     public void DeleteImports(int importId)
     {
-        _azureDbHelpers.RunCommand("DELETE FROM TreeImport WHERE Id = " + importId);
+        _azureDbHelpers.RunCommand("DELETE FROM DNA.TreeImport WHERE Id = " + importId);
     }
 
     public void DeleteTreeGroups(int importId)
     {
-        _azureDbHelpers.RunCommand("DELETE FROM TreeGroups WHERE ImportId = " + importId);
+        _azureDbHelpers.RunCommand("DELETE FROM DNA.TreeGroups WHERE ImportId = " + importId);
     }
 
     public void DeleteRecordMapGroups(int importId)
     {
-        _azureDbHelpers.RunCommand("DELETE FROM TreeRecordMapGroup WHERE ImportId = " + importId);
+        _azureDbHelpers.RunCommand("DELETE FROM DNA.TreeRecordMapGroup WHERE ImportId = " + importId);
     }
 
     #endregion
