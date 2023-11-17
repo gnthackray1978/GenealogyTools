@@ -13,7 +13,7 @@ using FTMContextNet.Data.Repositories.TreeAnalysis;
 
 namespace FTMContextNet.Application.UserServices.CreatePersonsAndRelationships
 {
-    public class CreatePersonsAndMarriages : IRequestHandler<CreatePersonAndRelationshipsCommand, CommandResult>
+    public class CreatePersonsAndRelationships : IRequestHandler<CreatePersonAndRelationshipsCommand, CommandResult>
     {
        //private static readonly SemaphoreSlim RateLimit = new SemaphoreSlim(1, 1);
         private readonly IPersistedCacheRepository _persistedCacheRepository;
@@ -23,7 +23,7 @@ namespace FTMContextNet.Application.UserServices.CreatePersonsAndRelationships
         private readonly IAuth _auth;
         private readonly IMSGConfigHelper _iMSGConfigHelper;
 
-        public CreatePersonsAndMarriages(IPersistedCacheRepository persistedCacheRepository,
+        public CreatePersonsAndRelationships(IPersistedCacheRepository persistedCacheRepository,
             IPersistedImportCacheRepository persistedImportCacheRepository,
             IGedRepository gedRepository,
             IAuth auth,
@@ -71,7 +71,7 @@ namespace FTMContextNet.Application.UserServices.CreatePersonsAndRelationships
 
         private async Task AddTreeRecord(CancellationToken cancellationToken)
         {
-            _ilog.WriteLine("Executing CreatePersonsAndMarriages");
+            _ilog.WriteLine("Executing CreatePersonsAndRelationships");
 
              
             await Task.Run(() =>

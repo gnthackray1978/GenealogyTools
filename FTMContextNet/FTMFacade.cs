@@ -154,8 +154,8 @@ namespace FTMContextNet
 
             CommandResult CommandResult = null;
             
-            var createPersonsAndMarriages = new CreatePersonsAndMarriages(persistedCacheRepository, persistedImportedCacheRepository, gr, new Auth(), _outputHandler, _iMSGConfigHelper);
-            CommandResult = createPersonsAndMarriages.Handle(new CreatePersonAndRelationshipsCommand(),new CancellationToken(false)).Result;
+            var createPersonsAndRelationships = new CreatePersonsAndRelationships(persistedCacheRepository, persistedImportedCacheRepository, gr, new Auth(), _outputHandler, _iMSGConfigHelper);
+            CommandResult = createPersonsAndRelationships.Handle(new CreatePersonAndRelationshipsCommand(),new CancellationToken(false)).Result;
             if (CommandResult.CommandResultType != CommandResultType.Success)
                 return CommandResult;
 
