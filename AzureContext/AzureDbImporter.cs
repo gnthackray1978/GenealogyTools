@@ -64,7 +64,7 @@ namespace AzureContext
                 executor.ExecuteCommand("TRUNCATE TABLE DNA.IgnoreList");//
                 executor.ExecuteCommand("TRUNCATE TABLE DNA.PersonOrigins");//
                 executor.ExecuteCommand("TRUNCATE TABLE DNA.Relationships");
-                executor.ExecuteCommand("TRUNCATE TABLE UKP.PlaceCache");//
+           //     executor.ExecuteCommand("TRUNCATE TABLE UKP.PlaceCache");//
             }
 
 

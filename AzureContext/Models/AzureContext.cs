@@ -1387,10 +1387,10 @@ namespace AzureContext.Models
                     row.MotherId,
                     row.DirectAncestor,
                     row.LocationsCached,
+                    row.ImportId,
                     row.RootPerson,
                     row.LinkNode,
                     row.UserId,
-                    row.ImportId,
                     row.LinkedLocations
                     );
  
