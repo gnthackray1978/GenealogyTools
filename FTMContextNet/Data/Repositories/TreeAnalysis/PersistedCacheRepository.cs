@@ -272,7 +272,7 @@ namespace FTMContextNet.Data.Repositories.TreeAnalysis
         {
             var treeRecords = new List<TreeRecord>();
 
-            var locationsMapOrigin = _persistedCacheContext.FTMPersonView.Select(s => new { s.Origin, s.LinkedLocations }).ToList();
+            var locationsMapOrigin = _persistedCacheContext.FTMPersonView.Where(w=>w.ImportId == importId).Select(s => new { s.Origin, s.LinkedLocations }).ToList();
 
             foreach (var tree in GetRootNameDictionary(importId).Values)
             {
@@ -281,7 +281,7 @@ namespace FTMContextNet.Data.Repositories.TreeAnalysis
 
                 treeRecords.Add(TreeRecord.CreateFromOrigin(tree,
                     string.Join(",", EnglishHistoricCounties.FromPlaceList(treeLocations)),
-                    treeLocations.Length, 0));
+                    treeLocations.Length, importId));
 
             }
 
