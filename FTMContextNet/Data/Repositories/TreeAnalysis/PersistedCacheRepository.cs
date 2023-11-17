@@ -309,7 +309,7 @@ namespace FTMContextNet.Data.Repositories.TreeAnalysis
             _persistedCacheContext.BulkInsertFTMPersonView( importId, userId, ftmPersons);
         }
 
-        public void InsertMarriages(int importId, int userId, List<RelationSubSet> marriages)
+        public void InsertRelationships(int importId, int userId, List<RelationSubSet> marriages)
         {
             var nextId = _persistedCacheContext.Relationships.Max(m => m.Id) + 1;
 

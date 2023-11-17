@@ -83,7 +83,7 @@ namespace FTMContextNet.Application.UserServices.CreatePersonsAndRelationships
                 _persistedCacheRepository.InsertPersons(_persistedImportCacheRepository.GetCurrentImportId(),
                     _auth.GetUser(), gedDb.Persons);
 
-                _persistedCacheRepository.InsertMarriages(_persistedImportCacheRepository.GetCurrentImportId(),
+                _persistedCacheRepository.InsertRelationships(_persistedImportCacheRepository.GetCurrentImportId(),
                     _auth.GetUser(), gedDb.Relationships);
 
                 _persistedCacheRepository.CreatePersonOriginEntries(_persistedImportCacheRepository.GetCurrentImportId(),_auth.GetUser());

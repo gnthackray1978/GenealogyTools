@@ -39,7 +39,7 @@ public interface IPersistedCacheRepository
     int InsertTreeGroups(int id, string treeGroup, int importId, int userId);
     int InsertTreeRecordMapGroup(string treeGroup, string treeName, int importId, int userId);
     void InsertPersons(int importId, int userId, List<Person> persons);
-    void InsertMarriages(int importId, int userId, List<RelationSubSet> marriages);
+    void InsertRelationships(int importId, int userId, List<RelationSubSet> marriages);
     Dictionary<string, List<string>> GetGroups(int importId);
     Dictionary<int, string> GetGroupPerson(int importId);
 }
