@@ -7,11 +7,8 @@ using FTMContextNet.Domain.ExtensionMethods;
 
 namespace FTMContextNet.Tests
 {
-    
-
     public class AzureDBIntegrationTests
     {
-
         //Test to check we can read and write to the TreeRecordMapGroup table
         [Fact]
         public void TestTreeRecordMapGroupReadWrite()
@@ -160,8 +157,7 @@ namespace FTMContextNet.Tests
             Assert.Null(dclone);
 
         }
-
-
+        
         [Fact]
         public void TestInsertGroups()
         {
@@ -221,10 +217,7 @@ namespace FTMContextNet.Tests
 
             Assert.Null(tg2);
         }
-
-
-
-
+        
         // function to test BulkInsertTreeRecord method
         [Fact]
         public void TestTreeRecordBulkInsert()
