@@ -119,9 +119,10 @@ namespace PlaceLibNet.Data.Repositories
                     s.Src,
                     s.Lat
                 })
-                .Where(w => w.Src != "placelib" && w.Lat!="").ToList();
+                .Where(w => w.Src != "placelib" && w.Lat=="").ToList();
 
-            
+            _iLog.WriteLine(placeList.Count + " places with unset lat and longs");
+
             foreach (var place in placeList
                          .Where(w=>w.parsedLocation.IsValid))
             {

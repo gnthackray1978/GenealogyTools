@@ -3,6 +3,7 @@ using FTMContext;
 using FTMContextNet.Domain.Collections;
 using FTMContextNet.Domain.Entities.NonPersistent;
 using FTMContextNet.Domain.Entities.NonPersistent.Person;
+using PlaceLibNet.Domain.Entities;
 using QuickGed.Types;
 
 namespace FTMContextNet.Data.Repositories.TreeAnalysis;
@@ -10,12 +11,15 @@ namespace FTMContextNet.Data.Repositories.TreeAnalysis;
 public interface IPersistedCacheRepository
 {
     List<string> DumpCount();
+
+    void BulkUpdatePersons(List<PlaceLocationDto> dataset);
     void UpdatePersons(int personId, string lat, string lng, string altLat, string altLng);
     void DeleteDupes(int importId);
+
     void DeleteDupes();
     void DeletePersons(int importId);
     void DeleteTreeRecord(int importId);
-    void DeleteMarriages(int importId);
+    void DeleteRelationships(int importId);
     void DeleteTreeGroups(int importId);
     void DeleteRecordMapGroups(int importId);
     void DeleteOrigins(int importId);
@@ -37,7 +41,13 @@ public interface IPersistedCacheRepository
     /// </summary>
     void PopulateTreeRecordFromCache(int userId, int importId);
     int InsertTreeGroups(int id, string treeGroup, int importId, int userId);
+
+    void InsertTreeGroups(Dictionary<int, string> treeGroups, int importId, int userId);
+
     int InsertTreeRecordMapGroup(string treeGroup, string treeName, int importId, int userId);
+    
+    void InsertTreeRecordMapGroup(Dictionary<string, List<string>> recordMapGroups, int importId, int userId);
+
     void InsertPersons(int importId, int userId, List<Person> persons);
     void InsertRelationships(int importId, int userId, List<RelationSubSet> marriages);
     Dictionary<string, List<string>> GetGroups(int importId);

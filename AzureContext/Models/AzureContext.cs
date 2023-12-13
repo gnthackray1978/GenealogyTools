@@ -101,6 +101,8 @@ namespace AzureContext.Models
 
         public virtual DbSet<Relationships> Relationships { get; set; }
 
+        public virtual DbSet<TempPersonUpdateTable> TempPersonUpdateTable { get; set; }
+
         private string ConString = "";
 
 
@@ -708,6 +710,9 @@ namespace AzureContext.Models
                 entity.Property(e => e.AltLong).HasColumnType("decimal(14, 10)");
 
             });
+
+
+
 
             modelBuilder.Entity<Relationships>(entity =>
             {

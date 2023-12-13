@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using MSGIdent;
@@ -10,6 +11,7 @@ using PlaceLibNet.Domain;
 using PlaceLibNet.Domain.Caching;
 using MSG.CommonTypes;
 using FTMContextNet.Data.Repositories.TreeAnalysis;
+using PlaceLibNet.Domain.Entities;
 
 namespace FTMContextNet.Application.UserServices.UpdatePersonLocations;
 
@@ -45,9 +47,11 @@ public class UpdatePersonLocations : IRequestHandler<UpdatePersonLocationsComman
 
         placeCache.Load();
 
-        _ilog.WriteLine(locations.Count + " locations");
+        _ilog.WriteLine("UpdatePersonLocations: " + locations.Count + " locations");
 
         int count = 0;
+
+        List<PlaceLocationDto> locationstp = new List<PlaceLocationDto>();
 
         foreach (var location in locations)
         {
@@ -70,11 +74,34 @@ public class UpdatePersonLocations : IRequestHandler<UpdatePersonLocationsComman
             if (location.Lat != "" || location.AltLat != "")
             {
                 count++;
-                _persistedCacheRepository.UpdatePersons(location.Id, location.Lat, location.Lng, location.AltLat,
-                    location.AltLng);
+              //  _persistedCacheRepository.UpdatePersons(location.Id, location.Lat, location.Lng, location.AltLat,
+              //      location.AltLng);
+
+              var idx = locationstp.FindIndex(f => f.Id == location.Id);
+
+              if (idx == -1)
+              {
+                  locationstp.Add(new PlaceLocationDto()
+                  {
+                      Id = location.Id,
+                      BirthLat = location.Lat,
+                      AltLat = location.AltLat,
+                      AltLong = location.AltLng,
+                      BirthLong = location.Lng
+                  });
+              }
             }
         }
 
+        var timer = new Stopwatch();
+        timer.Start();
+        
+        _persistedCacheRepository.BulkUpdatePersons(locationstp);
+
+        timer.Stop();
+
+        _ilog.WriteLine("Time taken: " + timer.Elapsed.ToString(@"m\:ss\.fff"));
+     
         _ilog.WriteLine("found " + count + "locations");
     }
 
@@ -87,13 +114,11 @@ public class UpdatePersonLocations : IRequestHandler<UpdatePersonLocationsComman
          
         _ilog.WriteLine("UpdatePersonLocations started");
 
-        var timer = new Stopwatch();
-        timer.Start();
+        
 
         await Task.Run(Execute, cancellationToken);
 
-        timer.Stop();
-        _ilog.WriteLine("Time taken: " + timer.Elapsed.ToString(@"m\:ss\.fff"));
+        
 
         return CommandResult.Success();
     }

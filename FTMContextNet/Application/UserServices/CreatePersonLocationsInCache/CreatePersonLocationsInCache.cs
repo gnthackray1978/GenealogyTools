@@ -60,15 +60,19 @@ public class CreatePersonLocationsInCache : IRequestHandler<CreatePersonLocation
             County = pri.County,
             Country = pri.Country ?? ""
         };
-
+        //just take whatever is in the ftmperson table
         if (pscs == null) return placeCache;
 
         placeCache.Lat = pscs.Lat;
         placeCache.Long = pscs.Long;
+        placeCache.County = pscs.Ctyhistnm;// the formatting of this might need checking!
+        placeCache.Country = "England";//only english counties work at the moment welsh and scottish counties are in there, the functionality just needs adding to set them
         placeCache.Src = "placelib";
-        placeCache.BadData = true;
-
-
+        placeCache.BadData = false;
+        placeCache.Searched = true;
+        
+        
+        
         return placeCache;
     }
     
@@ -87,6 +91,10 @@ public class CreatePersonLocationsInCache : IRequestHandler<CreatePersonLocation
 
         _placeLookupCache.Load();
         _personPlaceCache.Load();
+
+     //   var tp = _placeLookupCache.PlaceLookups.Where(w => w.Place.Contains("Hawks")).ToList();
+
+     //   var t = _personPlaceCache.Items.Where(w => w.Place.Contains("Hawks")).ToList();
 
         _logger.WriteLine("Unencoded places in cache: " + unencodedPlacesCount);
         _logger.WriteLine("Person table locations count: " + _personPlaceCache.Count);

@@ -72,7 +72,7 @@ public partial class GedController : ControllerBase
     [Route("/ged/delete")]
     public async Task<IActionResult> DeleteGed([FromBody]int importId)
     {
-        if (importId == 42) return Ok();
+     //   if (importId == 42) return Ok();
 
         var r = await _mediator
             .Send(new DeleteTreeCommand(), new CancellationToken(false));

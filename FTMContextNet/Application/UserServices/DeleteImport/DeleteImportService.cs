@@ -36,28 +36,29 @@ namespace FTMContextNet.Application.UserServices.DeleteImport
         {
              
             var importId = _persistedImportCacheRepository.GetCurrentImportId();
-
-            //personview
-            _persistedCacheRepository.DeletePersons(importId);
+            
             _ilog.WriteLine("Deleting persons for import id: " + importId);
-            //marriages
-            _persistedCacheRepository.DeleteMarriages(importId);
-            _ilog.WriteLine("Deleting marriages for import id: " + importId);
-            //dupeentries
-            _persistedCacheRepository.DeleteDupes(importId);
+            _persistedCacheRepository.DeletePersons(importId);
+
+            _ilog.WriteLine("Deleting relationships for import id: " + importId);
+            _persistedCacheRepository.DeleteRelationships(importId);
+
             _ilog.WriteLine("Deleting dupes for import id: " + importId);
-            //personorigins
-            _persistedCacheRepository.DeleteOrigins(importId);
+            _persistedCacheRepository.DeleteDupes(importId);
+
             _ilog.WriteLine("Deleting origins for import id: " + importId);
-            //treerecordmapgroups
-            _persistedCacheRepository.DeleteRecordMapGroups(importId);
+            _persistedCacheRepository.DeleteOrigins(importId);
+
             _ilog.WriteLine("Deleting record map groups for import id: " + importId);
-            //treegroups
-            _persistedCacheRepository.DeleteTreeGroups(importId);
+            _persistedCacheRepository.DeleteRecordMapGroups(importId);
+
             _ilog.WriteLine("Deleting tree groups for import id: " + importId);
-            //treerecords
-            _persistedCacheRepository.DeleteTreeRecord(importId);
+            _persistedCacheRepository.DeleteTreeGroups(importId);
+
             _ilog.WriteLine("Deleting tree records for import id: " + importId);
+            _persistedCacheRepository.DeleteTreeRecord(importId);
+
+            
             //import
             _persistedImportCacheRepository.DeleteImport(importId);
  

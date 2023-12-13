@@ -133,34 +133,31 @@
 
         <div id="pae-update-row" class="row">
             <div class="col"><a href="#Foo" onclick="p.createDupeView();">1. Create Dupe List </a></div>
-            <div class="col"><a href="#Foo" onclick="p.updateLocations();">2. Update Persons Locations</a></div>
+            <div class="col"></div>
             <div class="col"></div>
             <div class="col"></div>
         </div>
 
 
-        <div id="lpr-rows" >
+        <div id="lpr-rows">
             <div class="row topMargin">
                 <div class="col subheader">Location Processing</div>
             </div>
 
             <div class="row">
-                <div class="col"><a href="#Foo" onclick="p.getUnEncodedLocationsFromServer();">1. Adding missing locations </a></div>
+                <div class="col"><a href="#Foo" onclick="p.addMissingPlaces();">1. Adding missing locations </a></div>
                 <div class="col"><a href="#Foo" onclick="p.getUnEncodedLocationsFromServer();">2. GeoCode Location entries </a><div id="geocodecount" style="display:inline">0</div></div>
-                <div class="col"><a href="#Foo" onclick="p.updatePlaceMetadata();">3. Update location data</a></div>
+                <div class="col"><a href="#Foo" onclick="p.updatePlaceMetadata();">3. Update Place Cache county and lat long fields</a></div>
+                <div class="col"></div>
+            </div>
+
+            <div id="pae-update-row" class="row">
+                <div class="col"><a href="#Foo" onclick="p.updateLocations();">4. Update County and Country fields of FTMPerson table</a></div>
+                <div class="col"></div>
+                <div class="col"></div>
                 <div class="col"></div>
             </div>
         </div>
-
-        <div class="row topMargin">
-        <div class="col subheader">Data Migrations</div>
-        </div>
-        <div class="row bottomMargin">
-            <div class="col"><a href="#Foo" onclick="p.azureimport();">1. Export to azure</a></div>
-            <div class="col"></div>
-            <div class="col"></div>
-        </div>
-
 
         <div class="row topMargin">
             <div class="col subheader">Telemetry</div>

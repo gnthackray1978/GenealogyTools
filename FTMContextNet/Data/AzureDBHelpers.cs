@@ -19,6 +19,8 @@ public class AzureDBHelpers : IAzureDBHelpers
     public AzureDBHelpers(string connectionString)
     {
         _connectionString = connectionString;
+
+        _connectionString = _connectionString.Replace("Connection Timeout=30", "Connection Timeout=600");
     }
 
     public int GetNextId(string tableName)
@@ -99,6 +101,8 @@ public class AzureDBHelpers : IAzureDBHelpers
         {
             connection.Open();
 
+            command.CommandTimeout = 0;
+
             command.ExecuteNonQuery();
 
             connection.Close();
@@ -106,6 +110,7 @@ public class AzureDBHelpers : IAzureDBHelpers
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
+            throw;
         }
     }
 

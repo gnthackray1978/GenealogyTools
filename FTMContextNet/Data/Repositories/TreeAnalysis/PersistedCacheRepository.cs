@@ -11,6 +11,7 @@ using FTMContextNet.Domain.ExtensionMethods;
 using GoogleMapsHelpers;
 using LoggingLib;
 using Microsoft.EntityFrameworkCore;
+using PlaceLibNet.Domain.Entities;
 using QuickGed.Types;
 
 namespace FTMContextNet.Data.Repositories.TreeAnalysis
@@ -74,7 +75,7 @@ namespace FTMContextNet.Data.Repositories.TreeAnalysis
             _persistedCacheContext.DeleteTreeRecord(importId);
         }
 
-        public void DeleteMarriages(int importId)
+        public void DeleteRelationships(int importId)
         {
             _persistedCacheContext.DeleteMarriages(importId);
         }
@@ -237,6 +238,11 @@ namespace FTMContextNet.Data.Repositories.TreeAnalysis
             return _persistedCacheContext.PersonOrigins.Count() + 1;
         }
 
+        public void BulkUpdatePersons(List<PlaceLocationDto> dataset)
+        {
+            _persistedCacheContext.BulkUpdatePersonLocations(dataset);
+        }
+
         public void UpdatePersons(int personId, string lat, string lng, string altLat, string altLng)
         {
             _persistedCacheContext.UpdatePersonLocations(personId, lng, lat, altLng, altLat);
@@ -295,9 +301,28 @@ namespace FTMContextNet.Data.Repositories.TreeAnalysis
             return _persistedCacheContext.InsertGroups(id, treeGroup, importId, userId);
         }
 
+        public void InsertTreeGroups(Dictionary<int, string> treeGroups, int importId, int userId)
+        {
+            foreach (var group in treeGroups)
+            {
+                InsertTreeGroups(group.Key, group.Value, importId, userId);
+            }
+        }
+
         public int InsertTreeRecordMapGroup(string treeGroup, string treeName, int importId, int userId)
         {
             return _persistedCacheContext.InsertRecordMapGroup(treeGroup, treeName, importId, userId);
+        }
+
+        public void InsertTreeRecordMapGroup(Dictionary<string, List<string>> recordMapGroups, int importId, int userId)
+        {
+            foreach (var grp in recordMapGroups)
+            {
+                foreach (var mapping in grp.Value)
+                {
+                    InsertTreeRecordMapGroup(mapping, grp.Key, importId, userId);
+                }
+            }
         }
 
         public void InsertPersons(int importId, int userId, List<Person> persons)
@@ -338,6 +363,8 @@ namespace FTMContextNet.Data.Repositories.TreeAnalysis
 
                 results.Add(nameDict[treeId], (from gm in groupMembers where groupNames.ContainsKey(gm) select groupNames[gm]).ToList());
             }
+
+           
 
             return results;
         }

@@ -8,4 +8,4 @@ Console.WriteLine("Hello, World!");
 
 var az = new AzureDbImporter(new Log(),new MSGConfigHelper());
 
-az.Import();
+az.ImportPlaceCache();

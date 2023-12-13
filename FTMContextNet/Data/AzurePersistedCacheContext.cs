@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
 using System.Linq;
 using ConfigHelper;
 using FTMContextNet.Domain.Entities.Persistent.Cache;
@@ -7,6 +9,8 @@ using FTMContextNet.Domain.ExtensionMethods;
 using LoggingLib;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using PlaceLibNet.Domain.Entities;
+using PlaceLibNet.Domain.Entities.Persistent;
 
 namespace FTMContextNet.Data;
 
@@ -55,7 +59,7 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
 
     public int BulkInsertMarriages(int importId, int userId, List<Relationships> marriages)
     {
-        var connectionString = this.Database.GetConnectionString();
+    //    var connectionString = this.Database.GetConnectionString();
 
         var nextId = _azureDbHelpers.GetNextId("Relationships");
         
@@ -90,7 +94,7 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
             idx++;
         }
 
-        using var copy = new SqlBulkCopy(connectionString);
+        using var copy = new SqlBulkCopy(_configObj.MSGGenDB01);
 
         copy.DestinationTableName = "dna.Relationships";
         copy.BulkCopyTimeout = 600;
@@ -111,7 +115,7 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
     
     public int BulkInsertFTMPersonView(int importId, int userId, List<FTMPersonView> ftmPersonViews)
     {
-        var connectionString = this.Database.GetConnectionString();
+    //    var connectionString = this.Database.GetConnectionString();
 
         var nextId = _azureDbHelpers.GetNextId("FTMPersonView");
 
@@ -161,7 +165,7 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
         }
 
 
-        using var copy = new SqlBulkCopy(connectionString);
+        using var copy = new SqlBulkCopy(_configObj.MSGGenDB01);
 
         copy.DestinationTableName = "dna.FTMPersonView";
         copy.BulkCopyTimeout = 600;
@@ -193,12 +197,100 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
         return 1;
     }
     
-   
+    public void BulkUpdatePersonLocations(List<PlaceLocationDto> dataset)
+    {
+        //todo whole function is an epic hack and needs re-writing.
+        //but it is performant :P:P
+        using var connection = new SqlConnection(_configObj.MSGGenDB01);
+
+        using SqlCommand command = new SqlCommand("", connection);
+
+        var dt = _azureDbHelpers.CreateDataTable("SELECT TOP 1 * FROM dbo.__TempLocationUpdate");
+
+        foreach (var row in dataset)
+        {
+            try
+            {
+                dt.Rows.Add(row.Id,
+                    row.BirthLat,
+                    row.BirthLong,
+                    row.AltLat,
+                    row.AltLong
+                );
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                //   throw;
+            }
+
+        }
+
+        connection.Open();
+
+        using (SqlBulkCopy bulkcopy = new SqlBulkCopy(connection))
+        {
+            bulkcopy.BulkCopyTimeout = 660;
+            bulkcopy.DestinationTableName = "__TempLocationUpdate";
+            bulkcopy.ColumnMappings.Add("Id", "Id");
+            bulkcopy.ColumnMappings.Add("BirthLat", "BirthLat");
+            bulkcopy.ColumnMappings.Add("BirthLong", "BirthLong");
+            bulkcopy.ColumnMappings.Add("AltLat", "AltLat");
+            bulkcopy.ColumnMappings.Add("AltLong", "AltLong");
+
+            bulkcopy.WriteToServer(dt);
+            bulkcopy.Close();
+        }
+
+        try
+        {
+            command.CommandTimeout = 300;
+            command.CommandText = "UPDATE T SET T.BirthLat = Temp.Lat, T.BirthLong = Temp.Lng, T.AltLat = Temp.AltLat, T.AltLong = Temp.AltLng FROM DNA.FTMPersonView T INNER JOIN dbo.__TempLocationUpdate Temp ON T.Id = Temp.Id;";
+            command.ExecuteNonQuery();
+            
+        }
+        catch (Exception ex)
+        {
+            // Handle exception properly
+        }
+        finally
+        {
+            connection.Close();
+        }
+
+        ClearTable();
+    }
+
+    public void ClearTable()
+    {
+        using var connection = new SqlConnection(_configObj.MSGGenDB01);
+
+        using SqlCommand command = new SqlCommand("", connection);
+
+        connection.Open();
+
+        try
+        {
+            command.CommandType = CommandType.Text;
+            
+            command.CommandText = "DELETE FROM [dbo].[__TempLocationUpdate];";
+            command.ExecuteNonQuery();
+        }
+        catch (Exception ex)
+        {
+            // Handle exception properly
+        }
+        finally
+        {
+            connection.Close();
+        }
+    }
+
     public void UpdatePersonLocations(int personId, string lng, string lat, string altLng, string altLat)
     {
-        var connectionString = this.Database.GetDbConnection().ConnectionString;
+      //  var connectionString = this.Database.GetDbConnection().ConnectionString;
 
-        using var connection = new SqlConnection(connectionString);
+        using var connection = new SqlConnection(_configObj.MSGGenDB01);
 
         var command = connection.CreateCommand();
         command.CommandText = "UPDATE dna.FTMPersonView SET BirthLat = @BirthLat, BirthLong = @BirthLong, AltLat = @AltLat, AltLong = @AltLong WHERE Id = @Id";
@@ -229,7 +321,7 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
 
     public int BulkInsertPersonOrigins(int userId, List<PersonOrigins> origins)
     {
-        var connectionString = this.Database.GetDbConnection().ConnectionString;
+     //   var connectionString = this.Database.GetDbConnection().ConnectionString;
 
         var nextId = _azureDbHelpers.GetNextId("PersonOrigins");
 
@@ -259,8 +351,8 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
 
             idx++;
         }
-
-        using var copy = new SqlBulkCopy(this.Database.GetConnectionString());
+        // new SqlConnection(_configObj.MSGGenDB01);
+        using var copy = new SqlBulkCopy(_configObj.MSGGenDB01);
 
         copy.DestinationTableName = "dna.PersonOrigins";
         copy.BulkCopyTimeout = 600;
@@ -298,17 +390,15 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
 
     public int InsertGroups(int id, string groupName, int importId, int userId)
     {
-        var connectionString = this.Database.GetDbConnection().ConnectionString;
+        var con = this.Database.GetDbConnection();
 
-
-        using var connection = new SqlConnection(connectionString);
-
-        var command = connection.CreateCommand();
+        var command = con.CreateCommand();
         command.CommandText = "INSERT INTO dna.TreeGroups(Id, GroupName,ImportId, UserId) VALUES (@Id,@GroupName,@ImportId,@UserId);";
          
-        connection.Open();
+        if(con.State != ConnectionState.Open)
+            con.Open();
 
-        using var transaction = connection.BeginTransaction();
+        using var transaction = con.BeginTransaction();
 
         command.Transaction = transaction;
         command.Prepare();
@@ -327,7 +417,7 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
 
     public int InsertRecordMapGroup(string groupName, string treeName, int importId, int userId)
     {
-        var connectionString = this.Database.GetDbConnection().ConnectionString;
+        var connectionString = _configObj.MSGGenDB01;
 
         var nextId = _azureDbHelpers.GetNextId("TreeRecordMapGroup");
         
@@ -382,7 +472,7 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
 
     public void DeleteTreeRecord(int importId)
     {
-        _azureDbHelpers.RunCommand("DELETE FROM DNA.TreeRecord WHERE Id = " + importId);
+        _azureDbHelpers.RunCommand("DELETE FROM DNA.TreeRecord WHERE ImportId = " + importId);
     }
 
     public void DeleteMarriages(int importId)
@@ -447,7 +537,7 @@ public partial class AzurePersistedCacheContext : DbContext, IPersistedCacheCont
 
             entity.Property(e => e.Id).ValueGeneratedNever();
 
-            entity.Property(e => e.Ident).HasMaxLength(500);
+            entity.Property(e => e.Ident).HasMaxLength(1000);
 
             entity.Property(e => e.Origin).HasMaxLength(500);
 

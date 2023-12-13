@@ -40,6 +40,7 @@ namespace GenDataAPI
         public void ConfigureServices(IServiceCollection services)
         {
             var msgConfigHelper = new MSGConfigHelper();
+            var azureHelper = new AzureDBHelpers(msgConfigHelper.MSGGenDB01);
 
             var config = new MapperConfiguration(cfg =>
             {
@@ -47,11 +48,12 @@ namespace GenDataAPI
                 cfg.AddProfile(new AutoMapperConfiguration());
             });
 
-           // var hubContext = app.ApplicationServices.GetService < IHubContext < Notification >>
-
+            // var hubContext = app.ApplicationServices.GetService < IHubContext < Notification >>
+            //.AddSingleton<IAzureDBHelpers(Azure)
 
 
             services.AddSingleton<IMSGConfigHelper>(msgConfigHelper)
+                    .AddSingleton < IAzureDBHelpers>(azureHelper)
                     .AddMediatR(cfg => cfg
                     .RegisterServicesFromAssemblies(AppDomain.CurrentDomain.GetAssemblies())
                     .RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()))
@@ -63,9 +65,9 @@ namespace GenDataAPI
                     .AddSingleton<IPlaceNameFormatter>(new PlaceNameFormatter())
                     .AddTransient<IGedParser, GedParser>()
                     .AddTransient<IGedRepository, GedRepository>()
-                    .AddTransient<IPlacesContext,PlacesContext>()
+                    .AddTransient<IPlacesContext, AzurePlacesContext>()
                     .AddTransient<IPersonPlaceCache,PersonPlaceCache>()
-                    .AddTransient<IPersistedCacheContext, SQLitePersistedCacheContext>()
+                    .AddTransient<IPersistedCacheContext, AzurePersistedCacheContext>()
                     .AddTransient<IPersistedImportCacheRepository, PersistedImportCacheRepository>()
                     .AddTransient<IPersistedCacheRepository, PersistedCacheRepository>()
                     .AddTransient<IPlaceLibCoordCache, PlaceLibCoordCache>()

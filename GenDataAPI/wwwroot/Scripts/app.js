@@ -165,7 +165,7 @@ PlaceObj.prototype = {
          
         $.ajax({
             type: "post",
-            url: "/data/places",
+            url: "/data/persons/locations",
             contentType: "application/json",
             dataType: "json", 
             success: function (response) {
@@ -185,8 +185,8 @@ PlaceObj.prototype = {
         };
 
         $.ajax({
-            type: "post",
-            url: "/data/persons/locations", // "/api/controllerName/methodName"
+            type: "put",
+            url: "/data/persons/locations",
             contentType: "application/json",
             dataType: "json",
             data: JSON.stringify(Upload),

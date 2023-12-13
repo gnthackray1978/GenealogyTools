@@ -8,6 +8,7 @@ using FTMContextNet.Domain.Entities.Persistent.Cache;
 using LoggingLib;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using PlaceLibNet.Domain.Entities;
 
 namespace FTMContextNet.Data
 {
@@ -246,6 +247,12 @@ namespace FTMContextNet.Data
             transaction.Commit();
 
             return idx;
+        }
+
+
+        public void BulkUpdatePersonLocations(List<PlaceLocationDto> dataset)
+        {
+            throw new NotImplementedException();
         }
 
         public void UpdatePersonLocations(int personId, string lng, string lat, string altLng, string altLat)

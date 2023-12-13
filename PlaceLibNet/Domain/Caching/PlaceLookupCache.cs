@@ -29,7 +29,7 @@ public class PlaceLookupCache : IPlaceLookupCache
 
         var loc = PlaceLookups.BinarySearch(new PlaceLookup { PlaceFormatted = place }
             , Comparer<PlaceLookup>
-                .Create((s, y) => s.PlaceFormatted.CompareTo(y.PlaceFormatted)));
+                .Create((s, y) => s.PlaceFormatted.ToLower().CompareTo(y.PlaceFormatted.ToLower())));
 
         return loc >= 0;
     }

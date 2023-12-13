@@ -36,11 +36,11 @@ namespace PlaceLibNet.Data.Contexts
             string @long,
             string src)
         {
-            var connectionString = this.Database.GetDbConnection().ConnectionString;
+       //    var connectionString = this.Database.GetDbConnection().ConnectionString;
 
             var nextId =  GetNextId("PlaceCache");
 
-            using var connection = new SqlConnection(connectionString);
+            using var connection = new SqlConnection(_configObj.MSGGenDB01);
 
             var command = connection.CreateCommand();
             command.CommandText = "Insert INTO ukp.PlaceCache(Id,AltId,Name,NameFormatted,JSONResult,Country,County,Searched,BadData,Lat,Long,Src,DateCreated) VALUES(@Id,@AltId,@Name,@NameFormatted,@JSONResult,@Country,@County,@Searched,@BadData,@Lat,@Lon, @Src, @DateCreated)";
@@ -76,9 +76,7 @@ namespace PlaceLibNet.Data.Contexts
         
         public void UpdateFormattedName(int id, string name)
         {
-            var connectionString = Database.GetDbConnection().ConnectionString;
-
-            using var connection = new SqlConnection(connectionString);
+            using var connection = new SqlConnection(_configObj.MSGGenDB01);
 
             var command = connection.CreateCommand();
             command.CommandText = "UPDATE ukp.PlaceCache SET NameFormatted = @NameFormatted WHERE Id = @Id;";
@@ -100,9 +98,7 @@ namespace PlaceLibNet.Data.Contexts
 
         public void UpdatePlaceCacheLatLong(PlaceCache placeCache)
         {
-            var connectionString = Database.GetDbConnection().ConnectionString;
-
-            using var connection = new SqlConnection(connectionString);
+            using var connection = new SqlConnection(_configObj.MSGGenDB01);
 
             var command = connection.CreateCommand();
             command.CommandText = "UPDATE ukp.PlaceCache SET Lat = @Lat, Long = @Lon, BadData = @BadData, County = @County, Country = @Country, Src = @Src WHERE Id = @Id;";
@@ -130,10 +126,7 @@ namespace PlaceLibNet.Data.Contexts
         public void UpdateBadData(int id, bool badData)
         {
 
-            var connectionString = Database.GetDbConnection().ConnectionString;
-
-
-            using var connection = new SqlConnection(connectionString);
+            using var connection = new SqlConnection(_configObj.MSGGenDB01);
 
             var command = connection.CreateCommand();
             command.CommandText = "UPDATE ukp.PlaceCache SET BadData = @BadData WHERE Id = @Id;";
@@ -160,11 +153,10 @@ namespace PlaceLibNet.Data.Contexts
         public void UpdateJSONCacheResult(int id, string results)
         {
 
-            var connectionString = Database.GetDbConnection().ConnectionString;
-
-            using var connection = new SqlConnection(connectionString);
+            using var connection = new SqlConnection(_configObj.MSGGenDB01);
 
             var command = connection.CreateCommand();
+
             command.CommandText = "UPDATE ukp.PlaceCache SET JSONResult = @JSONResult, Country = '', County = '', Searched = 1, BadData = 1 WHERE Id = @Id;";
 
             connection.Open();
@@ -184,9 +176,7 @@ namespace PlaceLibNet.Data.Contexts
 
         public void UpdateCounty(int id, string county)
         {
-            var connectionString = Database.GetDbConnection().ConnectionString;
-
-            using var connection = new SqlConnection(connectionString);
+            using var connection = new SqlConnection(_configObj.MSGGenDB01);
 
             var command = connection.CreateCommand();
             command.CommandText = "UPDATE ukp.PlaceCache SET County = @County WHERE Id = @Id;";

@@ -10,6 +10,8 @@ using MSG.CommonTypes;
 using MediatR;
 using FTMContextNet.Data.Repositories.GedProcessing;
 using FTMContextNet.Data.Repositories.TreeAnalysis;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace FTMContextNet.Application.UserServices.CreatePersonsAndRelationships
 {
@@ -22,6 +24,8 @@ namespace FTMContextNet.Application.UserServices.CreatePersonsAndRelationships
         private readonly Ilog _ilog;
         private readonly IAuth _auth;
         private readonly IMSGConfigHelper _iMSGConfigHelper;
+        private int _currentImportId;
+        private int _currentUserId;
 
         public CreatePersonsAndRelationships(IPersistedCacheRepository persistedCacheRepository,
             IPersistedImportCacheRepository persistedImportCacheRepository,
@@ -52,76 +56,78 @@ namespace FTMContextNet.Application.UserServices.CreatePersonsAndRelationships
 
             //check if tree has been imported already if so then abort.
 
+            _ilog.WriteLine("Executing CreatePersonsAndRelationships Handler");
+
+            _currentImportId = _persistedImportCacheRepository.GetCurrentImportId();
+
+            _currentUserId = _auth.GetUser();
+
 
             await AddTreeRecord(cancellationToken);
 
             AddTreeMetaData();
 
-            AddGroups();
+            await AddGroups(cancellationToken);
 
             return CommandResult.Success();
         }
 
         private bool IsTreeImported()
         {
-            var importId = _persistedImportCacheRepository.GetCurrentImportId();
-
-            return _persistedCacheRepository.ImportPresent(importId);
+            return _persistedCacheRepository.ImportPresent(_currentImportId);
         }
 
         private async Task AddTreeRecord(CancellationToken cancellationToken)
         {
-            _ilog.WriteLine("Executing CreatePersonsAndRelationships");
-
-             
             await Task.Run(() =>
             {
                 string path = Path.Combine(_iMSGConfigHelper.GedPath, _persistedImportCacheRepository.GedFileName());
 
+                _ilog.WriteLine("Parsing Tree");
+
                 var gedDb = _gedRepository.ParseLabelledTree(path);
+                
+                _ilog.WriteLine("Adding Person Details");
 
-                _persistedCacheRepository.InsertPersons(_persistedImportCacheRepository.GetCurrentImportId(),
-                    _auth.GetUser(), gedDb.Persons);
+                _persistedCacheRepository.InsertPersons(_currentImportId, _currentUserId, gedDb.Persons);
 
-                _persistedCacheRepository.InsertRelationships(_persistedImportCacheRepository.GetCurrentImportId(),
-                    _auth.GetUser(), gedDb.Relationships);
+                _ilog.WriteLine("Adding Relationships");
 
-                _persistedCacheRepository.CreatePersonOriginEntries(_persistedImportCacheRepository.GetCurrentImportId(),_auth.GetUser());
+                _persistedCacheRepository.InsertRelationships(_currentImportId, _currentUserId, gedDb.Relationships);
+
+                _ilog.WriteLine("Adding Person Tree Origins");
+
+                _persistedCacheRepository.CreatePersonOriginEntries(_currentImportId, _currentUserId);
 
             }, cancellationToken);
         }
 
-        private void AddGroups()
-        { 
-            _ilog.WriteLine("Creating Tree Groups");
+        private async Task AddGroups(CancellationToken cancellationToken)
+        {
+            var groupPersons = _persistedCacheRepository.GetGroupPerson(_currentImportId);
 
-            foreach (var group in _persistedCacheRepository.GetGroupPerson(_persistedImportCacheRepository.GetCurrentImportId()))
-            {
-                _persistedCacheRepository.InsertTreeGroups(group.Key, group.Value,
-                    _persistedImportCacheRepository.GetCurrentImportId(), _auth.GetUser());
-            }
-            
-            _ilog.WriteLine("Creating Tree Group Mappings");
+            var groups = _persistedCacheRepository.GetGroups(_currentImportId);
 
-            var groups = _persistedCacheRepository.GetGroups(_persistedImportCacheRepository.GetCurrentImportId());
-        
-            foreach (var grp in groups)
+            await Task.Run(() =>
             {
-                foreach (var mapping in grp.Value)
-                {
-                    _persistedCacheRepository.InsertTreeRecordMapGroup( mapping, grp.Key, _persistedImportCacheRepository.GetCurrentImportId(), _auth.GetUser());
-                
-                }
-            }
-            
-            _ilog.WriteLine("Finished Create Tree Group Mappings");
+                _ilog.WriteLine("Adding Tree Groups");
+
+                _persistedCacheRepository.InsertTreeGroups(groupPersons, _currentImportId, _currentUserId);
+
+                _ilog.WriteLine("Adding Tree Group Mappings");
+
+                _persistedCacheRepository.InsertTreeRecordMapGroup(groups, _currentImportId, _currentUserId);
+
+                _ilog.WriteLine("Finished Create Tree Group Mappings");
+
+            }, cancellationToken);
         }
 
         private void AddTreeMetaData()
         {
             _ilog.WriteLine("Creating Tree Records");
 
-            _persistedCacheRepository.PopulateTreeRecordFromCache(_auth.GetUser(), _persistedImportCacheRepository.GetCurrentImportId());
+            _persistedCacheRepository.PopulateTreeRecordFromCache(_currentUserId, _currentImportId);
         }
     }
 }

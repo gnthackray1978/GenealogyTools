@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using FTMContextNet.Domain.Entities.Persistent.Cache;
 using Microsoft.EntityFrameworkCore;
+using PlaceLibNet.Domain.Entities;
 
 namespace FTMContextNet.Data;
 
@@ -34,6 +35,8 @@ public interface IPersistedCacheContext
     void DeleteTreeGroups(int importId);
     void DeleteRecordMapGroups(int importId);
     void UpdatePersonLocations(int personId, string lng, string lat, string altLng, string altLat);
+
+    void BulkUpdatePersonLocations(List<PlaceLocationDto> dataset);
 
     int SaveChanges();
 
