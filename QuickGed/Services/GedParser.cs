@@ -330,11 +330,26 @@ public class GedParser : IGedParser
                     }
                     else
                     {
-                        currentPerson.Forename = string.Join(' ', parts.Take(parts.Count-1)).Trim();
                         currentPerson.FamilyName = parts.Last().Trim();
+
+                        var forename = string.Join(' ', parts.Take(parts.Count - 1)).Trim();
+
+                        if (forename != currentPerson.FamilyName)
+                        {
+                            currentPerson.Forename = forename;
+                        }
                     }
                 }
-                if (line.Type == "GIVN") currentPerson.Forename = line.Data;
+
+                if (line.Type == "GIVN")
+                {
+                    currentPerson.Forename = line.Data;
+
+                    if (currentPerson.Forename == currentPerson.FamilyName)
+                    {
+                        currentPerson.FamilyName = "";
+                    }
+                }
                 if (line.Type == "SURN") currentPerson.FamilyName = line.Data;
 
                 break;
