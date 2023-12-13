@@ -10,6 +10,11 @@ using PlaceLibNet.Domain.Commands;
 
 namespace PlaceLibNet.Application.Services.UpdatePlaceMetaData
 {
+    /// <summary>
+    /// Update place cache lat long
+    /// Update place cache county
+    /// Update place cache bad data where appropriate
+    /// </summary>
     public class UpdatePlaceMetaData : IRequestHandler<UpdatePlaceMetaDataCommand, CommandResult>
     {
         private readonly Ilog _iLog;
@@ -23,6 +28,11 @@ namespace PlaceLibNet.Application.Services.UpdatePlaceMetaData
             _placeRepository = placeRepository;
         }
          
+        /// <summary>
+        /// Update place cache lat long
+        /// Update place cache county
+        /// Update place cache bad data where appropriate
+        /// </summary>
         public async Task<CommandResult> Handle(UpdatePlaceMetaDataCommand request, CancellationToken cancellationToken)
         {
             if (_auth.GetUser() == -1)
