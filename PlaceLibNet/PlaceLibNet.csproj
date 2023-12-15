@@ -18,15 +18,12 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="7.0.0" />
     <PackageReference Include="MSG.Auth" Version="1.0.1" />
     <PackageReference Include="MSG.CommonTypes" Version="1.0.1" />
+    <PackageReference Include="MSG.ConfigHelper" Version="1.0.0" />
     <PackageReference Include="MSG.GoogleMapsHelpers" Version="1.1.3" />
+    <PackageReference Include="MSG.LoggingLib" Version="1.0.0" />
     <PackageReference Include="MSG.MIisc" Version="1.0.4" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
     <PackageReference Include="System.Data.SQLite" Version="1.0.116" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\ConfigHelper\ConfigHelper.csproj" />
-    <ProjectReference Include="..\LoggingLib\LoggingLib.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -167,4 +167,6 @@ _[Ss]cripts
 
 
 ConfigHelper/MSGConfigHelper.cs
+config.json
+
 /.vs/GenealogyTools/DesignTimeBuild/.dtbcache.v2

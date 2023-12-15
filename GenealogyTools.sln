@@ -13,17 +13,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlaceLibNet", "PlaceLibNet\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FTMContextNet", "FTMContextNet\FTMContextNet.csproj", "{B6824CDD-CD5F-446F-9D06-475358649D7D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConfigHelper", "ConfigHelper\ConfigHelper.csproj", "{AD4614C4-0F64-4491-9502-ABF898AA4A41}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LoggingLib", "LoggingLib\LoggingLib.csproj", "{200E6D88-0F8B-4431-AC58-D75162197AB9}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QuickGed", "QuickGed\QuickGed.csproj", "{E618DA4E-3ED5-41C6-BA73-A0A67C0BCA95}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FTMContextNet.Tests", "FTMContextNet.Tests\FTMContextNet.Tests.csproj", "{41D857F5-1CF5-4849-917D-2CED69CF7516}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlaceLibNet.Tests", "PlaceLibNet.Tests\PlaceLibNet.Tests.csproj", "{21146C2C-5232-44AF-BDAD-4DB61349F423}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureDBImporter", "AzureDBImporter\AzureDBImporter.csproj", "{9DDDCBB9-313E-445D-A788-000200BFBE11}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AzureDBImporter", "AzureDBImporter\AzureDBImporter.csproj", "{9DDDCBB9-313E-445D-A788-000200BFBE11}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,18 +45,6 @@ Global
 		{B6824CDD-CD5F-446F-9D06-475358649D7D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B6824CDD-CD5F-446F-9D06-475358649D7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B6824CDD-CD5F-446F-9D06-475358649D7D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AD4614C4-0F64-4491-9502-ABF898AA4A41}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AD4614C4-0F64-4491-9502-ABF898AA4A41}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AD4614C4-0F64-4491-9502-ABF898AA4A41}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AD4614C4-0F64-4491-9502-ABF898AA4A41}.Release|Any CPU.Build.0 = Release|Any CPU
-		{200E6D88-0F8B-4431-AC58-D75162197AB9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{200E6D88-0F8B-4431-AC58-D75162197AB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{200E6D88-0F8B-4431-AC58-D75162197AB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{200E6D88-0F8B-4431-AC58-D75162197AB9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E618DA4E-3ED5-41C6-BA73-A0A67C0BCA95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E618DA4E-3ED5-41C6-BA73-A0A67C0BCA95}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E618DA4E-3ED5-41C6-BA73-A0A67C0BCA95}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E618DA4E-3ED5-41C6-BA73-A0A67C0BCA95}.Release|Any CPU.Build.0 = Release|Any CPU
 		{41D857F5-1CF5-4849-917D-2CED69CF7516}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{41D857F5-1CF5-4849-917D-2CED69CF7516}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{41D857F5-1CF5-4849-917D-2CED69CF7516}.Release|Any CPU.ActiveCfg = Release|Any CPU
